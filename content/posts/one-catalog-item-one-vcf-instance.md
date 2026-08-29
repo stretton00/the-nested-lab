@@ -4,6 +4,10 @@ date: 2026-08-31
 draft: true
 tags: [vcf, vcf-automation, vro, bringup, nested-esxi, automation]
 series: ["The Lab Factory"]
+cover:
+  image: "/images/post3-hero-factory.svg"
+  alt: "The lab factory: stage 1 nested hosts, stage 2 bringup, day-N items, one wrapper form"
+  hidden: false
 summary: "How an interactive PowerShell script grew into a catalog-driven factory that stands up complete nested VCF 9.1 instances — hosts, bringup, supervisor, fleet components — from a single request form. The design rules that made it survivable, and the traps that shaped them."
 ---
 
@@ -122,6 +126,9 @@ everything downstream changes character: upgrade rehearsals happen on
 freshly-built instances instead of precious pets; a broken environment is
 redeployed, not repaired; and the lab stops being a snowflake collection and
 becomes a *product* — versioned, validated, reproducible.
+
+![Three pods, identical IP plans, no route between them](/images/product-01-hook.jpg)
+*Where this is heading: the factory's output feeding per-student pods with identical addressing.*
 
 The factory's next customers, funnily enough, are the isolated VPC pods from
 [the other series on this blog](/series/the-vpc-pod-papers/) — same

@@ -4,6 +4,10 @@ date: 2026-08-30
 draft: true
 tags: [vcf, nsx, vpc, supervisor, ncp, troubleshooting]
 series: ["The VPC Pod Papers"]
+cover:
+  image: "/images/post2-hero-ordering.svg"
+  alt: "The ordering rule: VPC, VPCAttachment, LoadBalancer, then the namespace - swap steps 3 and 4 and VIPs pend forever"
+  hidden: false
 summary: "VIPs pending forever, a retryable error that never stops retrying, and an ordering rule the docs don't tell you: in a self-service NSX VPC, the LBService must exist before the namespace that will use it."
 ---
 
@@ -95,6 +99,11 @@ VPC already had an LBService got its VIPs assigned without any drama —
 esx01-access   VIP=192.168.144.34   22 OPEN · 443 OPEN
 esx02-access   VIP=192.168.144.35   22 OPEN · 443 OPEN
 ```
+
+And once the ordering is right, this is what "working" looks like — the
+pod's state a couple of minutes after a correctly-ordered deployment:
+
+![Live capture: catalog-deployed pod with both VMs powered on and VIPs assigned](/images/demo-c2-catalog-pod.jpg)
 
 ## The ordering rule
 
