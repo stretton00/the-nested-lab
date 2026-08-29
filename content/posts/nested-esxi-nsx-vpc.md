@@ -4,6 +4,10 @@ date: 2026-08-29
 draft: true
 tags: [vcf, nsx, vpc, nested-esxi, homelab, vsphere-supervisor]
 series: ["The VPC Pod Papers"]
+cover:
+  image: "/images/post1-hero-trunk.svg"
+  alt: "The trunk-subnet design: one trunk vNIC, binding maps demux VLANs 1610/1611/1612 into VPC subnets"
+  hidden: false
 summary: "Plain VPC subnets silently blackhole a nested ESXi host. Here's why — and the trunk subnet + binding map design that makes nested labs work as an ordinary NSX VPC tenant, verified end to end."
 ---
 
@@ -45,6 +49,8 @@ So every frame the management interface sends carries a MAC the port doesn't
 own. NSX drops it all — ARP, ping, everything — while the host itself boots
 green and reports healthy. There is no error anywhere. You just can't reach
 it, ever.
+
+![Standard VPC subnet port: SpoofGuard pins one IP+MAC; vmk0's synthesised MAC loses, silently](/images/post1-blackhole.svg)
 
 (There's a second trap stacked on top: VPC subnets run with DHCP deactivated,
 so the appliance also sits at "waiting for DHCP" unless you inject static
@@ -130,6 +136,9 @@ Two nested hosts, vNICs on `sn-trunk`, three VLANs. From host one:
 [root@esx01:~] vmkping -I vmk2 -c3 172.30.0.101   # vSAN, VLAN 1612
 3 packets transmitted, 3 packets received, 0% packet loss
 ```
+
+![Live capture: vmnic0 down, vMotion and vSAN VLANs still passing at 0% loss](/images/demo-c6-nic-failover.jpg)
+*The transcript that matters: fail the first NIC, and every VLAN keeps flowing on the second — captured live.*
 
 Two more results worth knowing before you design around this:
 
