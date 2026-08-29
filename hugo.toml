@@ -1,0 +1,65 @@
+# ============================================================
+# CHANGE THESE TWO WHEN YOU PICK THE NAME + DOMAIN
+baseURL = "https://example.github.io/"   # -> https://yourdomain.tld/ later
+title   = "The Nested Lab"               # working title
+# ============================================================
+languageCode = "en-gb"
+theme = "PaperMod"
+enableRobotsTXT = true
+timeZone = "Europe/London"
+
+[pagination]
+pagerSize = 10
+
+[minify]
+disableXML = true
+
+[params]
+description = "VCF platform engineering, proven live — nested labs, NSX VPCs, VCF Automation, with the receipts."
+author = "Adam"
+defaultTheme = "auto"
+ShowReadingTime = true
+ShowShareButtons = false
+ShowCodeCopyButtons = true
+ShowPostNavLinks = true
+ShowBreadCrumbs = true
+ShowToc = true
+disableSpecial1stPost = true
+
+  [params.homeInfoParams]
+  Title = "The Nested Lab"
+  Content = "VCF 9.x platform engineering with live receipts — nested ESXi, NSX VPCs, VCF Automation All Apps. Real commands, real output, real failure modes, then the fix."
+
+  # [[params.socialIcons]]        # uncomment + fill when ready
+  # name = "linkedin"
+  # url = "https://www.linkedin.com/in/YOURHANDLE/"
+  # [[params.socialIcons]]
+  # name = "github"
+  # url = "https://github.com/YOURHANDLE"
+
+[taxonomies]
+tag = "tags"
+series = "series"
+
+[menus]
+  [[menus.main]]
+  name = "Posts"
+  url = "/posts/"
+  weight = 10
+  [[menus.main]]
+  name = "Series"
+  url = "/series/"
+  weight = 20
+  [[menus.main]]
+  name = "Tags"
+  url = "/tags/"
+  weight = 30
+  [[menus.main]]
+  name = "About"
+  url = "/about/"
+  weight = 40
+
+[markup.highlight]
+noClasses = false
+codeFences = true
+guessSyntax = true
