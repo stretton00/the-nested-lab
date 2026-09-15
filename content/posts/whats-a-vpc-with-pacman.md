@@ -25,7 +25,7 @@ http://192.168.144.15/  ->  <title>Pacman in HTML 5 Canvas
 http://192.168.144.23/  ->  <title>Pacman in HTML 5 Canvas
 ```
 
-{{< video src="/images/pacman-vip-23.mp4" caption="Pac-Man, live at `192.168.144.23` — a VIP on the VPC load balancer. The only door in." >}}
+{{< video src="/images/pacman-vip-23.mp4" ratio="710 / 610" caption="Pac-Man, live at `192.168.144.23` — a VIP on the VPC load balancer. The only door in." >}}
 
 ## A VPC is a private universe with a door policy
 
