@@ -1,7 +1,7 @@
 ---
 title: "One catalog item, one VCF instance: building a lab factory"
-date: 2026-08-31
-draft: true
+date: 2027-02-16
+draft: false
 tags: [vcf, vcf-automation, vro, bringup, nested-esxi, automation]
 series: ["The Lab Factory"]
 cover:
@@ -36,6 +36,8 @@ Day-N    Supervisor · NSX Edge · VCF Automation · Ops Logs/Networks/RTM ·
          Identity (AD)           one catalog item each
 Wrapper  "Deploy VCF Stack"      one form, checkbox per component
 ```
+
+![The factory catalog: hosts, bringup, every day-N component, and the wrapper — ten tiles](/images/ui/f1-f00-factory-catalog.jpg)
 
 The wrapper's form has a checkbox per component; ticking one reveals that
 component's tab with every field pre-populated. One lab password feeds every
@@ -78,7 +80,10 @@ bringup takes longer than that. So the wrapper *never waits*:
 - Only fast, deterministic steps (identity configuration, minutes) run to
   completion inside the request.
 
-Result: a full-stack kick-off *completes* as a request in 20–30 minutes,
+![F06-Mgmt-VCF: the wrapper deployment, Create Successful, 13:12 → 14:05](/images/ui/f3-f00-stack-deployment-success.jpg)
+*A whole VCF instance as one deployment record — the request finished in under an hour while the build ran on for twelve.*
+
+Result: a full-stack kick-off *completes* as a request in well under an hour (53 minutes on the run pictured),
 while the actual multi-hour build continues as watchable server-side tasks.
 The request's job isn't to do the work — it's to **start the work
 correctly** and tell you where to watch it.

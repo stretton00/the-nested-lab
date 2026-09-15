@@ -1,7 +1,7 @@
 ---
 title: "The load balancer that must exist before the namespace"
-date: 2026-08-30
-draft: true
+date: 2026-09-29
+draft: false
 tags: [vcf, nsx, vpc, supervisor, ncp, troubleshooting]
 series: ["The VPC Pod Papers"]
 cover:
@@ -103,7 +103,10 @@ esx02-access   VIP=192.168.144.35   22 OPEN · 443 OPEN
 And once the ordering is right, this is what "working" looks like — the
 pod's state a couple of minutes after a correctly-ordered deployment:
 
-![Live capture: catalog-deployed pod with both VMs powered on and VIPs assigned](/images/demo-c2-catalog-pod.jpg)
+![Live replay: catalog-deployed pod with both VMs powered on and VIPs assigned](/images/c2-catalog-pod.gif)
+
+![VCFA deployment topology: namespace, subnets, hosts, two VIPs](/images/ui/u4-deployment-topology.jpg)
+*What the requester sees once the order is right.*
 
 ## The ordering rule
 

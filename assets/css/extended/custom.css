@@ -1,3 +1,227 @@
-:root { --code-bg: #0d1319; }
-.post-content pre { border: 1px solid rgba(125,145,165,.25); border-radius: 8px; }
-.post-content code { font-size: .92em; }
+/* ============================================================
+   The Nested Lab — house theme
+   Palette is deliberately adjacent to the VCF / NSX / Clarity UIs
+   the posts screenshot (navy chrome, action blue, neutral greys)
+   so the stills sit naturally on the page — without borrowing
+   any vendor branding.
+   ============================================================ */
+
+:root {
+    /* layout */
+    --main-width: 760px;
+    --nav-width: 1100px;
+    --radius: 6px;
+
+    /* light palette */
+    --theme:    #f4f6f8;          /* page ground (Clarity app background) */
+    --entry:    #ffffff;          /* cards, post body */
+    --primary:  #1b2a32;          /* headings, strong text (navy) */
+    --secondary:#5f7381;          /* meta, captions */
+    --tertiary: #dbe2e8;          /* hairlines, muted fills */
+    --content:  #24343e;          /* body copy */
+    --border:   #d7dee5;
+
+    --code-bg:        #e8eef2;    /* INLINE code — light, readable */
+    --code-block-bg:  #1b2a32;    /* fenced blocks — navy, matches the covers */
+
+    /* ours */
+    --nl-chrome:       #1b2a32;   /* header bar */
+    --nl-chrome-ink:   #e9eef2;
+    --nl-accent:       #0079b8;   /* action blue — links */
+    --nl-accent-hi:    #49afd9;   /* highlight blue — rules, hover */
+    --nl-accent-soft:  #e3f1f9;
+    --nl-series:       #6a2c8f;   /* series eyebrow */
+    color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+    --theme:    #121c24;
+    --entry:    #1b2a32;
+    --primary:  #e9eef2;
+    --secondary:#8fa1ad;
+    --tertiary: #2c3e4a;
+    --content:  #cfd8df;
+    --border:   #2a3b47;
+
+    --code-bg:        #263846;
+    --code-block-bg:  #0f171e;
+
+    --nl-chrome:       #0f171e;
+    --nl-chrome-ink:   #e9eef2;
+    --nl-accent:       #49afd9;
+    --nl-accent-hi:    #7dc9ea;
+    --nl-accent-soft:  #1c3442;
+    --nl-series:       #b58ad6;
+    color-scheme: dark;
+}
+
+/* ---------- type ---------- */
+body {
+    font-family: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    background: var(--theme);
+}
+h1, h2, h3, h4, .logo a, .post-title, .entry-header h2, .first-entry .entry-header h1 {
+    font-family: "Outfit", "Segoe UI", system-ui, sans-serif;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+}
+.post-content h2 {
+    font-size: 1.55rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 44px 0 16px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+}
+.post-content h3 { font-size: 1.2rem; font-weight: 600; margin: 30px 0 10px; }
+.post-content p, .post-content li { font-variant-numeric: tabular-nums; }
+.post-content a { color: var(--nl-accent); box-shadow: 0 1px 0 var(--nl-accent-hi); }
+.post-content a:hover { box-shadow: 0 2px 0 var(--nl-accent); }
+
+code, pre, kbd {
+    font-family: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+    font-feature-settings: "liga" 0;
+}
+.post-content code {
+    font-size: .86em;
+    padding: .15em .4em;
+    border-radius: 4px;
+    background: var(--code-bg);
+    color: var(--primary);
+    border: 1px solid transparent;
+}
+.post-content pre {
+    border: 1px solid #2a3b47;
+    border-radius: var(--radius);
+    background: var(--code-block-bg) !important;
+    box-shadow: 0 6px 24px -14px rgba(27, 42, 50, .55);
+}
+.post-content pre code {
+    background: transparent;
+    color: #dfe7ed;
+    font-size: .84em;
+    line-height: 1.55;
+    padding: 16px 18px;
+    border: 0;
+}
+/* Chroma tokens on the navy block (light + dark) */
+.post-content pre .k, .post-content pre .kd { color: #7dc9ea; }
+.post-content pre .s, .post-content pre .s2 { color: #b9d97a; }
+.post-content pre .c, .post-content pre .c1 { color: #7b8f9c; font-style: italic; }
+.post-content pre .nt { color: #49afd9; }
+.post-content pre .m, .post-content pre .mi { color: #e8c34a; }
+
+/* ---------- chrome: header like the VCF top bar ---------- */
+.header {
+    background: var(--nl-chrome);
+    border-bottom: 3px solid var(--nl-accent-hi);
+}
+.nav { height: 58px; }
+.logo a, #menu a, .logo-switches { color: var(--nl-chrome-ink); }
+.logo a { font-weight: 700; font-size: 20px; display: inline-flex; align-items: center; gap: 10px; }
+.logo a::before {
+    /* three nested squares — the mark */
+    content: "";
+    width: 20px; height: 20px; flex: none;
+    background:
+        linear-gradient(var(--nl-accent-hi), var(--nl-accent-hi)) 0 0 / 100% 100% no-repeat,
+        var(--nl-chrome);
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><rect x='1' y='1' width='18' height='18' rx='2' fill='none' stroke='black' stroke-width='2'/><rect x='6' y='6' width='8' height='8' rx='1' fill='none' stroke='black' stroke-width='2'/><rect x='9' y='9' width='2' height='2' fill='black'/></svg>") center / contain no-repeat;
+            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><rect x='1' y='1' width='18' height='18' rx='2' fill='none' stroke='black' stroke-width='2'/><rect x='6' y='6' width='8' height='8' rx='1' fill='none' stroke='black' stroke-width='2'/><rect x='9' y='9' width='2' height='2' fill='black'/></svg>") center / contain no-repeat;
+    background: var(--nl-accent-hi);
+}
+#menu a { font-family: "Outfit", system-ui, sans-serif; font-weight: 500; font-size: 15px; opacity: .85; }
+#menu a:hover, #menu .active a { opacity: 1; }
+#menu .active { font-weight: 600; border-bottom: 2px solid var(--nl-accent-hi); }
+#theme-toggle svg { color: var(--nl-chrome-ink); }
+
+/* ---------- home / lists ---------- */
+.first-entry {
+    min-height: 240px;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 30px;
+}
+.first-entry .entry-header h1 { font-size: 2rem; }
+.first-entry .entry-content { color: var(--content); }
+.post-entry {
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color .15s, box-shadow .15s;
+}
+.post-entry:hover, .post-entry:active {
+    transform: none;
+    border-color: var(--nl-accent-hi);
+    box-shadow: 0 8px 28px -18px rgba(0, 121, 184, .55);
+}
+.post-entry:active { transform: scale(.995); }
+.entry-header h2 { font-size: 1.28rem; font-weight: 600; color: var(--primary); }
+.entry-content { color: var(--secondary); font-size: .95rem; }
+.entry-footer { color: var(--secondary); font-size: .82rem; font-family: "JetBrains Mono", monospace; }
+.entry-cover img, .entry-cover figure img { border-radius: var(--radius) var(--radius) 0 0; }
+.entry-cover { margin-bottom: 0; }
+
+/* ---------- single post ---------- */
+.post-header { margin: 28px 0 22px; }
+.post-title { font-size: 2.1rem; font-weight: 700; line-height: 1.15; color: var(--primary); }
+.post-description { color: var(--secondary); font-size: 1.05rem; margin-top: 10px; }
+.post-meta { color: var(--secondary); font-family: "JetBrains Mono", monospace; font-size: .8rem; }
+.post-content { color: var(--content); }
+.post-content img { border-radius: var(--radius); border: 1px solid var(--border); }
+.post-content img[src$=".svg"] { border: 0; }
+.post-content blockquote {
+    border-left: 3px solid var(--nl-accent-hi);
+    background: var(--nl-accent-soft);
+    color: var(--content);
+    padding: 12px 18px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+/* the [SHOT] / [CAPTURE] markers — loud while drafting */
+.post-content blockquote:has(strong:first-child) strong:first-child { color: #b3261e; }
+
+.post-content table { font-size: .92rem; }
+.post-content th { background: var(--code-bg); color: var(--primary); font-family: "Outfit", sans-serif; font-weight: 600; }
+.post-content td, .post-content th { border-color: var(--border); }
+.post-content hr { border-top: 1px solid var(--border); margin: 36px 0; }
+
+/* "Rules learned" block — the last h2 before the footer rule */
+.post-content h2:last-of-type + ul {
+    background: var(--entry);
+    border: 1px solid var(--nl-accent-hi);
+    border-radius: var(--radius);
+    padding: 18px 22px 18px 38px;
+    margin: 14px 0 28px;
+}
+
+/* tags / series chips: Clarity-style badges */
+.post-tags a, .terms-tags a {
+    border: 1px solid var(--nl-accent-hi);
+    color: var(--nl-accent);
+    background: transparent;
+    border-radius: 999px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: .78rem;
+    padding: 0 12px;
+    line-height: 26px;
+}
+.post-tags a:hover, .terms-tags a:hover { background: var(--nl-accent-soft); }
+
+.toc { background: var(--entry); border: 1px solid var(--border); }
+.toc .inner { font-size: .92rem; }
+details.toc summary { font-family: "Outfit", sans-serif; font-weight: 600; }
+
+.footer { color: var(--secondary); font-size: .82rem; }
+.footer a { color: var(--nl-accent); }
+
+/* cover figure caption + reduced motion for animated SVG covers */
+.entry-cover figcaption { color: var(--secondary); font-size: .8rem; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+
+/* inline video (shortcode: video) */
+.nl-video { margin: 22px 0; }
+.nl-video video { width: 100%; border-radius: var(--radius); border: 1px solid var(--border); background: #000; display: block; }
+.nl-video figcaption { color: var(--secondary); font-size: .85rem; margin-top: 8px; text-align: center; }
