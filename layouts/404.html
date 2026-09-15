@@ -1,0 +1,7 @@
+{{- define "main" }}
+<div class="not-found" style="text-align:center;padding:60px 0">
+  <h1 style="font-size:5rem;margin:0;font-family:'JetBrains Mono',monospace;color:var(--nl-accent)">404</h1>
+  <p style="font-size:1.2rem;color:var(--secondary)">No route exists to this page — which, on this blog, is usually the point.</p>
+  <p><a href="{{ "posts/" | absURL }}">Back to the posts</a> · <a href="{{ "series/" | absURL }}">Browse by series</a></p>
+</div>
+{{- end }}

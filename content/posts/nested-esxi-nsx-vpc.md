@@ -1,7 +1,7 @@
 ---
 title: "Nested ESXi inside an NSX VPC: the trunk-subnet design"
-date: 2026-08-29
-draft: true
+date: 2026-09-15T08:00:00+01:00
+draft: false
 tags: [vcf, nsx, vpc, nested-esxi, homelab, vsphere-supervisor]
 series: ["The VPC Pod Papers"]
 cover:
@@ -101,6 +101,8 @@ That direction is easy to invert, so it's worth saying twice: **the binding
 map belongs to the VLAN subnet and points at the trunk**, not the other way
 round.
 
+![NSX: sn-trunk realized once per VPC, binding maps hanging off the VLAN subnets](/images/ui/u11b-nsx-sntrunk-per-vpc.jpg)
+
 On the nested host, nothing exotic — plain VST, like physical:
 
 ```
@@ -110,6 +112,9 @@ Management Network  vSwitch0                     1     1610
 vMotion             vSwitch0                     1     1611
 vSAN                vSwitch0                     1     1612
 ```
+
+![Host Client: port groups on VLANs 1610 / 1611 / 1612](/images/ui/u12a-hostclient-portgroups-vlans.jpg)
+*The same three VLANs as the nested host sees them.*
 
 And because there's no DHCP in a VPC subnet, the nested-ESXi appliance gets
 its identity through OVF properties in the VM Service spec:

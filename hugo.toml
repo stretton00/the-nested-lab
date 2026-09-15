@@ -1,6 +1,6 @@
 # ============================================================
 # CHANGE THESE TWO WHEN YOU PICK THE NAME + DOMAIN
-baseURL = "https://example.github.io/"   # -> https://yourdomain.tld/ later
+baseURL = "http://localhost:1313/"   # local preview only - GitHub Pages workflow passes --baseURL; set the real domain here when chosen
 title   = "The Nested Lab"               # working title
 # ============================================================
 languageCode = "en-gb"
@@ -16,7 +16,7 @@ disableXML = true
 
 [params]
 description = "VCF platform engineering, proven live — nested labs, NSX VPCs, VCF Automation, with the receipts."
-author = "Adam"
+author = "Adam Stretton"
 defaultTheme = "auto"
 ShowReadingTime = true
 ShowShareButtons = false
@@ -25,15 +25,29 @@ ShowPostNavLinks = true
 ShowBreadCrumbs = true
 ShowToc = true
 disableSpecial1stPost = true
+ShowFullTextinRSS = true
+ShowWordCount = false
+UseHugoToc = true
+hideFooter = false
+
+  [params.assets]
+  favicon = "/favicon.svg"
+  favicon16x16 = "/favicon-16.png"
+  favicon32x32 = "/favicon-32.png"
+  apple_touch_icon = "/apple-touch-icon.png"
+  disableHLJS = true
 
   [params.homeInfoParams]
   Title = "The Nested Lab"
   Content = "VCF 9.x platform engineering with live receipts — nested ESXi, NSX VPCs, VCF Automation All Apps. Real commands, real output, real failure modes, then the fix."
 
-  # [[params.socialIcons]]        # uncomment + fill when ready
-  # name = "linkedin"
-  # url = "https://www.linkedin.com/in/YOURHANDLE/"
-  # [[params.socialIcons]]
+  [[params.socialIcons]]
+  name = "linkedin"
+  url = "https://www.linkedin.com/in/adam-stretton-32471943/"
+  [[params.socialIcons]]
+  name = "rss"
+  url = "/index.xml"
+  # [[params.socialIcons]]          # add when you have a public repo for the blog code
   # name = "github"
   # url = "https://github.com/YOURHANDLE"
 
@@ -58,6 +72,13 @@ series = "series"
   name = "About"
   url = "/about/"
   weight = 40
+  [[menus.main]]
+  name = "Contact"
+  url = "/contact/"
+  weight = 50
+
+[outputs]
+home = ["HTML", "RSS", "JSON"]
 
 [markup.highlight]
 noClasses = false
