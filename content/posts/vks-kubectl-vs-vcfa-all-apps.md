@@ -28,25 +28,15 @@ kubectl apply -f cluster.yaml
 ```yaml
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
-metadata: {name: demo01, namespace: demo}
 spec:
-  clusterNetwork:
-    pods:     {cidrBlocks: ["172.16.0.0/16"]}
-    services: {cidrBlocks: ["10.96.0.0/12"]}
-    serviceDomain: cluster.local
+  clusterNetwork: { pods, services, serviceDomain }   # set all three — see below
   topology:
     class: builtin-generic-v3.6.0
-    classNamespace: vmware-system-vks-public
+    classNamespace: vmware-system-vks-public          # the gotcha
     version: v1.35.5+vmware.1
     controlPlane: {replicas: 1}
-    workers:
-      machineDeployments:
-        - class: node-pool
-          name: np01
-          replicas: 2
-    variables:
-      - {name: vmClass, value: best-effort-large}
-      - {name: storageClass, value: vsan-default-storage-policy}
+    workers: { one node pool, 2 replicas }
+    variables: [ vmClass, storageClass ]
 ```
 
 Fifteen minutes later: a cluster. Requires a vSphere namespace that
@@ -142,6 +132,17 @@ guardrail, the deployment is the audit trail, and Ops sees it as a
 provided service rather than a stray object.
 
 The cluster's the same either way. The *service* isn't.
+
+## Why this matters outside the lab
+
+The business case for the second path is governance without friction.
+Development teams get Kubernetes clusters on request; the platform team
+gets quotas, ownership, RBAC and a monitoring view of every cluster for
+free. That's the difference between a managed Kubernetes *service* and a
+collection of clusters nobody can account for — and it's typically the
+gap that stops organisations offering Kubernetes broadly at all. Everything
+the developers touch stays standard Kubernetes; the control lands around
+it, not on it.
 
 ## Rules learned
 

@@ -176,6 +176,16 @@ Two things, honestly:
 - Ops resource resolution by *name* is fragile. Resolving by an identifier
   stored in the config after first lookup would survive a rename.
 
+## Why this matters outside the lab
+
+The operational payoff is an AI service that can be *run*, not just
+hosted: four alerts that fire before users complain, a saturation dial that
+tells capacity planners when to add a GPU, and an integration that reports
+its own health so silence is never mistaken for calm. For a customer, that
+is the difference between an LLM pilot and an LLM in production — and the
+design ports to any workload that speaks Prometheus but has no VCF
+Operations adapter of its own.
+
 ## Rules learned
 
 - Make the collector's **stdout a single integer** and let the scheduler

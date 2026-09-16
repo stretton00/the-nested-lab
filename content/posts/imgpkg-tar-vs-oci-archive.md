@@ -120,6 +120,16 @@ already in the registry you can ship just the signatures.
 
 That one gets [its own post](/series/dark-site-notes/).
 
+## Why this matters outside the lab
+
+Air-gapped customers pay for every failed transfer twice — once in the
+change window that slipped, once in the impex cycle to try again. Staging
+discipline is the whole game: knowing which tool wrote each archive, what
+survives a copy, and proving the load against a throwaway registry *before*
+anything crosses the airlock. That rehearsal is a fixed part of how we
+prepare dark-site deliveries, and it's why the loading step is the boring
+part on the day.
+
 ## Rules learned
 
 - `tar -tf x.tar | head` before anything else. `manifest.json` = imgpkg;

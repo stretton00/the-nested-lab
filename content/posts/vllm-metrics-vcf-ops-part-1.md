@@ -154,6 +154,16 @@ vLLM can find "time to first token, 95th percentile" without a manual.
 ![The key hierarchy as it lands in VCF Operations](/images/ui/o5-ops-vllm-metric-tree.jpg)
 *`vllm | category | metric` in the Ops metric picker — see [part 2](/series/llm-ops-on-vcf/) for how this was captured.*
 
+## Why this matters outside the lab
+
+Organisations putting language models into service quickly discover that
+"is it up?" isn't the question. The questions are: how long are users
+waiting for the first word, is the service about to run out of memory, and
+do we need another GPU before Friday? This pipeline answers them inside the
+same VCF Operations console the infrastructure team already lives in, so
+AI services get the same capacity planning, alerting and dashboards as
+everything else — no second monitoring stack, no new team to staff it.
+
 ## Rules learned
 
 - **Never push raw histogram buckets** into a gauge-oriented TSDB.

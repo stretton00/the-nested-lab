@@ -145,6 +145,17 @@ And whichever you pick: **codify the ordering rules** into the scripts
 that provision tenancy, so the sharp edges stay encapsulated and the people
 requesting catalog items never meet them.
 
+## Why this matters outside the lab
+
+Most customers arriving at VCF 9 have an estate of Aria Automation content
+and a question: rewrite, coexist, or migrate? The answer above is the one
+we take into design workshops. In practice it plays out as an assessment —
+which existing templates and workflows still earn their keep, which use
+cases are genuinely better served by the VPC model, and where the
+boundaries sit — followed by a coexistence plan that moves workloads across
+opportunistically instead of on a deadline. The two architectures sharing
+one organisation is what makes that low-risk.
+
 ## Rules learned
 
 - Two shapes, not two skins: imperative-through-a-broker vs

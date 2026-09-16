@@ -73,11 +73,7 @@ A Secret holding user-data, referenced from the VM:
 bootstrap:
   cloudInit:
     cloudConfig:
-      users:
-        - name: lab
-          hashed_passwd: "$6$..."
-          sudo: ALL=(ALL) NOPASSWD:ALL
-          ssh_authorized_keys: ["ssh-ed25519 AAAA..."]
+      users: [ ... a local user with a key ... ]
       write_files:
         - path: /var/www/html/index.html
           content: "shared-svc repo01\n"
@@ -127,6 +123,16 @@ esxcli network ip interface ipv4 set -i vmk2 -t static -I 172.30.0.100 -N 255.25
 Now the display is truthful and the routing is correct. (The full-realism
 alternative is a dedicated `vmotion` netstack for vmk1; I kept the default
 stack so the service tags stay visible in the Host Client.)
+
+## Why this matters outside the lab
+
+For the business, "no DHCP" translates into something security and
+operations teams both want: **predictable addressing**. Every environment
+has a known address plan, firewall rules can be written once, and nothing
+turns up on the network with an address nobody expected. Bootstrap
+providers deliver the second benefit — images stay generic and
+configuration is injected at deploy time, so there are fewer golden images
+to maintain and far less drift between environments.
 
 ## Rules learned
 

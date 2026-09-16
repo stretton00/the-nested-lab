@@ -125,6 +125,16 @@ Encode it in whatever provisions your VPCs — a script, a pipeline, an
 operator. It's four API calls and it turns a silent, undiagnosable
 `<pending>` into a platform that just works.
 
+## Why this matters outside the lab
+
+Nobody buys a platform for its ordering rules — but this is exactly the kind
+of edge that decides whether self-service provisioning feels reliable or
+flaky to the people using it. In a customer deployment the answer isn't a
+blog post; it's that the provisioning automation already does the four
+steps in the right order, every time, so a tenant never sees a VIP stuck at
+`<pending>`. Knowing where the sharp edges are — because you've been cut by
+them in a lab — is most of what an experienced delivery partner is for.
+
 ## Rules learned
 
 - In a self-service NSX VPC, **the LBService must predate the namespace**.

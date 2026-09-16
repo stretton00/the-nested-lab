@@ -86,6 +86,15 @@ bugs in the workflows than any amount of code review.
 ![Deploy VCF Stack request form: one checkbox per component, and validateOnly](/images/ui/f2-f00-stack-form-validateonly.jpg)
 *The same form, real or dry-run. One checkbox decides.*
 
+## Why this matters outside the lab
+
+For anyone who has sat through a failed change window, the value is
+obvious: a full dry run against the *real* estate before anything moves.
+Fewer failed changes, shorter windows, and a plan output that answers the
+change board's questions before they're asked. It also gives auditors
+something they rarely get from infrastructure automation — evidence of what
+was going to happen, produced by the same tooling that then did it.
+
 ## Rules learned
 
 - Add `validateOnly` to **every** workflow. Default false. Wrappers

@@ -105,6 +105,19 @@ The transit gateway gives you reachability; policy gives you precision. A
 `tcp/80,443` from the transit range and nothing else, so the repo is a
 repo and not a foothold. I left it open for the test; you shouldn't.
 
+## Why this matters outside the lab
+
+This is the pattern that makes isolated tenants *affordable*. Without it,
+every isolated environment needs its own patch server, repository, DNS and
+directory — cost and drift that quietly kill the idea. With it, a customer
+runs one set of shared services for dozens of tenants, keeps them patched in
+one place, and can still show a security reviewer that the shared service
+has no path back into any tenant.
+
+The same hub serves well beyond patching: central logging and monitoring
+collectors, licence servers, artifact registries, build agents — anything
+tenants consume but shouldn't be able to be reached *by*.
+
 ## Rules learned
 
 - `PrivateTGW` is the shared-services mode: addresses from the **transit

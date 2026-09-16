@@ -138,6 +138,16 @@ request" — vRO processing the import, the catalog schema after re-import,
 and the form service still enforcing the previous custom form for a minute
 or two. Same symptom for all three. Check timing before assuming a bug.
 
+## Why this matters outside the lab
+
+Repeatable, generated VCF deployments matter well beyond a lab: a second
+site, a disaster-recovery instance, a new business unit, an environment per
+supported release. Generating the specification from a validated reference
+removes the class of errors that comes from editing hundreds of lines of
+JSON by hand, and running the installer's own validation first turns
+"find out in hour two" into "find out in minute one". It's the difference
+between a VCF deployment being a project and being a procedure.
+
 ## Rules learned
 
 - **Generate the spec** from a validated export plus one number. Nobody

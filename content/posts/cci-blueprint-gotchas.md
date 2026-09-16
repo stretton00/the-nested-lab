@@ -134,6 +134,16 @@ order](/posts/the-lb-that-must-exist-first/). The blueprint's `vpcName`
 input says "must exist and be Realized", and it means it. Nothing in the
 blueprint fails if they're missing; the deployment just never gets a VIP.
 
+## Why this matters outside the lab
+
+VCF Automation's All Apps model is new, and new platforms have edges. None
+of these seven are documented; all of them stall a first project by days if
+you meet them cold. The value of a delivery partner who has already built
+on the platform isn't the YAML — it's that a customer's first blueprint
+publishes on day one instead of week two, and that the sharp edges are
+encoded into templates and provisioning scripts where users never meet
+them.
+
 ## Rules learned
 
 - Expressions need **block-style YAML**; flow mappings don't get parsed.
