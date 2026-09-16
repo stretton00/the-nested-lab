@@ -64,8 +64,8 @@ VM, *Agent Actions → Install*, supply guest credentials, wait. On the
 registered as a **Product Managed Agent**, version 9.1.0.0.3033, with
 `Last Operation Status` reading `Install Success`.
 
-![Manage Telegraf Agents: Test-2025 - Agent Running, Product Managed Agent, Install Success, version 9.1.0.0.3033, both collection ticks green, with a Ping Check and an HTTP Check under Custom Monitoring](/images/ui/o3-ops-manage-telegraf-agents-w2025.jpg)
-*The agent list with the Windows Server 2025 row expanded. Agent Running, product-managed, Install Success, both collection ticks green — and under Custom Monitoring a Ping Check and an HTTP Check configured from the same screen, no config file touched.*
+![Manage Telegraf Agents: Test-2025 - Agent Running, Product Managed Agent, Install Success, version 9.1.0.0.3033, both collection ticks green, with a Ping Check receiving data under Custom Monitoring](/images/ui/o3-ops-manage-telegraf-agents-w2025.jpg)
+*The agent list with the Windows Server 2025 row expanded. Agent Running, product-managed, Install Success, both collection ticks green — and under Custom Monitoring a Ping Check, configured from the same screen and already receiving data, no config file touched.*
 
 ![The Windows OS on Windows 2025 object: one object, Normal, no alerts, with Custom Script, Ping Check and Services children and live CPU/memory properties](/images/ui/o9-ops-w2025-windows-os-summary.jpg)
 *The object the agent created, as Ops sees it: green, no alerts, CPU and memory properties populated. This is the picture that matters — not the install dialog.*
@@ -87,9 +87,10 @@ build, and the WMIC prerequisite — in whatever you use for a CMDB. When the
 support matrix catches up you want to know whether you're on the version
 they tested.
 
-**Give it a check that will go flat first.** The Ping and HTTP checks
-above are configured from the agent row in Ops (*Custom Monitoring*), and
-a *Custom Script* entry on the same screen can run anything on the box.
+**Give it a check that will go flat first.** The Ping Check above is
+configured from the agent row in Ops (*Custom Monitoring*); HTTP, TCP and
+UDP checks live there too, and a *Custom Script* entry on the same screen
+can run anything on the box.
 Point one at something trivially OS-dependent and alert on its *absence*:
 if a Windows update changes an API under the agent, that line stops before
 anything else does.
