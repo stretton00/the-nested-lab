@@ -56,10 +56,12 @@ The posts group into series, and the series read in order:
 ## The lab
 
 None of this would exist without the lab, and the lab exists because of
-**[Comms-care](https://www.comms-care.com/)**, where I work. Comms-care runs
-a shared physical VCF platform on which **every consultant gets their own
-dedicated nested VCF instance** — a complete environment, not a slice of a
-shared one. Mine is `f06`; the identifiers you'll see throughout the posts
+**[Comms-care](https://www.comms-care.com/)**, where I work. A team there
+builds, runs and keeps improving a shared physical VCF platform on which
+**every consultant gets their own dedicated nested VCF instance** — a
+complete environment, not a slice of a shared one. The automation that
+stamps those instances out is a team effort too; the Lab Factory series
+describes it, but plenty of hands made it work. Mine is `f06`; the identifiers you'll see throughout the posts
 (`res.lab`, `172.30.0.0/16`, `192.168.144.x`) are that instance's own.
 
 Each instance is a full VCF 9.x stack — vCenter, NSX, SDDC Manager, the
@@ -86,8 +88,8 @@ That's what makes it useful well beyond one blog:
   is sharing blast radius. The blackholed vmk0 in part 1 of the Pod Papers
   cost an afternoon of *my* lab, and no one else's.
 
-The posts are mine; the platform that made them possible is Comms-care's,
-and I'm grateful for it. Nothing here is a customer environment.
+The posts are mine; the platform that made them possible belongs to the
+Comms-care team, and I'm grateful for it. Nothing here is a customer environment.
 
 ## Disclaimer
 

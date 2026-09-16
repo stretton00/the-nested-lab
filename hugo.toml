@@ -37,7 +37,7 @@ hideFooter = false
   [params.homeInfoParams]
   Title = "The Nested Lab"
   Content = """
-**The full VMware Cloud Foundation stack, engineered live.** One consultant, one dedicated nested VCF 9.x instance, and a standing rule: every command, every error and every fix you read here was captured from a running environment.
+**The full VMware Cloud Foundation stack, engineered live.** Written from a nested VCF 9.x lab that the team at [Comms-care](https://www.comms-care.com/) builds and looks after — a platform where every consultant gets a complete VCF instance of their own to demo, prove and break. The standing rule: every command, every error and every fix you read here was captured from a running environment.
 
 What gets covered — because all of it runs in the lab:
 
