@@ -1,6 +1,6 @@
 ---
 title: "VPC subnets have no DHCP — and that's fine"
-date: 2026-12-08
+date: 2026-09-16T07:20:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, cloud-init, ovf, esxi, bootstrap]
 series: ["The VPC Pod Papers"]

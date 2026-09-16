@@ -1,6 +1,6 @@
 ---
 title: "vLLM metrics into VCF Operations, part 1: don't ship the histogram"
-date: 2027-04-13
+date: 2026-09-30
 draft: false
 tags: [vllm, llm, observability, vcf-operations, prometheus, powershell, gpu]
 series: ["LLM Ops on VCF"]

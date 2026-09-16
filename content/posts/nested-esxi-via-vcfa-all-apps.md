@@ -1,6 +1,6 @@
 ---
 title: "A datacenter in a catalog tile: nested ESXi pods via VCF Automation All Apps"
-date: 2026-11-10
+date: 2026-09-16T07:40:00+01:00
 draft: false
 tags: [vcf, vcf-automation, all-apps, cci, blueprint, nested-esxi, vpc]
 series: ["The VPC Pod Papers"]

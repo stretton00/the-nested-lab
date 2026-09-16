@@ -1,6 +1,6 @@
 ---
 title: "Nested ESXi inside an NSX VPC: the trunk-subnet design"
-date: 2026-09-15T08:00:00+01:00
+date: 2026-09-16T08:20:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, nested-esxi, homelab, vsphere-supervisor]
 series: ["The VPC Pod Papers"]

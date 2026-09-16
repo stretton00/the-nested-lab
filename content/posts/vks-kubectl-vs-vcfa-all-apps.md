@@ -1,6 +1,6 @@
 ---
 title: "One VKS cluster, two ways: kubectl vs VCF Automation All Apps"
-date: 2027-01-19
+date: 2026-09-16T06:50:00+01:00
 draft: false
 tags: [vcf, vks, kubernetes, vcf-automation, all-apps, vcf-operations]
 series: ["All Apps in Practice"]
