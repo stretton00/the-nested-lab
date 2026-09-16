@@ -106,6 +106,16 @@ Where it's genuinely insufficient: anything about physical link behaviour —
 LACP negotiation, LLDP, flapping, MTU mismatch on one uplink. The virtual
 fabric never fails asymmetrically, so it can't reproduce those.
 
+## Why this matters outside the lab
+
+The practical value here is knowing *what a nested environment can and
+can't prove* — which is what lets you decide when a virtual lab is enough
+and when it isn't. For training, upgrade rehearsals, configuration and
+policy testing and the vast majority of "how does it behave when…"
+questions, nested is enough and dramatically cheaper. For physical link
+behaviour — LACP, optics, asymmetric faults — you still want metal. Being
+able to make that call confidently is worth more than the test itself.
+
 ## Rules learned
 
 - Give nested VCF hosts **two vNICs on the same trunk subnet**. Bringup,

@@ -116,6 +116,16 @@ survives; only the *plumbing* moves.
 ![The Nested ESX request form: environment, version, role, size, count — and Host Indexes already computed by the form action](/images/ui/f6-f00-nested-esx-form.jpg)
 *Every menu prompt from the script is now a field; `Host Indexes` is the form action's answer to "next free esxNN".*
 
+## Why this matters outside the lab
+
+Almost every organisation has these scripts: valuable, trusted, and stuck
+on one person's machine. The message of this post for them is that
+modernising doesn't mean rewriting. The logic survives; what changes is
+where it lives — behind a request form with access control, an audit
+trail, consistent inputs and a deployment record. That's how a team turns
+tribal knowledge into a service without losing the years of edge cases the
+script already handles.
+
 ## Rules learned
 
 - Porting is **sorting**: input → expression → platform abstraction →

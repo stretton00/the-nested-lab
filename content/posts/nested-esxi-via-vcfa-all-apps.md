@@ -93,33 +93,21 @@ esx01:
   type: CCI.Supervisor.Resource
   dependsOn: [bmMgmt]                    # no point booting before VLAN 1610 exists
   properties:
-    context: ${resource.namespace.id}
     manifest:
-      apiVersion: vmoperator.vmware.com/v1alpha5
-      kind: VirtualMachine
+      kind: VirtualMachine                # vmoperator.vmware.com/v1alpha5
       spec:
-        image: {kind: VirtualMachineImage, name: ${input.esxOva}}
-        className: ${input.vmClass}
-        guestID: vmkernel8Guest
         hardware:
-          cdrom:
-            - {name: cdrom0, image: {kind: VirtualMachineImage, name: ${input.isoImage}}, connected: true}
+          cdrom: [ ... the ISO, declared, connected ... ]
         network:
-          interfaces:
-            - {name: eth0, network: {kind: Subnet, name: sn-trunk, apiVersion: crd.nsx.vmware.com/v1alpha1}}
-            - {name: eth1, network: {kind: Subnet, name: sn-trunk, apiVersion: crd.nsx.vmware.com/v1alpha1}}
+          interfaces: [ eth0 -> sn-trunk, eth1 -> sn-trunk ]
         bootstrap:
-          vAppConfig:
-            properties:
-              - key: guestinfo.hostname
-                value:
-                  value: esx01.${input.podName}.res.lab
-              - {key: guestinfo.ipaddress, value: {value: "172.30.0.40"}}
-              - {key: guestinfo.vlan,      value: {value: "1610"}}
-              # ... netmask, gateway, dns, ntp, ssh=True
+          vAppConfig: [ guestinfo.hostname / ipaddress / vlan / ... ]
   wait:
     fields: [{path: status.powerState, value: PoweredOn}]
 ```
+
+(Abridged — the full resource carries the image references, VM class,
+guest ID and the complete `guestinfo` set.)
 
 Two vNICs, both on the trunk — [the nested equivalent of a VCF host's two
 pNICs](/series/the-vpc-pod-papers/). The ISO rides along as a declarative
@@ -128,18 +116,11 @@ something: the request doesn't finish until the host is powered on.
 
 ### The doors — one VIP per host
 
+A `VirtualMachineService` of type `LoadBalancer` per host, selecting it by
+label and publishing 22 and 443, and a blueprint **output** that reads the
+VIP back out of the service's status:
+
 ```yaml
-esx01Access:
-  type: CCI.Supervisor.Resource
-  properties:
-    context: ${resource.namespace.id}
-    manifest:
-      apiVersion: vmoperator.vmware.com/v1alpha5
-      kind: VirtualMachineService
-      spec:
-        type: LoadBalancer
-        selector: {app: esx01}
-        ports: [{name: https, port: 443, targetPort: 443}, {name: ssh, port: 22, targetPort: 22}]
 outputs:
   esx01Ssh: {value: "ssh root@${resource.esx01Access.object.status.loadBalancer.ingress[0].ip}"}
 ```
@@ -176,6 +157,26 @@ rather than the HTTP code — a 200 with `ContentValid: False` is a thing.
 And only **one** version can be published: unrelease 1.0.0 before releasing
 1.1.0, or you get a 409. (The full list of sharp edges is
 [its own post](/series/the-vpc-pod-papers/).)
+
+## Why this matters outside the lab
+
+This is where platform engineering turns into a service. The difference
+between "we can build you an environment" and "request one from the
+catalog" is the difference between days and minutes — and between a
+bespoke build and one that is consistent, quota-controlled and recorded
+every time. For an organisation that means:
+
+- **Time-to-environment** measured in minutes, requested by the people who
+  need it, without a queue.
+- **Consistency by construction** — every environment comes from the same
+  definition, so support, training material and runbooks all match.
+- **Governance built in** — quotas, ownership, history and clean teardown
+  are properties of the deployment record, not a spreadsheet.
+
+The nested-ESXi pod is one catalog item. The same approach delivers any
+environment shape: application stacks for developers, sandboxes for a
+proof of concept, demo kits for a sales team, isolated builds for a
+partner.
 
 ## Rules learned
 

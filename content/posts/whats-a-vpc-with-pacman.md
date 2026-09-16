@@ -125,6 +125,24 @@ their API watches days earlier (`http2: client connection lost`) and never
 re-established informers until restarted. It didn't cause this outage, but
 it's the kind of thing you only find when you're forced to look.
 
+## Why this matters outside the lab
+
+If you run a platform for more than one team, this is the feature you've
+been asking the network team for. A VPC gives each team, project or customer
+its own private network space — created by them, in minutes, with nothing
+reachable from outside until they publish it. Security teams like it for the
+same reason developers do: exposure is a deliberate, auditable act, not a
+side effect of plugging something in.
+
+What organisations do with it once they have it:
+
+- **Per-team sandboxes** that can't see each other, provisioned without a
+  ticket.
+- **Partner or supplier environments** isolated from the corporate estate
+  but hosted on the same platform.
+- **Multi-tenant hosting** — service providers and internal IT alike — with
+  isolation enforced by topology rather than a growing pile of firewall rules.
+
 ## Rules learned
 
 - A VPC's boundary is **the absence of a route**, not a rule. `Private`

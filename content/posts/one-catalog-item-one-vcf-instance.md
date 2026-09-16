@@ -139,6 +139,23 @@ The factory's next customers, funnily enough, are the isolated VPC pods from
 [the other series on this blog](/series/the-vpc-pod-papers/) — same
 philosophy, one layer further down.
 
+## Why this matters outside the lab
+
+A complete VCF instance from one form changes what an environment costs
+to have. Environments that used to be precious — because building one took
+a week — become disposable, and a lot follows from that:
+
+- **Proofs of concept** run on an environment built for the customer's
+  scenario, not on whatever happens to be free.
+- **Upgrade and migration rehearsals** happen on a fresh instance of the
+  right version, then it's deleted.
+- **Training and enablement** get a real VCF per person or per team.
+- **Reference builds** exist for every supported release, on demand.
+
+This is how Comms-care provides a dedicated instance to every consultant.
+The same factory, pointed at a customer's requirements, is a repeatable
+way to deliver environments rather than a one-off project each time.
+
 ## Rules learned
 
 - Derive names, subnets and VLANs from a single environment number; generate

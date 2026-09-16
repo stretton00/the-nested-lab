@@ -161,6 +161,18 @@ Three findings from the node roll:
 | toolkit pod Running | containerd pause ref reset | guard DS log |
 | DNS "works" | `.local` → mDNS | hosts injector |
 
+## Why this matters outside the lab
+
+For regulated and disconnected estates the takeaway is that air-gapped
+platform upgrades are entirely achievable — but they are a supply-chain
+exercise, not a software one. Every dependency has to be identified,
+staged, verified and rehearsed before the change window, and the gates that
+catch problems have to be built in advance because there is no internet to
+fall back on. Organisations running GPU and AI workloads in these
+environments are exactly who this is for: the platform can be kept current
+without ever opening the network, provided the preparation is treated as
+the real work.
+
 ## Rules learned
 
 - Five supply chains, not one. List them before you start.

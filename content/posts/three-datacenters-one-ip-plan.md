@@ -132,6 +132,24 @@ separation is.
 | Isolation guarantee | policy (auditable, breakable) | topology (no route exists) |
 | Tenant self-service | no | yes — the VPC is a tenant object |
 
+## Why this matters outside the lab
+
+"Identical environments" sounds like a lab nicety. It's actually one of the
+most requested things in enterprise IT, usually asked for in other words:
+
+- **Training at scale** — every seat in the room sees the same addresses as
+  the slides, so material is written once and never parameterised per pod.
+- **Per-engineer or per-team replicas** of a reference environment, for
+  development and testing that behaves exactly like the original.
+- **Regulatory or business-unit separation** on shared infrastructure
+  without VRF sprawl or a bespoke firewall estate — isolation is a property
+  of the topology, which is the easiest kind to evidence to an auditor.
+- **Blue/green copies** of an environment for change rehearsal, then
+  cut-over or discard.
+
+On a physical network each of these is a project. On VCF with NSX VPCs it's
+a template.
+
 ## Rules learned
 
 - Overlapping `privateIPs` across VPCs is **supported and intentional**.

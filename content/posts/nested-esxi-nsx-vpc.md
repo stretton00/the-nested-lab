@@ -78,16 +78,7 @@ inside the Geneve overlay).
 All of it is tenant-creatable through the supervisor as Kubernetes objects:
 
 ```yaml
-apiVersion: crd.nsx.vmware.com/v1alpha1
-kind: Subnet
-metadata: {name: sn-trunk}
-spec: {accessMode: Private, ipv4SubnetSize: 32}
----
-apiVersion: crd.nsx.vmware.com/v1alpha1
-kind: Subnet
-metadata: {name: sn-mgmt}
-spec: {accessMode: Private, ipv4SubnetSize: 32}
----
+# sn-trunk and sn-mgmt are ordinary Private Subnets; the interesting object:
 apiVersion: crd.nsx.vmware.com/v1alpha1
 kind: SubnetConnectionBindingMap
 metadata: {name: bm-mgmt}
@@ -159,6 +150,26 @@ vmnic1 with zero loss — and the SSH session I was watching from never
 dropped. The vmk MAC migrating between trunk ports mid-flow is exactly the
 scenario that MAC-pinned standard ports would blackhole; the trunk carries
 it fine.
+
+## Why this matters outside the lab
+
+Running whole vSphere environments *inside* a VPC turns the platform into
+something most customers never had: a way to stand up complete, isolated
+copies of infrastructure on demand, without a physical fabric change and
+without waiting for anyone. That's what makes it commercially interesting:
+
+- **Training and certification labs** where every learner gets a real
+  vSphere environment, not a shared one.
+- **Reproducing a customer problem** on a like-for-like copy instead of on
+  the customer's estate.
+- **Rehearsing upgrades and migrations** end to end before the change
+  window, then throwing the copy away.
+- **Vendor and feature evaluations** with real behaviour, at zero risk to
+  production.
+
+This is the design Comms-care uses to give every consultant a dedicated
+environment, and the same pattern scales to a classroom or a proof-of-concept
+factory.
 
 ## Rules learned
 
