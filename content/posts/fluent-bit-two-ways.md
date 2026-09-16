@@ -182,6 +182,17 @@ the raw XML.
 The output stanza is byte-identical. That's the lesson: standardise the
 *sink* and let each platform own its *source*.
 
+## Why this matters outside the lab
+
+The business outcome is one place to look. Windows servers, Kubernetes
+clusters and the platform itself all ship logs to the same VCF Operations
+for Logs, with the same fields, searchable in one query — so an incident
+that spans a Windows service and a container gets investigated in one
+screen instead of three tools. Standardising the *destination* while
+letting each platform keep its native shipper is also what keeps the
+estate maintainable: one endpoint to secure and retain, no bespoke agent
+per team.
+
 ## Rules learned
 
 - Ops for Logs ingestion = CFAPI `:9543/api/v2/events`, JSON. One output

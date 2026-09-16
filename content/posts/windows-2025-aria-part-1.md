@@ -150,6 +150,17 @@ runs `05-build-master.ps1` until the build is complete.
 > **[SHOT]** Aria request form (inputs visible) + a deployment topology view
 > of the machine with its disks and networks. Sanitise environment names.
 
+## Why this matters outside the lab
+
+For an organisation, this pipeline turns a Windows server from something a
+person builds into something the platform *delivers*: a request in a
+catalog, a domain-joined and agent-loaded server out, with the security
+team's controls (naming, join, hardening, monitoring agents) applied every
+time because they're in the pipeline, not in a checklist. The separation of
+concerns is what makes it maintainable — the platform holds the
+credentials, the guest does the work, and a change to the software stack
+is a script update on a share rather than a template re-release.
+
 ## Rules learned
 
 - Split by **who holds the credential**: platform queries AD/vCenter,

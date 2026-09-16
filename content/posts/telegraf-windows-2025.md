@@ -107,6 +107,16 @@ cluster.local` in its spec.
 > **[SHOT]** `kubectl get pods -n tanzu-system-telegraf` before (FailedMount)
 > and after (Running); the CoreDNS rewrite stanza.
 
+## Why this matters outside the lab
+
+The practical lesson for customers is about **how** to adopt something the
+vendor hasn't blessed yet. New operating systems arrive before support
+matrices catch up, and "wait" is often not an option. The approach here —
+run it, record exactly what you're running, add a canary that detects
+breakage early, upgrade one node first — is how an operations team gets
+Windows Server 2025 monitored on day one without taking on hidden risk.
+The same discipline applies to any unsupported-but-working combination.
+
 ## Rules learned
 
 - "Unsupported" = *you* own the fix path. Decide that consciously, record

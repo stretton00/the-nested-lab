@@ -140,6 +140,16 @@ Strip the Windows specifics and five ideas survive:
 4. **Health is three checks**, never the installer's exit code.
 5. **Clean up before you validate**, so "clean" is a checkable claim.
 
+## Why this matters outside the lab
+
+The report is the part customers remember. It replaces "your server is
+ready" with evidence: what was installed and whether it's healthy, where
+the server landed in vCenter, how the network was configured, how long each
+step took and where the reboots were. Service desks use it to close the
+request, security teams use it to confirm the controls, and platform teams
+use the timeline to spot regressions. The same idea — validate, then
+publish proof — transfers to any provisioning pipeline, Windows or not.
+
 ## Rules learned
 
 - Ship a **report**, not a status. Self-contained HTML, one JSON source.
