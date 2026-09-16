@@ -61,11 +61,14 @@ timeout. (Registry, not `Get-ComputerInfo` — that cmdlet takes 20–30
 seconds on Server 2025 and would trip the plugin's own timeout, which is a
 very unhelpful way for a canary to die.)
 
-![Manage Telegraf Agents: Test-2025 — Agent Running, Product Managed Agent, 9.1.0.0.3033](/images/ui/o3-ops-manage-telegraf-agents-w2025.jpg)
-*The agent list. One Windows Server 2025 VM, agent running, product-managed — and a `Last Operation Status` of "Start Failed" sitting next to a green "Agent Running". That contradiction is the first thing you own on an unsupported OS: the start operation's status check didn't recognise the platform; the service came up anyway.*
+![Manage Telegraf Agents: Test-2025 - Agent Running, Product Managed Agent, Install Success, with Ping Check, the w2025-canary custom script and a Services check under it](/images/ui/o3-ops-manage-telegraf-agents-w2025.jpg)
+*The agent list with the row expanded. One Windows Server 2025 VM, agent running, product-managed, both collection ticks green - and under it the agent is doing real work on an OS the matrix doesn't list: a ping check, a service check, and the canary with its full command line. (On the first pass the `Last Operation Status` read "Start Failed" next to a green "Agent Running" - the operation's status check didn't recognise the platform, the service came up anyway. Re-running the operation cleared it. That contradiction is the first thing you own on an unsupported OS.)*
 
-![Custom Monitoring on the W2025 agent: Ping Check, Services, and the w2025-canary custom script](/images/ui/o8-ops-telegraf-w2025-canary.jpg)
-*Expand the row and the agent is doing real work on an OS the matrix doesn't list: a ping check, a service check, and the canary.*
+![The Windows OS on Windows 2025 object: one object, Normal, no alerts, with Custom Script, Ping Check and Services children and live CPU/memory properties](/images/ui/o9-ops-w2025-windows-os-summary.jpg)
+*The object the agent created, as Ops sees it: green, no alerts, CPU and memory properties populated, and three child objects for the checks. This is the picture that matters - not the install dialog.*
+
+![Ping Check metrics for the W2025 agent: Availability flat at 100 and Average Response Time in a steady band across a three-hour window](/images/ui/o10-ops-w2025-ping-check-availability.jpg)
+*And the proof the agent is doing more than existing: the Ping Check it runs from Windows Server 2025, availability flat at 100 across the morning, response time steady at a couple of milliseconds. Metrics arriving on schedule from an OS the matrix doesn't list.*
 
 ![The VM object in Ops: Microsoft Windows Server 2025 (64-bit), tools running](/images/ui/o2-ops-w2025-vm-summary.jpg)
 
