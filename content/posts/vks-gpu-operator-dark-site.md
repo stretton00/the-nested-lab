@@ -1,6 +1,6 @@
 ---
 title: "VKS and the GPU Operator in a dark site: the whole airlock"
-date: 2027-05-11
+date: 2026-11-11
 draft: false
 tags: [air-gap, vks, gpu-operator, nvidia, harbor, imgpkg, cosign, kernel-headers, vcf]
 series: ["Dark Site Notes"]

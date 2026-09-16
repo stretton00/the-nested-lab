@@ -1,6 +1,6 @@
 ---
 title: "The load balancer that must exist before the namespace"
-date: 2026-09-29
+date: 2026-09-16T08:10:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, supervisor, ncp, troubleshooting]
 series: ["The VPC Pod Papers"]

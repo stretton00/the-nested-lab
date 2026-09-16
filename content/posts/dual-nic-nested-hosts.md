@@ -1,6 +1,6 @@
 ---
 title: "Dual-NIC nested hosts: what redundancy means when the fabric is virtual"
-date: 2026-11-24
+date: 2026-09-16T07:30:00+01:00
 draft: false
 tags: [vcf, nested-esxi, nsx, vpc, networking, vsphere]
 series: ["The VPC Pod Papers"]

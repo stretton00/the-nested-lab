@@ -1,6 +1,6 @@
 ---
 title: "imgpkg tar vs OCI archive: why your air-gap tarballs won't load"
-date: 2027-02-02
+date: 2026-10-28
 draft: false
 tags: [air-gap, harbor, imgpkg, crane, oci, vks, gpu-operator]
 series: ["Dark Site Notes"]

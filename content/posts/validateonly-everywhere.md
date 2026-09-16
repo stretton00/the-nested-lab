@@ -1,6 +1,6 @@
 ---
 title: "validateOnly everywhere: plan mode for infrastructure"
-date: 2027-03-02
+date: 2026-09-16T06:30:00+01:00
 draft: false
 tags: [automation, vro, vcf-automation, opinion, platform-engineering]
 series: ["The Lab Factory"]

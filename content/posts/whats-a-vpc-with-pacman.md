@@ -1,6 +1,6 @@
 ---
 title: "What's a VPC? Let Pac-Man explain"
-date: 2026-09-15T09:00:00+01:00
+date: 2026-09-16T08:30:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, vks, kubernetes, explainer]
 series: ["The VPC Pod Papers"]

@@ -1,6 +1,6 @@
 ---
 title: "vLLM metrics into VCF Operations, part 2: monitor the monitor"
-date: 2027-04-27
+date: 2026-10-14
 draft: false
 tags: [vllm, llm, observability, vcf-operations, telegraf, powershell, alerting]
 series: ["LLM Ops on VCF"]
