@@ -30,9 +30,11 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-      - name: Keep the daily schedule alive
+      - name: Keep the daily schedule alive   # GitHub disables cron workflows after 60 quiet days; re-enabling resets that clock
         if: github.event_name == 'schedule'
-        uses: gautamkrishnar/keepalive-workflow@v2
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow enable hugo.yaml
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
