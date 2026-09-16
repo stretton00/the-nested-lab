@@ -1,8 +1,5 @@
-# ============================================================
-# CHANGE THESE TWO WHEN YOU PICK THE NAME + DOMAIN
-baseURL = "http://localhost:1313/"   # local preview only - GitHub Pages workflow passes --baseURL; set the real domain here when chosen
-title   = "The Nested Lab"               # working title
-# ============================================================
+baseURL = "https://thenestedlab.com/"   # hugo server overrides this locally; Pages workflow passes its own too
+title   = "The Nested Lab"
 languageCode = "en-gb"
 theme = "PaperMod"
 enableRobotsTXT = true
