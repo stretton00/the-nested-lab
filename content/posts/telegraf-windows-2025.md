@@ -1,7 +1,7 @@
 ---
 title: "Telegraf on Windows Server 2025: unsupported, works anyway"
-date: 2027-05-12
-draft: true
+date: 2026-09-16T12:20:00+01:00
+draft: false
 tags: [observability, telegraf, windows, vcf-operations, metrics, support-matrix]
 series: ["Observability on VCF"]
 cover:
@@ -10,8 +10,6 @@ cover:
   hidden: false
 summary: "The VCF Operations agent support matrix doesn't list Windows Server 2025. The Telegraf agent installs, runs and reports anyway. What 'unsupported' really means, how to deploy it deliberately, what to watch because of it — and the same Telegraf on VKS, where a hidden proxy dependency bit me."
 ---
-
-> **DRAFT STATUS:** VKS half and the Ops-side Windows evidence (agent running, product-managed, W2025 object) are captured. Still to do on the box itself: the canary `inputs.exec` and a perf-counter chart. Marked **[CAPTURE]**.
 
 Two facts, both true:
 
@@ -36,40 +34,43 @@ So: it works. You just own it.
 
 ## Deploying it deliberately
 
-**[CAPTURE]** — the section below is the plan; fill in with the live run.
+On the [pipeline-built W2025 server](/series/the-windows-build-pipeline/)
+the agent went on from VCF Operations itself — *Applications → Manage
+Telegraf Agents → Install* — and registered as a **Product Managed Agent**,
+version 9.1.0.0.3033. Then the two things that make it *yours*:
 
-On the [pipeline-built W2025 server](/posts/windows-2025-aria-part-1/),
-via Ops: *Environment → Applications → Manage Telegraf Agents → Install*.
-The bootstrap uses WinRM or a downloaded installer; the agent registers
-against the Ops cloud proxy and appears under the VM object.
+**1. Record exactly what you're running.** Agent build, Telegraf version,
+OS build — in whatever you use for a CMDB. When the support matrix catches
+up you want to know whether you're on the version they tested.
 
-Then the two things that make it *yours*:
+**2. Add a canary.** Something trivially OS-dependent that will go flat
+first if a Windows update changes an API under the agent. Ops makes this a
+two-minute job with no editing of `telegraf.conf`: *Custom Monitoring →
+Custom Script → Add*, pointing at a script that already exists on the box.
+Mine reads the build number from the registry and prints it as a
+key/value pair:
 
-1. **Record the exact versions** — agent build, Telegraf version, OS build
-   — in whatever you use for a CMDB. When the matrix catches up, you want
-   to know whether you're on the version they tested.
-2. **Add a canary metric.** `inputs.exec` running something trivially
-   OS-dependent (`Get-ComputerInfo | select OsBuildNumber`) — if a future
-   Windows update changes an API and the input silently breaks, this is
-   the series that goes flat first. Alert on absence.
+```powershell
+# C:\temp\canary.ps1
+$b = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentBuildNumber
+"osbuild=$b"        # -> osbuild=26100
+```
 
-This is the same host that runs the [vLLM metrics
-collector](/posts/vllm-metrics-vcf-ops-part-2/) as an `inputs.exec`
-plugin, so the agent is already doing custom work; the canary is one more
-stanza.
+Prefix `powershell -NoProfile -ExecutionPolicy Bypass -File`, five-minute
+timeout. (Registry, not `Get-ComputerInfo` — that cmdlet takes 20–30
+seconds on Server 2025 and would trip the plugin's own timeout, which is a
+very unhelpful way for a canary to die.)
 
 ![Manage Telegraf Agents: Test-2025 — Agent Running, Product Managed Agent, 9.1.0.0.3033](/images/ui/o3-ops-manage-telegraf-agents-w2025.jpg)
-*The agent list. One Windows Server 2025 VM, agent running, product-managed — and a `Last Operation Status` of "Start Failed" sitting next to a green "Agent Running". That contradiction is the first thing you own on an unsupported OS: the start operation's status check didn't recognise the platform, the service came up anyway.*
+*The agent list. One Windows Server 2025 VM, agent running, product-managed — and a `Last Operation Status` of "Start Failed" sitting next to a green "Agent Running". That contradiction is the first thing you own on an unsupported OS: the start operation's status check didn't recognise the platform; the service came up anyway.*
 
-![Expanded: Custom Monitoring on the W2025 agent — a Ping Check and a Services check already configured](/images/ui/o4-ops-telegraf-w2025-custom-monitoring.jpg)
-*Expand the row and the agent is doing real work: a ping check and a Windows service check, both product-managed plugins, on an OS the matrix doesn't list.*
+![Custom Monitoring on the W2025 agent: Ping Check, Services, and the w2025-canary custom script](/images/ui/o8-ops-telegraf-w2025-canary.jpg)
+*Expand the row and the agent is doing real work on an OS the matrix doesn't list: a ping check, a service check, and the canary.*
 
 ![The VM object in Ops: Microsoft Windows Server 2025 (64-bit), tools running](/images/ui/o2-ops-w2025-vm-summary.jpg)
 
 ![Windows OS on Windows 2025: AgentManagedType = Product Managed, Tags|source = Windows_2025](/images/ui/o1-ops-w2025-agent-metrics.jpg)
-*The "Windows OS on Windows 2025" child object the agent created, with `Telegraf Availability` in the metric tree and the `AgentManagedType` property reading Product Managed.*
-
-> **[SHOT]** still wanted: a `win_perf_counters` CPU chart and the canary series once it's configured; the support-matrix page/KB for the "says no" half.
+*The "Windows OS on Windows 2025" child object the agent created, with `Telegraf Availability` in the metric tree and `AgentManagedType` reading Product Managed.*
 
 ## What to watch, *because* it's unsupported
 
@@ -104,8 +105,6 @@ unresolvable — because the cluster was created without
 patched the live cluster; every new cluster gets `serviceDomain:
 cluster.local` in its spec.
 
-> **[SHOT]** `kubectl get pods -n tanzu-system-telegraf` before (FailedMount)
-> and after (Running); the CoreDNS rewrite stanza.
 
 ## Why this matters outside the lab
 
