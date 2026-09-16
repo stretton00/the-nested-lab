@@ -9,6 +9,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write   # keepalive-workflow re-enables the schedule if the repo goes quiet for 60 days
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -29,6 +30,9 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+      - name: Keep the daily schedule alive
+        if: github.event_name == 'schedule'
+        uses: gautamkrishnar/keepalive-workflow@v2
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5

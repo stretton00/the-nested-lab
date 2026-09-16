@@ -16,7 +16,8 @@ description = "The full VMware Cloud Foundation stack, engineered live in a dedi
 author = "Adam Stretton"
 defaultTheme = "auto"
 ShowReadingTime = true
-ShowShareButtons = false
+ShowShareButtons = true
+ShareButtons = ["linkedin", "x", "reddit"]
 ShowCodeCopyButtons = true
 ShowPostNavLinks = true
 ShowBreadCrumbs = true
@@ -79,6 +80,10 @@ series = "series"
   url = "/tags/"
   weight = 30
   [[menus.main]]
+  name = "Search"
+  url = "/search/"
+  weight = 35
+[[menu.main]]
   name = "About"
   url = "/about/"
   weight = 40
