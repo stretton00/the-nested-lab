@@ -1,0 +1,341 @@
+{
+  "Hostname": "ACME-LDN-APP-006",
+  "Domain": "corp.acme.example",
+  "BuildTimestamp": "16-09-2026 - 09:53:16",
+  "AriaMetadata": {
+    "Project": "Platform-Engineering",
+    "Deployment": "app-tier-ldn-2026-09-16",
+    "Requester": "j.doe@acme.example"
+  },
+  "Tags": [
+    {
+      "TagKey": "environment",
+      "TagValue": "prod"
+    },
+    {
+      "TagKey": "application",
+      "TagValue": "app-tier"
+    },
+    {
+      "TagKey": "location",
+      "TagValue": "ldn"
+    },
+    {
+      "TagKey": "classification",
+      "TagValue": "internal"
+    },
+    {
+      "TagKey": "backup",
+      "TagValue": "tier-2"
+    },
+    {
+      "TagKey": "cost-centre",
+      "TagValue": "CC-4410"
+    }
+  ],
+  "SystemHealth": {
+    "DomainTrust": "OK",
+    "PendingReboot": false,
+    "Uptime": "0d 0h 6m",
+    "TimeZone": "GMT Standard Time",
+    "WinRM": "Running",
+    "RDP": true,
+    "UAC": true,
+    "VRATaskClean": true,
+    "DNSResolution": true,
+    "NTPSource": "dc01.corp.acme.example"
+  },
+  "Security": {
+    "LocalAdmins": "CORP\\Domain Admins, CORP\\SRV-LocalAdmins-APP, ACME-LDN-APP-006\\Administrator",
+    "TargetOU": "OU=Application,OU=Servers,OU=LDN,DC=corp,DC=acme,DC=example"
+  },
+  "NetworkInterfaces": [
+    {
+      "InterfaceAlias": "Ethernet0",
+      "MACAddress": "00-50-56-9A-3C-1F",
+      "IPAddress": "10.40.12.66",
+      "PrefixLength": "24",
+      "Gateway": "10.40.12.1"
+    },
+    {
+      "InterfaceAlias": "Ethernet1",
+      "MACAddress": "00-50-56-9A-71-B4",
+      "IPAddress": "10.40.80.66",
+      "PrefixLength": "24",
+      "Gateway": ""
+    }
+  ],
+  "OS_Context": {
+    "Caption": "Microsoft Windows Server 2025 Standard (Build 26100)",
+    "LatestPatch": "KB5063878 (Cumulative Update, 2025-08)"
+  },
+  "Hardware": {
+    "CPU": 4,
+    "RAM_GB": 16
+  },
+  "Disks": [
+    {
+      "Letter": "C:",
+      "Name": "OS",
+      "SizeGB": 99.4,
+      "FreeGB": 62.8
+    },
+    {
+      "Letter": "D:",
+      "Name": "Data",
+      "SizeGB": 199.9,
+      "FreeGB": 198.7
+    },
+    {
+      "Letter": "L:",
+      "Name": "Logs",
+      "SizeGB": 49.9,
+      "FreeGB": 49.6
+    }
+  ],
+  "SoftwareValidation": [
+    {
+      "StepName": "MonitoringAgent",
+      "Status": "Healthy",
+      "Checks": [
+        {
+          "CheckType": "Flag",
+          "Target": "01_MonitoringAgent_installed.flag",
+          "Passed": true
+        },
+        {
+          "CheckType": "Service",
+          "Target": "HealthService (Running)",
+          "Passed": true
+        },
+        {
+          "CheckType": "Path",
+          "Target": "C:\\Program Files\\Monitoring Agent\\Agent\\HealthService.exe",
+          "Passed": true
+        }
+      ]
+    },
+    {
+      "StepName": "InventoryAgent",
+      "Status": "Healthy",
+      "Checks": [
+        {
+          "CheckType": "Flag",
+          "Target": "02_InventoryAgent_installed.flag",
+          "Passed": true
+        },
+        {
+          "CheckType": "Service",
+          "Target": "InventoryAgent (Running)",
+          "Passed": true
+        },
+        {
+          "CheckType": "Path",
+          "Target": "C:\\Program Files\\Inventory\\Agent\\agent.exe",
+          "Passed": true
+        }
+      ]
+    },
+    {
+      "StepName": "EndpointSecurity",
+      "Status": "Healthy",
+      "Checks": [
+        {
+          "CheckType": "Flag",
+          "Target": "03_EndpointSecurity_installed.flag",
+          "Passed": true
+        },
+        {
+          "CheckType": "Service",
+          "Target": "masvc (Running)",
+          "Passed": true
+        },
+        {
+          "CheckType": "Path",
+          "Target": "C:\\Program Files\\Endpoint Security\\Agent\\masvc.exe",
+          "Passed": true
+        }
+      ]
+    },
+    {
+      "StepName": "LogAgent",
+      "Status": "Healthy",
+      "Checks": [
+        {
+          "CheckType": "Flag",
+          "Target": "04_LogAgent_installed.flag",
+          "Passed": true
+        },
+        {
+          "CheckType": "Service",
+          "Target": "LogAgentService (Running)",
+          "Passed": true
+        },
+        {
+          "CheckType": "Path",
+          "Target": "C:\\Program Files (x86)\\Log Agent\\liwinsvc.exe",
+          "Passed": true
+        }
+      ]
+    },
+    {
+      "StepName": "WindowsUpdates",
+      "Status": "Healthy",
+      "Checks": [
+        {
+          "CheckType": "Flag",
+          "Target": "05_WindowsUpdates_installed.flag",
+          "Passed": true
+        }
+      ]
+    }
+  ],
+  "InstalledApps": [
+    {
+      "Name": "Monitoring Agent",
+      "Version": "10.19.10200.0",
+      "Publisher": "Monitoring Vendor"
+    },
+    {
+      "Name": "Inventory Agent",
+      "Version": "6.14.1",
+      "Publisher": "Inventory Vendor"
+    },
+    {
+      "Name": "Endpoint Security Agent",
+      "Version": "5.8.3.407",
+      "Publisher": "Security Vendor"
+    },
+    {
+      "Name": "Log Agent",
+      "Version": "8.18.1",
+      "Publisher": "Log Vendor"
+    },
+    {
+      "Name": "VMware Tools",
+      "Version": "13.0.0.24696409",
+      "Publisher": "Broadcom"
+    }
+  ],
+  "ProvisionStartTime": "16-09-2026 09:12:04",
+  "TotalProvisioningSec": 2472,
+  "StepTimings": [
+    {
+      "StepName": "Install: MonitoringAgent",
+      "StartTime": "16-09-2026 09:12:04",
+      "DurationSec": 210,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Install: InventoryAgent",
+      "StartTime": "16-09-2026 09:15:39",
+      "DurationSec": 95,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Install: EndpointSecurity",
+      "StartTime": "16-09-2026 09:17:19",
+      "DurationSec": 480,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Install: LogAgent",
+      "StartTime": "16-09-2026 09:25:24",
+      "DurationSec": 70,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Install: WindowsUpdates",
+      "StartTime": "16-09-2026 09:26:39",
+      "DurationSec": 1260,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Cleanup: Eject ISO",
+      "StartTime": "16-09-2026 09:51:39",
+      "DurationSec": 2,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Cleanup: Restore UAC",
+      "StartTime": "16-09-2026 09:51:44",
+      "DurationSec": 1,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Cleanup: Remove Cloudbase-Init",
+      "StartTime": "16-09-2026 09:51:47",
+      "DurationSec": 25,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Collect: Network",
+      "StartTime": "16-09-2026 09:52:14",
+      "DurationSec": 3,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Collect: Infrastructure (vCenter Placement)",
+      "StartTime": "16-09-2026 09:52:18",
+      "DurationSec": 12,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Collect: OS / Hardware",
+      "StartTime": "16-09-2026 09:52:31",
+      "DurationSec": 6,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Collect: AD / Security",
+      "StartTime": "16-09-2026 09:52:38",
+      "DurationSec": 4,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Collect: Disks",
+      "StartTime": "16-09-2026 09:52:43",
+      "DurationSec": 2,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Collect: Post-Build Health",
+      "StartTime": "16-09-2026 09:52:46",
+      "DurationSec": 9,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Collect: Software Validation",
+      "StartTime": "16-09-2026 09:52:56",
+      "DurationSec": 3,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Collect: Installed Applications",
+      "StartTime": "16-09-2026 09:53:00",
+      "DurationSec": 5,
+      "Status": "SUCCESS"
+    },
+    {
+      "StepName": "Write: Validation JSON",
+      "StartTime": "16-09-2026 09:53:06",
+      "DurationSec": 1,
+      "Status": "SUCCESS"
+    }
+  ],
+  "Infrastructure": {
+    "vCenterServer": "ldn-vc01.corp.acme.example",
+    "Datacenter": "LDN-DC1",
+    "Cluster": "LDN-PROD-CL02",
+    "Host": "ldn-esx14.corp.acme.example",
+    "FolderPath": "LDN-DC1 / Servers / Application / Prod",
+    "Datastores": [
+      "LDN-VSAN-01"
+    ],
+    "Networks": [
+      "dvpg-app-1012",
+      "dvpg-backup-1080"
+    ]
+  },
+  "GuestStatus": "Success"
+}

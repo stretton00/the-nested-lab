@@ -1,7 +1,7 @@
 ---
 title: "Windows Server 2025 via Aria Automation, part 1: the pipeline"
-date: 2027-03-03
-draft: true
+date: 2026-09-17T06:10:00+01:00
+draft: false
 tags: [aria-automation, vcf-automation, vm-apps, windows, cloudbase-init, vro, powershell]
 series: ["The Windows Build Pipeline"]
 cover:
@@ -147,8 +147,27 @@ run across SMB — immune to network blips and file locks mid-install) and
 registers the **`Build-Master` startup task**. From here on, every boot
 runs `05-build-master.ps1` until the build is complete.
 
-> **[SHOT]** Aria request form (inputs visible) + a deployment topology view
-> of the machine with its disks and networks. Sanitise environment names.
+What the requester actually sees is a short form. Stripped of the
+site-specific enum values, the inputs are:
+
+```yaml
+inputs:
+  location:        # site code -> hostname prefix
+  classification:  # security zone -> hostname prefix, OU
+  environment:     # prod / pre-prod / test -> hostname prefix, tags
+  application:     # application code -> hostname prefix, folder
+  image:           # Windows2025 (the template is image-versioned)
+  flavor:          # Small / Medium / Large -> vCPU + RAM
+  count:           # number of identical machines
+  bootDiskSizeGB:  # C: (extended in-guest by 01-config-disks)
+  primaryNetwork:  # required
+  network2..4:     # optional; each becomes a static NIC
+  additionalDisks: # [{number, name, letter, sizeGB}] -> D:, L:, ...
+  tags:            # free-form key/value -> written to disk, shown in the report
+```
+
+Every one of those either shapes the hostname, lands in `guestinfo`, or
+is written to disk for the build engine to read. Nothing is entered twice.
 
 ## Why this matters outside the lab
 

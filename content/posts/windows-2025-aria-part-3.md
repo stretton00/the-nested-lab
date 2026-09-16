@@ -1,7 +1,7 @@
 ---
 title: "Windows Server 2025 via Aria Automation, part 3: validation as a product, and the details that hurt"
-date: 2027-03-31
-draft: true
+date: 2026-09-17T06:30:00+01:00
+draft: false
 tags: [aria-automation, windows, powershell, validation, reporting, session-0]
 series: ["The Windows Build Pipeline"]
 cover:
@@ -28,8 +28,8 @@ in, one self-contained HTML file out. No server, no external assets — CSS,
 SVG icons and the timeline chart are all inline — so it opens from the file
 share or as an email attachment as-is.
 
-> **[SHOT]** The report, anonymised: header + banner + scorecard (top),
-> then the Gantt (bottom). This is the hero image for the whole series.
+![Server Build Validation Report: header, BUILD SUCCESSFUL banner, scorecard (Software 5/5, Build Time 41m 12s, Domain Trust OK, Pending Reboot NO, Disks OK), system information and security cards](/images/ui/a1-aria-report-top.jpg)
+*The top of the report. Rendered by the real renderer from an anonymised payload: the hostnames, domain and vendor names are fictional, the code that drew it is not. [Open the full report](/files/ACME-LDN-APP-006_Validation_Report.html) — it's one self-contained HTML file — or the [JSON it was built from](/files/ACME-LDN-APP-006_data-validation.json).*
 
 Header: VM, execution time, project, deployment, requester. Banner:
 **BUILD SUCCESSFUL / BUILD FAILED** per the strict rule from part 2. A
@@ -47,14 +47,23 @@ sticky status bar keeps hostname and verdict visible while scrolling. Then:
 | **Timeline** | SVG Gantt of every step at true wall-clock position; phase colours; **automatic REBOOT detection** (gaps > 30 s shaded and labelled) |
 | Installed apps | collapsible full inventory |
 
+![Software validation cards (flag, service, path per agent), the network table joined to vSphere portgroups, and storage volumes with capacity bars and datastore chips](/images/ui/a2-aria-report-software-network.jpg)
+*Sections 3 to 5: one card per agent with its three checks; adapters joined to their portgroups; volumes with their backing datastore.*
+
 The network table is the one that gets the "oh" reaction: the guest knows
 its adapters, vCenter knows the portgroups, and the guestinfo bridge from
 part 1 lets one table show both, joined on MAC, with no credentials
 crossing the boundary.
 
+![Deployment tags as colour chips and the vCenter to datacenter to cluster to host placement chain with the VM folder](/images/ui/a3-aria-report-tags-placement.jpg)
+*Tags and placement — all of it from the request and from `guestinfo`, none of it from a credential in the guest.*
+
 The Gantt is the one operations teams use. When a build takes 90 minutes
 instead of 40, the chart shows whether it was the updates step, a slow
 installer, or a 20-minute gap where the machine sat at a boot prompt.
+
+![Provisioning timeline: SVG Gantt with phase colours and the REBOOT gap shaded amber](/images/ui/a4-aria-report-timeline.jpg)
+*Section 8. Phase colours, true wall-clock positions, and the reboot detected from a gap over 30 seconds — nothing logged "rebooting now".*
 
 ## The details that hurt
 

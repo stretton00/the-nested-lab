@@ -1,0 +1,223 @@
+﻿    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>Server Validation: ACME-LDN-APP-006</title>
+    <style>
+    :root {
+      --blue:#0056b3; --blue-lt:#e8f0fb; --pass-c:#155724; --pass-bg:#d4edda; --pass-bd:#c3e6cb;
+      --fail-c:#721c24; --fail-bg:#f8d7da; --fail-bd:#f5c6cb; --warn-c:#856404; --warn-bg:#fff3cd; --warn-bd:#ffc107;
+      --text:#343a40; --muted:#6c757d; --border:#dee2e6; --surface:#ffffff; --bg:#f8f9fa;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;color:var(--text);padding:0}
+
+    .sticky-bar{position:sticky;top:0;z-index:100;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 28px;font-size:0.85em;font-weight:600;letter-spacing:.03em;box-shadow:0 2px 8px rgba(0,0,0,0.2);transform:translateY(-100%);opacity:0;transition:transform .2s,opacity .2s;}
+    .sticky-bar.visible{transform:translateY(0);opacity:1}
+    .sticky-bar .sb-host{font-size:1em}
+    .sticky-bar .sb-status{padding:3px 12px;border-radius:20px;font-size:.85em;font-weight:700;letter-spacing:.05em}
+    .sb-status-fail{background:rgba(220,53,69,.35);border:1px solid rgba(220,53,69,.6)}
+    .sb-status-pass{background:rgba(40,167,69,.35);border:1px solid rgba(40,167,69,.6)}
+
+    .container{max-width:1200px;margin:0 auto;background:var(--surface);box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+    .header-block{text-align:center;border-bottom:3px solid var(--blue);padding:24px 30px 20px;background:var(--surface)}
+    .header-block h1{color:var(--blue);font-size:2em;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+    .header-block p{color:var(--muted);font-size:1em;margin-top:6px}
+    .banner{padding:14px;text-align:center;font-size:1.35em;font-weight:700;text-transform:uppercase;border:2px solid;margin:0}
+    .banner-success{background:var(--pass-bg);color:var(--pass-c);border-color:var(--pass-bd)}
+    .banner-fail{background:var(--fail-bg);color:var(--fail-c);border-color:var(--fail-bd)}
+
+    .scorecard{display:flex;gap:0;background:#f8f9fa;border-bottom:1px solid var(--border)}
+    .sc-stat{flex:1;padding:14px 20px;border-right:1px solid var(--border);text-align:center}
+    .sc-stat:last-child{border-right:none}
+    .sc-stat .scs-label{font-size:.7em;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin-bottom:4px}
+    .sc-stat .scs-val{font-size:1.4em;font-weight:700}
+    .scs-pass{color:var(--pass-c)} .scs-fail{color:var(--fail-c)} .scs-warn{color:var(--warn-c)}
+
+    .body-pad{padding:24px 30px 32px}
+    .section-title{background:var(--bg);color:var(--blue);padding:9px 14px;font-size:1.15em;font-weight:600;border-left:5px solid var(--blue);margin:28px 0 14px;display:flex;align-items:center}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:.92em}
+    th,td{padding:10px 13px;text-align:left;border:1px solid var(--border);vertical-align:top}
+    th{background:var(--bg);color:#495057;font-weight:600;text-transform:uppercase;font-size:.82em}
+    .pass{color:var(--pass-c);font-weight:700;background:var(--pass-bg);text-align:center}
+    .fail{color:var(--fail-c);font-weight:700;background:var(--fail-bg);text-align:center}
+    .warn{color:var(--warn-c);font-weight:700;background:var(--warn-bg);text-align:center}
+
+    .tile-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+    .tile{flex:1;min-width:140px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:12px 14px}
+    .tile-label{font-size:.7em;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin-bottom:5px}
+    .tile-val{font-size:1em;font-weight:700;word-break:break-word}
+    .tile-val.accent{color:var(--blue)}
+    .tile.wide{flex:2}
+
+    .status-cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .status-card{flex:1;min-width:130px;border-radius:7px;padding:11px 13px;display:flex;align-items:center;gap:11px;border:1px solid}
+    .status-card .sc-icon{font-size:1.4em;line-height:1;flex-shrink:0;width:26px;display:flex;align-items:center;justify-content:center}
+    .status-card .sc-body{display:flex;flex-direction:column}
+    .status-card .sc-label{font-size:.68em;text-transform:uppercase;letter-spacing:.08em;font-weight:600;opacity:.75}
+    .status-card .sc-value{font-size:.92em;font-weight:700;margin-top:1px}
+    .sc-pass{background:var(--pass-bg);border-color:var(--pass-bd);color:var(--pass-c)}
+    .sc-fail{background:var(--fail-bg);border-color:var(--fail-bd);color:var(--fail-c)}
+    .admins-panel{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:11px 15px;margin-bottom:16px}
+    .admins-panel .ap-label{font-size:.7em;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:#495057;margin-bottom:7px}
+    .admins-panel ul{margin:0;padding-left:18px;columns:2;column-gap:20px}
+    .admins-panel li{font-size:.88em;margin-bottom:2px;break-inside:avoid}
+
+    .sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px}
+    .sw-card{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg)}
+    .sw-card.sw-fail{border-color:var(--fail-bd);background:var(--fail-bg)}
+    .sw-head{padding:11px 14px;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.6)}
+    .sw-name{font-weight:700;font-size:1em}
+    .sw-badge{padding:3px 10px;border-radius:20px;font-size:.78em;font-weight:700;border:1px solid}
+    .sw-badge-pass{background:var(--pass-bg);color:var(--pass-c);border-color:var(--pass-bd)}
+    .sw-badge-fail{background:var(--fail-bg);color:var(--fail-c);border-color:var(--fail-bd)}
+    .sw-checks{padding:0 14px 12px;display:flex;flex-direction:column;gap:5px;margin-top:8px}
+    .sw-check{display:flex;align-items:flex-start;gap:7px;font-size:.84em;color:var(--muted)}
+    .ck-ok{color:var(--pass-c)} .ck-bad{color:var(--fail-c)}
+
+    .disk-bar-wrap{min-width:80px}
+    .disk-bar-track{height:7px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:3px}
+    .disk-bar-fill{height:100%;border-radius:4px}
+    .disk-bar-ok{background:linear-gradient(90deg,#28a745,#5cb85c)}
+    .disk-bar-warn{background:linear-gradient(90deg,#ffc107,#fd7e14)}
+    .disk-bar-bad{background:linear-gradient(90deg,#dc3545,#c0392b)}
+    .disk-pct-lbl{font-size:.75em;color:var(--muted);margin-top:1px}
+
+    .gantt-wrap{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:14px;overflow-x:auto;margin-bottom:12px}
+    .gantt-meta{font-size:.82em;color:var(--muted);margin-bottom:10px}
+    .gantt-meta strong{color:var(--text)}
+    .phase-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .pl-item{display:flex;align-items:center;gap:5px;font-size:.78em;color:var(--muted)}
+    .pl-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+    details summary{cursor:pointer;color:var(--blue);font-weight:600;outline:none;margin-bottom:5px}
+
+    .tag-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;padding:2px 0}
+    .tag-chip{display:inline-flex;border-radius:20px;overflow:hidden;font-size:.8em;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+    .tc-key{padding:5px 10px;color:#fff;letter-spacing:.02em;white-space:nowrap}
+    .tc-val{padding:5px 13px;white-space:nowrap}
+    /* Random Tag Palette */
+    .tc-blue .tc-key{background:#0056b3} .tc-blue .tc-val{background:#e8f0fb;color:#0056b3}
+    .tc-green .tc-key{background:#155724} .tc-green .tc-val{background:#d4edda;color:#155724}
+    .tc-red .tc-key{background:#721c24} .tc-red .tc-val{background:#f8d7da;color:#721c24}
+    .tc-yellow .tc-key{background:#856404} .tc-yellow .tc-val{background:#fff3cd;color:#856404}
+    .tc-purple .tc-key{background:#4b0082} .tc-purple .tc-val{background:#e6e6fa;color:#4b0082}
+    .tc-teal .tc-key{background:#005f6b} .tc-teal .tc-val{background:#d0f0f5;color:#005f6b}
+    .tc-orange .tc-key{background:#b35900} .tc-orange .tc-val{background:#ffebd6;color:#b35900}
+    .tc-gray .tc-key{background:#495057} .tc-gray .tc-val{background:#e9ecef;color:#343a40}
+
+    .infra-chain{display:flex;align-items:stretch;margin-bottom:14px;flex-wrap:wrap;gap:0}
+    .ic-node{flex:1;min-width:155px;background:var(--bg);border:1px solid var(--border);padding:12px 13px;display:flex;flex-direction:column;gap:3px;position:relative}
+    .ic-node:not(:last-child){border-right:none}
+    .ic-node:first-child{border-radius:8px 0 0 8px}
+    .ic-node:last-child{border-radius:0 8px 8px 0;border-right:1px solid var(--border)}
+    .ic-node-inner{display:flex;align-items:center;gap:8px}
+    .ic-icon{flex-shrink:0;opacity:.75}
+    .ic-meta{display:flex;flex-direction:column;gap:2px;min-width:0}
+    .ic-type{font-size:.65em;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700}
+    .ic-val{font-size:.8em;font-weight:600;color:var(--text);word-break:break-word;line-height:1.3}
+    .infra-details{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+    .id-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 13px}
+    .idc-header{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+    .idc-label{font-size:.68em;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700}
+    .idc-val{font-size:.8em;color:var(--text);word-break:break-word;line-height:1.5}
+    .idc-tag{display:inline-block;background:var(--blue-lt);color:var(--blue);border-radius:4px;padding:2px 7px;font-size:.78em;font-weight:600;margin:2px 2px 0 0}
+    .ic-node:not(:last-child)::after{content:'>';position:absolute;right:-9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1.2em;font-weight:300;z-index:1}
+    .infra-pending{background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:6px;padding:11px 15px;color:var(--warn-c);font-style:italic;margin-bottom:16px}
+    .footer{text-align:center;padding:18px;border-top:1px solid var(--border);color:var(--muted);font-size:.8em;background:var(--bg)}
+    </style>
+    </head>
+    <body>
+
+    <div class="sticky-bar" id="stickyBar">
+      <span class="sb-host">&#x1F5A5;&nbsp; ACME-LDN-APP-006 &nbsp;&middot;&nbsp; app-tier-ldn-2026-09-16</span>
+      <span class="sb-status sb-status-pass">BUILD SUCCESSFUL</span>
+    </div>
+
+    <div class="container">
+      <div class="header-block">
+        <h1>Server Build Validation Report</h1>
+        <p>VM Name: <strong>ACME-LDN-APP-006</strong> &nbsp;|&nbsp; Executed: 16-09-2026 - 09:53:16</p>
+        <p style="font-size:.88em;color:var(--muted);margin-top:6px">
+          Project: <strong>Platform-Engineering</strong> &nbsp;|&nbsp;
+          Deployment: <strong>app-tier-ldn-2026-09-16</strong> &nbsp;|&nbsp;
+          Requester: <strong>j.doe@acme.example</strong>
+        </p>
+      </div>
+
+      <div class="banner banner-success" id="mainBanner">OVERALL BUILD STATUS: BUILD SUCCESSFUL</div>
+
+      <div class="scorecard">
+        <div class="sc-stat"><div class="scs-label">Software</div><div class="scs-val scs-pass">5 / 5</div></div>
+        <div class="sc-stat"><div class="scs-label">Build Time</div><div class="scs-val">41m 12s</div></div>
+        <div class="sc-stat"><div class="scs-label">Domain Trust</div><div class="scs-val scs-pass">OK</div></div>
+        <div class="sc-stat"><div class="scs-label">Pending Reboot</div><div class="scs-val scs-pass">NO</div></div>
+        <div class="sc-stat"><div class="scs-label">Disks</div><div class="scs-val scs-pass">OK</div></div>
+      </div>
+
+      <div class="body-pad">
+      <div class="section-title"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#0056b3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:7px"><rect x="1" y="2" width="11" height="8" rx="1"/><line x1="6" y1="10" x2="6" y2="12"/><line x1="3" y1="12" x2="9" y2="12"/><line x1="13" y1="5" x2="15" y2="7"/><polyline points="13,7 15,7 15,5"/></svg>1. System Information</div>
+      <div class="tile-row">
+        <div class="tile wide"><div class="tile-label">Hostname</div><div class="tile-val accent">ACME-LDN-APP-006</div></div>
+        <div class="tile wide"><div class="tile-label">Operating System</div><div class="tile-val">Microsoft Windows Server 2025 Standard (Build 26100)</div></div>
+        <div class="tile" style="flex:3"><div class="tile-label">Latest Patch</div><div class="tile-val" style="color:var(--pass-c)">KB5063878 (Cumulative Update, 2025-08)</div></div>
+      </div>
+      <div class="tile-row">
+        <div class="tile"><div class="tile-label">CPU Cores</div><div class="tile-val accent">4</div></div>
+        <div class="tile"><div class="tile-label">Memory</div><div class="tile-val accent">16 GB</div></div>
+        <div class="tile"><div class="tile-label">Uptime</div><div class="tile-val">0d 0h 6m</div></div>
+        <div class="tile wide"><div class="tile-label">Time Zone</div><div class="tile-val">GMT Standard Time</div></div>
+        <div class="tile"><div class="tile-label">Pending Reboot</div><div class="tile-val pass">NO</div></div>
+      </div>
+
+      <div class="section-title"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#0056b3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:7px"><path d="M8 1 L14 4 L14 8 C14 11.5 11 14 8 15 C5 14 2 11.5 2 8 L2 4 Z"/></svg>2. Security &amp; Active Directory</div>
+      <table><tr><th>Domain</th><th>Trust Status</th><th>Target OU</th><th>NTP Source</th></tr>
+      <tr><td>corp.acme.example</td><td class="pass">OK</td><td>OU=Application,OU=Servers,OU=LDN,DC=corp,DC=acme,DC=example</td><td>dc01.corp.acme.example</td></tr></table>
+
+      <div class="status-cards">
+        <div class="status-card sc-pass"><div class="sc-icon">&#10003;</div><div class="sc-body"><span class="sc-label">WinRM</span><span class="sc-value">Running</span></div></div>
+        <div class="status-card sc-pass"><div class="sc-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="2" width="14" height="11" rx="1.5"/><line x1="8" y1="13" x2="8" y2="16"/><line x1="4" y1="16" x2="12" y2="16"/><line x1="23" y1="8" x2="16" y2="8"/><polyline points="19,5 23,8 19,11"/></svg></div><div class="sc-body"><span class="sc-label">RDP</span><span class="sc-value">Enabled</span></div></div>
+        <div class="status-card sc-pass"><div class="sc-icon">&#128274;</div><div class="sc-body"><span class="sc-label">UAC</span><span class="sc-value">Enabled</span></div></div>
+      </div>
+
+      <div class="admins-panel"><div class="ap-label">Local Administrators</div><ul>
+          <li>CORP\Domain Admins</li> <li>CORP\SRV-LocalAdmins-APP</li> <li>ACME-LDN-APP-006\Administrator</li>
+      </ul></div>
+
+      <div class="section-title"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#0056b3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:7px"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><polyline points="9,12 11,14 15,10"/></svg>3. Software Validation Status</div>
+      <div class="sw-grid"><div class='sw-card '><div class='sw-head'><span class='sw-name'>MonitoringAgent</span><span class='sw-badge sw-badge-pass'>PASS</span></div><div class='sw-checks'><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Flag: 01_MonitoringAgent_installed.flag</span></div><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Service: HealthService (Running)</span></div><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Path: C:\Program Files\Monitoring Agent\Agent\HealthService.exe</span></div></div></div><div class='sw-card '><div class='sw-head'><span class='sw-name'>InventoryAgent</span><span class='sw-badge sw-badge-pass'>PASS</span></div><div class='sw-checks'><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Flag: 02_InventoryAgent_installed.flag</span></div><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Service: InventoryAgent (Running)</span></div><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Path: C:\Program Files\Inventory\Agent\agent.exe</span></div></div></div><div class='sw-card '><div class='sw-head'><span class='sw-name'>EndpointSecurity</span><span class='sw-badge sw-badge-pass'>PASS</span></div><div class='sw-checks'><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Flag: 03_EndpointSecurity_installed.flag</span></div><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Service: masvc (Running)</span></div><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Path: C:\Program Files\Endpoint Security\Agent\masvc.exe</span></div></div></div><div class='sw-card '><div class='sw-head'><span class='sw-name'>LogAgent</span><span class='sw-badge sw-badge-pass'>PASS</span></div><div class='sw-checks'><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Flag: 04_LogAgent_installed.flag</span></div><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Service: LogAgentService (Running)</span></div><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Path: C:\Program Files (x86)\Log Agent\liwinsvc.exe</span></div></div></div><div class='sw-card '><div class='sw-head'><span class='sw-name'>WindowsUpdates</span><span class='sw-badge sw-badge-pass'>PASS</span></div><div class='sw-checks'><div class='sw-check'><span class='ck ck-ok'>&#10003;</span> <span>Flag: 05_WindowsUpdates_installed.flag</span></div></div></div>      </div>
+
+      <div class="section-title"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#0056b3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:7px"><circle cx="8" cy="8" r="2"/><circle cx="2" cy="3" r="1.5"/><circle cx="14" cy="3" r="1.5"/><circle cx="2" cy="13" r="1.5"/><circle cx="14" cy="13" r="1.5"/><line x1="3.2" y1="4" x2="6.5" y2="6.8"/><line x1="12.8" y1="4" x2="9.5" y2="6.8"/><line x1="3.2" y1="12" x2="6.5" y2="9.2"/><line x1="12.8" y1="12" x2="9.5" y2="9.2"/></svg>4. Network Configuration</div>
+      <table><tr><th>Adapter</th><th>MAC Address</th><th>IP Address</th><th>Subnet Mask</th><th>Gateway</th><th>vSphere Network</th></tr><tr><td>Ethernet0</td><td>00-50-56-9A-3C-1F</td><td>10.40.12.66</td><td>255.255.255.0</td><td>10.40.12.1</td><td><span class='idc-tag' style='margin:0'>dvpg-app-1012</span></td></tr><tr><td>Ethernet1</td><td>00-50-56-9A-71-B4</td><td>10.40.80.66</td><td>255.255.255.0</td><td></td><td><span class='idc-tag' style='margin:0'>dvpg-backup-1080</span></td></tr>	  </table>
+
+      <div class="section-title"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#0056b3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:7px"><ellipse cx="8" cy="4" rx="6" ry="2"/><line x1="2" y1="4" x2="2" y2="12"/><line x1="14" y1="4" x2="14" y2="12"/><ellipse cx="8" cy="12" rx="6" ry="2"/></svg>5. Storage Volumes</div>
+      <table><tr><th>Drive</th><th>Label</th><th>Total (GB)</th><th>Used (GB)</th><th>Free (GB)</th><th style="min-width:120px">Free %</th><th>Datastore(s)</th></tr><tr><td>C:</td><td>OS</td><td>99.4</td><td>36.6</td><td>62.8</td><td><div class='disk-bar-wrap'><div class='disk-bar-track'><div class='disk-bar-fill disk-bar-ok' style='width:63.2%'></div></div><div class='disk-pct-lbl'>63.2% free</div></div></td><td><span class='idc-tag' style='margin:0 0 3px 0;display:inline-block'>LDN-VSAN-01</span><br/></td></tr><tr><td>D:</td><td>Data</td><td>199.9</td><td>1.2</td><td>198.7</td><td><div class='disk-bar-wrap'><div class='disk-bar-track'><div class='disk-bar-fill disk-bar-ok' style='width:99.4%'></div></div><div class='disk-pct-lbl'>99.4% free</div></div></td><td><span class='idc-tag' style='margin:0 0 3px 0;display:inline-block'>LDN-VSAN-01</span><br/></td></tr><tr><td>L:</td><td>Logs</td><td>49.9</td><td>0.3</td><td>49.6</td><td><div class='disk-bar-wrap'><div class='disk-bar-track'><div class='disk-bar-fill disk-bar-ok' style='width:99.4%'></div></div><div class='disk-pct-lbl'>99.4% free</div></div></td><td><span class='idc-tag' style='margin:0 0 3px 0;display:inline-block'>LDN-VSAN-01</span><br/></td></tr>      </table>
+
+      <div class="section-title"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#0056b3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:7px"><path d="M2 2 L9 2 L14 7 L9 14 L2 14 Z"/><circle cx="5" cy="5.5" r="1"/></svg>6. Deployment Tags</div><div class='tag-chips'><div class='tag-chip tc-yellow'><span class='tc-key'>environment</span><span class='tc-val'>prod</span></div><div class='tag-chip tc-blue'><span class='tc-key'>application</span><span class='tc-val'>app-tier</span></div><div class='tag-chip tc-teal'><span class='tc-key'>location</span><span class='tc-val'>ldn</span></div><div class='tag-chip tc-orange'><span class='tc-key'>classification</span><span class='tc-val'>internal</span></div><div class='tag-chip tc-red'><span class='tc-key'>backup</span><span class='tc-val'>tier-2</span></div><div class='tag-chip tc-yellow'><span class='tc-key'>cost-centre</span><span class='tc-val'>CC-4410</span></div></div>      <div class="section-title"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#0056b3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:7px"><rect x="1" y="2" width="14" height="4" rx="1"/><rect x="1" y="7" width="14" height="4" rx="1"/><rect x="1" y="12" width="14" height="3" rx="1"/><circle cx="12" cy="4" r="0.8" fill="#0056b3"/><circle cx="12" cy="9" r="0.8" fill="#0056b3"/></svg>7. Infrastructure Placement</div>        <div class="infra-chain">
+          <div class="ic-node"><div class="ic-node-inner"><div class="ic-icon"><svg viewBox="0 0 18 18" width="22" height="22" fill="none" stroke="#0056b3" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="16" height="4" rx="1"/><rect x="1" y="11" width="16" height="4" rx="1"/><path d="M4 6 C4 2 14 2 14 6"/><circle cx="14" cy="8" r="0.8" fill="#0056b3"/><circle cx="14" cy="13" r="0.8" fill="#0056b3"/></svg></div><div class="ic-meta"><span class="ic-type">vCenter</span><span class="ic-val">ldn-vc01.corp.acme.example</span></div></div></div>
+          <div class="ic-node"><div class="ic-node-inner"><div class="ic-icon"><svg viewBox="0 0 18 18" width="22" height="22" fill="none" stroke="#0056b3" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="14" height="10" rx="1"/><rect x="5" y="3" width="8" height="4" rx="1"/><line x1="7" y1="11" x2="7" y2="17"/><line x1="11" y1="11" x2="11" y2="17"/><line x1="2" y1="11" x2="16" y2="11"/></svg></div><div class="ic-meta"><span class="ic-type">Datacenter</span><span class="ic-val">LDN-DC1</span></div></div></div>
+          <div class="ic-node"><div class="ic-node-inner"><div class="ic-icon"><svg viewBox="0 0 18 18" width="22" height="22" fill="none" stroke="#0056b3" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="3.5" r="2"/><circle cx="3" cy="14" r="2"/><circle cx="15" cy="14" r="2"/><line x1="9" y1="5.5" x2="4.2" y2="12.3"/><line x1="9" y1="5.5" x2="13.8" y2="12.3"/><line x1="5" y1="14" x2="13" y2="14"/></svg></div><div class="ic-meta"><span class="ic-type">Cluster</span><span class="ic-val">LDN-PROD-CL02</span></div></div></div>
+          <div class="ic-node"><div class="ic-node-inner"><div class="ic-icon"><svg viewBox="0 0 18 18" width="22" height="22" fill="none" stroke="#0056b3" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="16" height="5" rx="1"/><rect x="1" y="10" width="16" height="5" rx="1"/><circle cx="14" cy="5.5" r="1" fill="#0056b3"/><circle cx="14" cy="12.5" r="1" fill="#0056b3"/><line x1="3" y1="5.5" x2="11" y2="5.5"/><line x1="3" y1="12.5" x2="11" y2="12.5"/></svg></div><div class="ic-meta"><span class="ic-type">ESXi Host</span><span class="ic-val">ldn-esx14.corp.acme.example</span></div></div></div>
+        </div>		<div class="infra-details">
+		  <div class="id-card" style="grid-column: 1 / -1"><div class="idc-header"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="#0056b3" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4 L1 14 L15 14 L15 7 L8 7 L6 4 Z"/></svg><span class="idc-label">vSphere VM Folder</span></div><div class="idc-val">LDN-DC1 / Servers / Application / Prod</div></div>
+		</div>      <div class="section-title"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#0056b3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:7px"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="4" x2="8" y2="8"/><line x1="8" y1="8" x2="11" y2="10"/></svg>8. Provisioning Timeline</div>
+      <div class="gantt-wrap">
+        <div class="gantt-meta">
+          Start: <strong>16-09-2026 09:12:04</strong> &nbsp;&middot;&nbsp;
+          Total session: <strong>41m 12s</strong> &nbsp;&middot;&nbsp;
+          Steps: <strong>17</strong>
+        </div><svg viewBox='0 0 780 419' width='100%' style='display:block;overflow:visible'><rect x='0' y='0' width='780' height='23' fill='#f8f9fa'/><rect x='0' y='46' width='780' height='23' fill='#f8f9fa'/><rect x='0' y='92' width='780' height='23' fill='#f8f9fa'/><rect x='0' y='138' width='780' height='23' fill='#f8f9fa'/><rect x='0' y='184' width='780' height='23' fill='#f8f9fa'/><rect x='0' y='230' width='780' height='23' fill='#f8f9fa'/><rect x='0' y='276' width='780' height='23' fill='#f8f9fa'/><rect x='0' y='322' width='780' height='23' fill='#f8f9fa'/><rect x='0' y='368' width='780' height='23' fill='#f8f9fa'/><rect x='691.6' y='0' width='56' height='391' fill='#fff3cd' opacity='0.7'/><text x='719.6' y='12' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='10' fill='#856404' font-weight='700'>REBOOT</text><text x='719.6' y='24' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9' fill='#856404'>~4m 0s gap</text><text x='189' y='15.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Install: MonitoringAgent</text><text x='189' y='38.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Install: InventoryAgent</text><text x='189' y='61.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Install: EndpointSecurity</text><text x='189' y='84.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Install: LogAgent</text><text x='189' y='107.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Install: WindowsUpdates</text><text x='189' y='130.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Cleanup: Eject ISO</text><text x='189' y='153.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Cleanup: Restore UAC</text><text x='189' y='176.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Cleanup: Remove Cloudbase-Init</text><text x='189' y='199.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Collect: Network</text><text x='189' y='222.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Collect: Infrastructure (vCenter Placement)</text><text x='189' y='245.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Collect: OS / Hardware</text><text x='189' y='268.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Collect: AD / Security</text><text x='189' y='291.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Collect: Disks</text><text x='189' y='314.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Collect: Post-Build Health</text><text x='189' y='337.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Collect: Software Validation</text><text x='189' y='360.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Collect: Installed Applications</text><text x='189' y='383.5' text-anchor='end' font-family='Segoe UI,sans-serif' font-size='10.5' fill='#495057'>Write: Validation JSON</text><rect x='195' y='3' width='49' height='15' rx='3' fill='#28a745' opacity='0.88'><title>Install: MonitoringAgent | 0s | 4m 30s | SUCCESS</title></rect><text x='219.5' y='15.5' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9' fill='white' font-weight='600'>4m 30s</text><rect x='245' y='26' width='22' height='15' rx='3' fill='#28a745' opacity='0.88'><title>Install: InventoryAgent | 215s | 2m 35s | SUCCESS</title></rect><rect x='268.3' y='49' width='112' height='15' rx='3' fill='#28a745' opacity='0.88'><title>Install: EndpointSecurity | 315s | 8m 0s | SUCCESS</title></rect><text x='324.3' y='61.5' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9' fill='white' font-weight='600'>8m 0s</text><rect x='381.1' y='72' width='16' height='15' rx='3' fill='#28a745' opacity='0.88'><title>Install: LogAgent | 800s | 1m 10s | SUCCESS</title></rect><rect x='398.5' y='95' width='293' height='15' rx='3' fill='#28a745' opacity='0.88'><title>Install: WindowsUpdates | 875s | 21m 0s | SUCCESS</title></rect><text x='545' y='107.5' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9' fill='white' font-weight='600'>21m 0s</text><rect x='747.4' y='118' width='3' height='15' rx='3' fill='#fd7e14' opacity='0.88'><title>Cleanup: Eject ISO | 2375s | 2s | SUCCESS</title></rect><rect x='748.6' y='141' width='3' height='15' rx='3' fill='#fd7e14' opacity='0.88'><title>Cleanup: Restore UAC | 2380s | 1s | SUCCESS</title></rect><rect x='749.3' y='164' width='6' height='15' rx='3' fill='#fd7e14' opacity='0.88'><title>Cleanup: Remove Cloudbase-Init | 2383s | 25s | SUCCESS</title></rect><rect x='755.6' y='187' width='3' height='15' rx='3' fill='#6f42c1' opacity='0.88'><title>Collect: Network | 2410s | 3s | SUCCESS</title></rect><rect x='756.5' y='210' width='3' height='15' rx='3' fill='#6f42c1' opacity='0.88'><title>Collect: Infrastructure (vCenter Placement) | 2414s | 12s | SUCCESS</title></rect><rect x='759.5' y='233' width='3' height='15' rx='3' fill='#6f42c1' opacity='0.88'><title>Collect: OS / Hardware | 2427s | 6s | SUCCESS</title></rect><rect x='761.2' y='256' width='3' height='15' rx='3' fill='#6f42c1' opacity='0.88'><title>Collect: AD / Security | 2434s | 4s | SUCCESS</title></rect><rect x='762.3' y='279' width='3' height='15' rx='3' fill='#6f42c1' opacity='0.88'><title>Collect: Disks | 2439s | 2s | SUCCESS</title></rect><rect x='763' y='302' width='3' height='15' rx='3' fill='#6f42c1' opacity='0.88'><title>Collect: Post-Build Health | 2442s | 9s | SUCCESS</title></rect><rect x='765.3' y='325' width='3' height='15' rx='3' fill='#6f42c1' opacity='0.88'><title>Collect: Software Validation | 2452s | 3s | SUCCESS</title></rect><rect x='766.3' y='348' width='3' height='15' rx='3' fill='#6f42c1' opacity='0.88'><title>Collect: Installed Applications | 2456s | 5s | SUCCESS</title></rect><rect x='767.7' y='371' width='3' height='15' rx='3' fill='#6f42c1' opacity='0.88'><title>Write: Validation JSON | 2462s | 1s | SUCCESS</title></rect><line x1='195' y1='391' x2='780' y2='391' stroke='#dee2e6' stroke-width='1'/><line x1='195' y1='0' x2='195' y2='391' stroke='#dee2e6' stroke-width='1'/><line x1='195' y1='391' x2='195' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='195' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>0s</text><line x1='222.9' y1='391' x2='222.9' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='222.9' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>2m</text><line x1='250.8' y1='391' x2='250.8' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='250.8' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>4m</text><line x1='278.7' y1='391' x2='278.7' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='278.7' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>6m</text><line x1='306.7' y1='391' x2='306.7' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='306.7' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>8m</text><line x1='334.6' y1='391' x2='334.6' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='334.6' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>10m</text><line x1='362.5' y1='391' x2='362.5' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='362.5' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>12m</text><line x1='390.4' y1='391' x2='390.4' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='390.4' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>14m</text><line x1='418.3' y1='391' x2='418.3' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='418.3' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>16m</text><line x1='446.2' y1='391' x2='446.2' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='446.2' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>18m</text><line x1='474.1' y1='391' x2='474.1' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='474.1' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>20m</text><line x1='502' y1='391' x2='502' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='502' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>22m</text><line x1='530' y1='391' x2='530' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='530' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>24m</text><line x1='557.9' y1='391' x2='557.9' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='557.9' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>26m</text><line x1='585.8' y1='391' x2='585.8' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='585.8' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>28m</text><line x1='613.7' y1='391' x2='613.7' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='613.7' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>30m</text><line x1='641.6' y1='391' x2='641.6' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='641.6' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>32m</text><line x1='669.5' y1='391' x2='669.5' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='669.5' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>34m</text><line x1='697.4' y1='391' x2='697.4' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='697.4' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>36m</text><line x1='725.3' y1='391' x2='725.3' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='725.3' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>38m</text><line x1='753.3' y1='391' x2='753.3' y2='396' stroke='#adb5bd' stroke-width='1'/><text x='753.3' y='407' text-anchor='middle' font-family='Segoe UI,sans-serif' font-size='9.5' fill='#6c757d'>40m</text></svg>        <div class="phase-legend"><span class="pl-item"><span class="pl-dot" style="background:#4a90d9"></span>Cloudbase-Init</span><span class="pl-item"><span class="pl-dot" style="background:#28a745"></span>Software Install</span><span class="pl-item"><span class="pl-dot" style="background:#fd7e14"></span>Cleanup</span><span class="pl-item"><span class="pl-dot" style="background:#6f42c1"></span>Validation Collect</span><span class="pl-item"><span class="pl-dot" style="background:#0056b3"></span>Share & Report</span><span class="pl-item"><span class="pl-dot" style="background:#dc3545"></span>Failed</span></div>
+      </div>
+
+      <div class="section-title"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#0056b3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:7px"><line x1="1" y1="3" x2="15" y2="3"/><line x1="1" y1="7" x2="15" y2="7"/><line x1="1" y1="11" x2="10" y2="11"/><circle cx="13" cy="11" r="2.5"/><line x1="13" y1="9.5" x2="13" y2="11"/><line x1="13" y1="11" x2="14.2" y2="12"/></svg>9. Installed Applications</div><details><summary>Show / Hide Installed Applications (5 entries)</summary><table style='margin-top:10px'><tr><th>Application</th><th>Version</th><th>Publisher</th></tr><tr><td>Monitoring Agent</td><td>10.19.10200.0</td><td>Monitoring Vendor</td></tr><tr><td>Inventory Agent</td><td>6.14.1</td><td>Inventory Vendor</td></tr><tr><td>Endpoint Security Agent</td><td>5.8.3.407</td><td>Security Vendor</td></tr><tr><td>Log Agent</td><td>8.18.1</td><td>Log Vendor</td></tr><tr><td>VMware Tools</td><td>13.0.0.24696409</td><td>Broadcom</td></tr></table></details>      </div></div>
+
+      <div class="footer">
+        Automatically generated by VMware Aria Automation Provisioning Engine &nbsp;&middot;&nbsp; 
+        Report Generated: 16-09-2026 16:01:33
+      </div>
+    </div>
+
+    <script>
+    const bar = document.getElementById('stickyBar');
+    const obs = new IntersectionObserver(e => { bar.classList.toggle('visible', !e[0].isIntersecting); }, { threshold: 0 });
+    obs.observe(document.getElementById('mainBanner'));
+    </script>
+    </body></html>
