@@ -83,7 +83,7 @@ series = "series"
   name = "Search"
   url = "/search/"
   weight = 35
-[[menu.main]]
+  [[menus.main]]
   name = "About"
   url = "/about/"
   weight = 40
