@@ -35,7 +35,7 @@ jobs:
       - name: Build
         env:
           HUGO_ENVIRONMENT: production
-        run: hugo --gc --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
+        run: hugo --gc --minify   # baseURL comes from hugo.toml (https://thenestedlab.com/)
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
