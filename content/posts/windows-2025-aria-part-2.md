@@ -140,6 +140,16 @@ over 30 seconds between steps is shaded and labelled REBOOT.
 > **[SHOT]** The `Flags\` folder listing at completion + the Gantt from the
 > report with the reboot gap shaded (part 3 has the full report shot).
 
+## Why this matters outside the lab
+
+What customers get from a reboot-safe build is predictability: every
+server takes the same steps in the same order, survives the reboots
+Windows insists on, and finishes clean — with no tooling, no credentials
+and no leftover tasks on the delivered machine. That last part matters to
+security reviewers as much as the first part matters to operations. And
+because every step's timing is recorded, "why did this build take twice as
+long?" has an answer instead of a guess.
+
 ## Rules learned
 
 - A reboot-safe build is **kill switch + per-step flags + persisted

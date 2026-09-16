@@ -1,7 +1,7 @@
 ---
 title: "Seven demo apps, one request: deploying a showcase stack via VCF Automation"
-date: 2027-01-06
-draft: true
+date: 2026-09-16T08:40:00+01:00
+draft: false
 tags: [vcf, vks, vcf-automation, all-apps, demo, kubernetes, pacman]
 series: ["All Apps in Practice"]
 cover:
@@ -26,8 +26,8 @@ goldpinger     192.168.144.25        (DaemonSet incl. control plane)
 prometheus     (in-cluster: KSM + node-exporter, 11/11 targets up)
 ```
 
-> **[SHOT]** Browser grid GIF: four tabs cycling — KubeDoom (VNC), KubeInvaders,
-> kube-ops-view, Pac-Man. No login needed; grab any time.
+![Three of the seven live on their VIPs — KubeInvaders, kube-ops-view, Pac-Man — and the whole set as VCF Operations sees it](/images/demo-apps-grid.jpg)
+*Captured from the VIPs the platform handed out. KubeDoom is VNC-only and podinfo is an API, so they sit this one out; the Ops topology tile shows all seven by name.*
 
 ## The path that matters: tenanted, not shortcut
 
@@ -103,6 +103,18 @@ integrated on a fresh environment: 16.7 minutes to `CREATE_SUCCESSFUL`.
 An immediate re-run: 3.3 minutes, all steps idempotent — which is the
 number I actually care about, because it means a broken demo is a re-run,
 not a rebuild.
+
+## Why this matters outside the lab
+
+A demo stack sounds like a toy. It's actually the fastest way to make a
+platform *legible* to people who don't read YAML: a customer watches a
+request become a cluster, watches seven services get their own addresses,
+opens one and plays it. Everything underneath — self-service Kubernetes,
+load balancing, persistent storage, isolation — is being exercised in a way
+a non-technical stakeholder can see working. The same stack is what we
+put in front of a new team on day one, and the same idempotent deploy is
+what makes it safe to demonstrate live: if it breaks on stage, it re-runs
+in three minutes.
 
 ## Rules learned
 
