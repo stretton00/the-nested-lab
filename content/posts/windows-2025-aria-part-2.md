@@ -1,7 +1,7 @@
 ---
 title: "Windows Server 2025 via Aria Automation, part 2: a state machine that survives four reboots"
-date: 2027-03-17
-draft: true
+date: 2026-09-17T06:20:00+01:00
+draft: false
 tags: [aria-automation, windows, powershell, state-machine, cloudbase-init]
 series: ["The Windows Build Pipeline"]
 cover:
@@ -137,8 +137,29 @@ carries **no credentials, payloads or tooling**.
 The report's timeline chart finds the update reboot automatically: any gap
 over 30 seconds between steps is shaded and labelled REBOOT.
 
-> **[SHOT]** The `Flags\` folder listing at completion + the Gantt from the
-> report with the reboot gap shaded (part 3 has the full report shot).
+At completion the `Flags\` folder is the whole history of the build in
+file names:
+
+```
+Flags  00_config-network.flag
+  01_config-disks.flag
+  02_join-domain.flag
+  03_init-puller.flag
+  04_stage-payloads.flag
+  01_MonitoringAgent_installed.flag
+  02_InventoryAgent_installed.flag
+  03_EndpointSecurity_installed.flag
+  04_LogAgent_installed.flag
+  05_WindowsUpdates_installed.flag
+  99_cleanup_complete.flag
+  100_build_complete.flag        <- kill switch
+```
+
+And the persisted timings turn into this, in the report from [part
+3](/posts/windows-2025-aria-part-3/):
+
+![Provisioning timeline from the build report: five install steps, a shaded four-minute REBOOT gap after Windows Updates, then cleanup, collection and write steps](/images/ui/a4-aria-report-timeline.jpg)
+*Every bar sits at its true wall-clock position across the reboots because the state file carried the timings. The amber band is the reboot after Windows Updates, found automatically from the gap.*
 
 ## Why this matters outside the lab
 
