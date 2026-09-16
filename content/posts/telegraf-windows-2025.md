@@ -2,20 +2,21 @@
 title: "Telegraf on Windows Server 2025: unsupported, works anyway"
 date: 2026-09-16T12:20:00+01:00
 draft: false
-tags: [observability, telegraf, windows, vcf-operations, metrics, support-matrix]
+tags: [observability, telegraf, windows, vcf-operations, metrics, support-matrix, wmic]
 series: ["Observability on VCF"]
 cover:
   image: "/images/post20-hero-telegraf.svg"
-  alt: "The support matrix says no; the metrics say yes"
+  alt: "The support matrix says no; the agent status says Install Success"
   hidden: false
-summary: "The VCF Operations agent support matrix doesn't list Windows Server 2025. The Telegraf agent installs, runs and reports anyway. What 'unsupported' really means, how to deploy it deliberately, what to watch because of it — and the same Telegraf on VKS, where a hidden proxy dependency bit me."
+summary: "The VCF Operations agent support matrix doesn't list Windows Server 2025. Add one missing Windows component (WMIC) and the ordinary UI-driven install works: agent running, checks green, metrics flowing. What 'unsupported' really means, the one prerequisite, and what to watch because of it."
 ---
 
 Two facts, both true:
 
 1. The VCF Operations application-monitoring agent (Telegraf, packaged by
    Broadcom) does not list Windows Server 2025 as a supported OS.
-2. It installs, runs, and reports on Windows Server 2025.
+2. It installs from the VCF Operations UI, runs, and reports on Windows
+   Server 2025 — once one missing Windows component is put back.
 
 This post is about the gap between those, because "unsupported" is a
 statement about *who fixes it when it breaks*, not about whether it works
@@ -32,48 +33,66 @@ to Ops. The Windows APIs those inputs use haven't changed in a decade.
 
 So: it works. You just own it.
 
-## Deploying it deliberately
+## The one prerequisite: put WMIC back
 
-On the [pipeline-built W2025 server](/series/the-windows-build-pipeline/)
-the agent went on from VCF Operations itself — *Applications → Manage
-Telegraf Agents → Install* — and registered as a **Product Managed Agent**,
-version 9.1.0.0.3033. Then the two things that make it *yours*:
+Windows Server 2025 no longer ships the WMI command-line tool, `wmic`.
+It's been deprecated for years and is now a Feature on Demand rather
+than part of the base install. The agent's install bootstrap still calls
+it, so on a stock Server 2025 build the install from Ops does not
+complete.
 
-**1. Record exactly what you're running.** Agent build, Telegraf version,
-OS build — in whatever you use for a CMDB. When the support matrix catches
-up you want to know whether you're on the version they tested.
-
-**2. Add a canary.** Something trivially OS-dependent that will go flat
-first if a Windows update changes an API under the agent. Ops makes this a
-two-minute job with no editing of `telegraf.conf`: *Custom Monitoring →
-Custom Script → Add*, pointing at a script that already exists on the box.
-Mine reads the build number from the registry and prints it as a
-key/value pair:
+Add the capability first, then install:
 
 ```powershell
-# C:\temp\canary.ps1
-$b = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentBuildNumber
-"osbuild=$b"        # -> osbuild=26100
+DISM /Online /Add-Capability /CapabilityName:WMIC~~~~
+wmic os get caption   # should now answer
 ```
 
-Prefix `powershell -NoProfile -ExecutionPolicy Bypass -File`, five-minute
-timeout. (Registry, not `Get-ComputerInfo` — that cmdlet takes 20–30
-seconds on Server 2025 and would trip the plugin's own timeout, which is a
-very unhelpful way for a canary to die.)
+(Settings → System → Optional features → Add → "WMIC" does the same thing
+through the UI.) That is the whole workaround. Note it in whatever you use
+for build standards for Server 2025 — it's a one-line prerequisite for the
+agent, and it will keep being one until the bootstrap stops needing it.
 
-![Manage Telegraf Agents: Test-2025 - Agent Running, Product Managed Agent, Install Success, with Ping Check, the w2025-canary custom script and a Services check under it](/images/ui/o3-ops-manage-telegraf-agents-w2025.jpg)
-*The agent list with the row expanded. One Windows Server 2025 VM, agent running, product-managed, both collection ticks green - and under it the agent is doing real work on an OS the matrix doesn't list: a ping check, a service check, and the canary with its full command line. (On the first pass the `Last Operation Status` read "Start Failed" next to a green "Agent Running" - the operation's status check didn't recognise the platform, the service came up anyway. Re-running the operation cleared it. That contradiction is the first thing you own on an unsupported OS.)*
+## The normal install, from the UI
+
+With WMIC present the install path is exactly the supported-OS one, no
+scripts, no manual `telegraf.conf`:
+
+*Operate → Workloads → Applications → Manage Telegraf Agents*, tick the
+VM, *Agent Actions → Install*, supply guest credentials, wait. On the
+[pipeline-built W2025 server](/series/the-windows-build-pipeline/) it
+registered as a **Product Managed Agent**, version 9.1.0.0.3033, with
+`Last Operation Status` reading `Install Success`.
+
+![Manage Telegraf Agents: Test-2025 - Agent Running, Product Managed Agent, Install Success, version 9.1.0.0.3033, both collection ticks green, with a Ping Check and an HTTP Check under Custom Monitoring](/images/ui/o3-ops-manage-telegraf-agents-w2025.jpg)
+*The agent list with the Windows Server 2025 row expanded. Agent Running, product-managed, Install Success, both collection ticks green — and under Custom Monitoring a Ping Check and an HTTP Check configured from the same screen, no config file touched.*
 
 ![The Windows OS on Windows 2025 object: one object, Normal, no alerts, with Custom Script, Ping Check and Services children and live CPU/memory properties](/images/ui/o9-ops-w2025-windows-os-summary.jpg)
-*The object the agent created, as Ops sees it: green, no alerts, CPU and memory properties populated, and three child objects for the checks. This is the picture that matters - not the install dialog.*
+*The object the agent created, as Ops sees it: green, no alerts, CPU and memory properties populated. This is the picture that matters — not the install dialog.*
 
 ![Ping Check metrics for the W2025 agent: Availability flat at 100 and Average Response Time in a steady band across a three-hour window](/images/ui/o10-ops-w2025-ping-check-availability.jpg)
-*And the proof the agent is doing more than existing: the Ping Check it runs from Windows Server 2025, availability flat at 100 across the morning, response time steady at a couple of milliseconds. Metrics arriving on schedule from an OS the matrix doesn't list.*
+*And the proof it's doing work rather than just existing: a Ping Check run from the Server 2025 guest, availability flat at 100 across the morning, response time steady at a couple of milliseconds.*
 
 ![The VM object in Ops: Microsoft Windows Server 2025 (64-bit), tools running](/images/ui/o2-ops-w2025-vm-summary.jpg)
 
 ![Windows OS on Windows 2025: AgentManagedType = Product Managed, Tags|source = Windows_2025](/images/ui/o1-ops-w2025-agent-metrics.jpg)
-*The "Windows OS on Windows 2025" child object the agent created, with `Telegraf Availability` in the metric tree and `AgentManagedType` reading Product Managed.*
+*The "Windows OS on Windows 2025" child object, with `Telegraf Availability` in the metric tree and `AgentManagedType` reading Product Managed.*
+
+## Then make it yours
+
+Two small things turn "it happens to work" into something you can run:
+
+**Record exactly what you're running.** Agent build, Telegraf version, OS
+build, and the WMIC prerequisite — in whatever you use for a CMDB. When the
+support matrix catches up you want to know whether you're on the version
+they tested.
+
+**Give it a check that will go flat first.** The Ping and HTTP checks
+above are configured from the agent row in Ops (*Custom Monitoring*), and
+a *Custom Script* entry on the same screen can run anything on the box.
+Point one at something trivially OS-dependent and alert on its *absence*:
+if a Windows update changes an API under the agent, that line stops before
+anything else does.
 
 ## What to watch, *because* it's unsupported
 
@@ -81,57 +100,43 @@ very unhelpful way for a canary to die.)
   Take a snapshot before pushing an agent upgrade to the W2025 fleet;
   upgrade one first.
 - **Windows cumulative updates.** Performance counter names are stable;
-  provider GUIDs occasionally aren't. Watch the canary after Patch Tuesday.
+  provider GUIDs occasionally aren't. Watch your canary check after Patch
+  Tuesday.
+- **WMIC on new builds.** Any image or pipeline that produces Server 2025
+  needs the capability added, or the next install will fail the way the
+  first one did.
 - **Service account and WinRM hardening.** W2025 tightens defaults; if the
-  install bootstrap fails it's almost always WinRM/TLS, not the agent.
+  install bootstrap fails and WMIC is present, it's almost always WinRM/TLS,
+  not the agent.
 - **Don't file cases on it.** Reproduce on a supported OS first. That's
   the deal you made.
-
-## The same Telegraf on VKS — and its hidden dependency
-
-On VKS the Telegraf package has a dependency that isn't in its README:
-with `isMetricProxyConfigured: true` it mounts two secrets
-(`metrics-proxy-tls-config`, `metrics-proxy-http-config`) that **only the
-Supervisor Management Proxy service propagates** into guest clusters. Without
-the proxy installed on the supervisor, every Telegraf pod sits in
-`ContainerCreating` / `FailedMount` forever, and nothing says why.
-
-Install the proxy supervisor service, and the chain is retroactive:
-`SecretExport` in the guest's `kube-system` → `SecretImport` into
-`tanzu-system-telegraf` → pods Running. (The `PackageInstall` needed an
-annotation bump to clear a stale `ReconcileFailed` backoff.)
-
-Then the second trap: Telegraf's output URL came out as
-`https://supervisor-management-proxy.default.svc.:10093` — domainless and
-unresolvable — because the cluster was created without
-`clusterNetwork.serviceDomain`. Immutable. A CoreDNS `rewrite` rule
-patched the live cluster; every new cluster gets `serviceDomain:
-cluster.local` in its spec.
-
 
 ## Why this matters outside the lab
 
 The practical lesson for customers is about **how** to adopt something the
 vendor hasn't blessed yet. New operating systems arrive before support
 matrices catch up, and "wait" is often not an option. The approach here —
-run it, record exactly what you're running, add a canary that detects
-breakage early, upgrade one node first — is how an operations team gets
-Windows Server 2025 monitored on day one without taking on hidden risk.
-The same discipline applies to any unsupported-but-working combination.
+find the real blocker (one missing Windows component, not the agent), use
+the standard install path, record exactly what you're running, add a check
+that detects breakage early, upgrade one node first — is how an operations
+team gets Windows Server 2025 monitored on day one without taking on
+hidden risk. The same discipline applies to any unsupported-but-working
+combination.
 
 ## Rules learned
 
 - "Unsupported" = *you* own the fix path. Decide that consciously, record
-  versions, add a canary, upgrade one node first.
+  versions, add a canary check, upgrade one node first.
+- Server 2025 ships without WMIC; the agent bootstrap needs it. Add the
+  capability first and the ordinary UI install works.
 - The Windows inputs aren't version-gated; W2025 runs the agent fine.
   Alert on metric **absence**, not just thresholds.
-- On VKS, Telegraf **hard-depends on the Supervisor Management Proxy**
-  when the metric proxy flag is set; `FailedMount` on two secrets is the
-  tell.
-- Set `serviceDomain` at cluster create. Every add-on that builds a
-  service URL will thank you.
+- Configure checks from the agent row in Ops; leave `telegraf.conf` alone
+  so upgrades from Ops stay clean.
 
-*Previously: [fluent-bit two ways](/posts/fluent-bit-two-ways/).*
+*Previously: [fluent-bit two ways](/posts/fluent-bit-two-ways/). Next in
+the [Observability on VCF](/series/observability-on-vcf/) series: the
+same Telegraf on VKS, and the dependency that isn't in its README.*
 
 ---
 *Lab environment; opinions my own. Support status as observed at time of
