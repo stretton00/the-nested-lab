@@ -112,7 +112,7 @@ turned out to matter:
 [INPUT]
     Name          winevtlog
     Channels      System,Application,Security
-    DB            C:luent-bit\winevt.db        # bookmark: no replay after restart
+    DB            C:\fluent-bit\winevt.db        # bookmark: no replay after restart
     String_Inserts On
 
 [FILTER]
