@@ -1,0 +1,4 @@
+{{- /* renders a real-looking mailto link assembled client-side so crawlers see nothing usable */ -}}
+{{- $u := .Get "user" }}{{- $d := .Get "domain" }}
+<span class="nl-email" data-u="{{ $u }}" data-d="{{ $d }}"><noscript>{{ $u }} [at] {{ $d }}</noscript></span>
+<script>(function(){var s=document.currentScript.previousElementSibling,a=s.dataset.u+"@"+s.dataset.d;s.innerHTML='<a href="mailto:'+a+'">'+a+'</a>';})();</script>

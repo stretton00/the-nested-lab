@@ -11,7 +11,7 @@ The best way to reach me is **LinkedIn** —
 Connection requests with a note about which post brought you here get a
 faster reply than blank ones.
 
-Or email: <span class="nl-email" data-user="adam.stretton" data-domain="comms-care.com">adam.stretton [at] comms-care [dot] com</span>.
+Or email: {{< email user="adam.stretton" domain="comms-care.com" >}}.
 
 ## What I'm glad to hear about
 
@@ -28,13 +28,3 @@ Or email: <span class="nl-email" data-user="adam.stretton" data-domain="comms-ca
 - Support your production environment. Everything here is lab work;
   Broadcom Support is the right door for anything you're paying for.
 - Share customer material. Techniques are generalised deliberately.
-
-## Reuse
-
-Text and diagrams here are
-[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — take them,
-credit the post. Code snippets are MIT unless a post says otherwise.
-
-<script>
-document.querySelectorAll('.nl-email').forEach(function(e){var a=e.dataset.user+'@'+e.dataset.domain;e.innerHTML='<a href="mailto:'+a+'">'+a+'</a>';});
-</script>
