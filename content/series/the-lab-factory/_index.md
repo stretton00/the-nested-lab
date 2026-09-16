@@ -1,4 +1,4 @@
 ---
 title: "The Lab Factory"
-description: "A complete nested VCF 9.1 instance from a single request form: the host-deploy script reborn as a catalog item, the VCF Installer driven from vRO, day-N components as items, and validateOnly on everything."
+description: "How a team gives every consultant their own complete VCF 9.1 instance on demand. One catalog request produces nested ESXi hosts, a full bringup (vCenter, NSX, SDDC Manager, fleet components) and the day-N stack — the host-deploy script reborn as a catalog item, the VCF Installer driven from vRO, and validateOnly on everything."
 ---
