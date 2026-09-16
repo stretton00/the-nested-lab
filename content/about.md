@@ -55,12 +55,39 @@ The posts group into series, and the series read in order:
 
 ## The lab
 
-A multi-pod nested VCF estate: each pod is a full VCF 9.x instance
-(vCenter, NSX, SDDC Manager, the fleet components, a vSphere Supervisor
-with NSX VPC networking) running on nested ESXi hosts, built and rebuilt
-by the automation described in the Lab Factory series. Identifiers you'll
-see throughout — `res.lab`, `f06`, `172.30.0.0/16`, `192.168.144.x` — are
-the lab's own. Nothing here is a customer environment.
+None of this would exist without the lab, and the lab exists because of
+**[Comms-care](https://www.comms-care.com/)**, where I work. Comms-care runs
+a shared physical VCF platform on which **every consultant gets their own
+dedicated nested VCF instance** — a complete environment, not a slice of a
+shared one. Mine is `f06`; the identifiers you'll see throughout the posts
+(`res.lab`, `172.30.0.0/16`, `192.168.144.x`) are that instance's own.
+
+Each instance is a full VCF 9.x stack — vCenter, NSX, SDDC Manager, the
+fleet components, a vSphere Supervisor with NSX VPC networking — running on
+nested ESXi hosts, built and rebuilt by the automation described in [The
+Lab Factory](/series/the-lab-factory/). A fresh instance is a catalog
+request away, which changes how you treat it: it's somewhere to break things
+on purpose.
+
+That's what makes it useful well beyond one blog:
+
+- **Customer demonstrations on the real product.** When a customer wants to
+  see VCF Automation's catalog provision an isolated environment, or a VKS
+  cluster appear in VCF Operations, they see it running — on the same
+  release they're deploying, not a slide.
+- **Proving use cases before they hit production.** The isolated-pod
+  design, the shared-services VPC, the observability pipelines in these
+  posts were all worked out here first, with the failure modes found and
+  documented in the lab rather than on a customer's change window.
+- **Upgrade rehearsals.** A per-consultant instance means an upgrade path
+  can be rehearsed end to end — and torn down and rehearsed again — before
+  the runbook is trusted with a live estate.
+- **Learning by breaking.** Because every consultant has their own, nobody
+  is sharing blast radius. The blackholed vmk0 in part 1 of the Pod Papers
+  cost an afternoon of *my* lab, and no one else's.
+
+The posts are mine; the platform that made them possible is Comms-care's,
+and I'm grateful for it. Nothing here is a customer environment.
 
 ## Disclaimer
 
