@@ -225,3 +225,11 @@ details.toc summary { font-family: "Outfit", sans-serif; font-weight: 600; }
 .nl-video { margin: 22px 0; }
 .nl-video video { width: 100%; border-radius: var(--radius); border: 1px solid var(--border); background: #000; display: block; }
 .nl-video figcaption { color: var(--secondary); font-size: .85rem; margin-top: 8px; text-align: center; }
+
+/* 404 - own class so PaperMod's .not-found (160px, absolute) never applies */
+.nl-404{text-align:center;padding:clamp(40px,10vh,96px) 16px;max-width:var(--main-width);margin:0 auto}
+.nl-404-code{font-family:'JetBrains Mono',monospace;font-size:clamp(3.5rem,14vw,6rem);font-weight:600;line-height:1;color:var(--nl-accent);margin:0 0 18px}
+.nl-404-text{font-size:clamp(1rem,2.6vw,1.2rem);color:var(--secondary);margin:0 auto 18px;max-width:34em}
+.nl-404-links{font-size:1rem;margin:0}
+.nl-404-links a{color:var(--nl-accent);text-decoration:none;border-bottom:1px solid transparent}
+.nl-404-links a:hover{border-bottom-color:var(--nl-accent)}
