@@ -52,8 +52,9 @@ Each seam exists for a reason you can state in one sentence:
   holds a vCenter or AD-admin credential.
 - **cloudbase-init owns what must happen before anything else** — the
   network has to work before the share can be reached; the disk layout
-  has to exist before installers land on it; the domain join changes the
-  security context everything after it runs in.
+  has to exist before installers land on it; and the domain join changes
+  the security context everything after it runs in, which is the whole
+  reason the next layer exists (more on that below).
 - **The engine is pulled, not embedded** — because installers change,
   agents get new versions, and re-releasing a cloud template for every
   payload update is how automation dies. Update a script on the share;
@@ -108,23 +109,76 @@ wall: it pairs OS adapters with the request's NICs **positionally**, which
 is valid for freshly cloned VMs where NICs were added in PCI order. If
 anyone ever customises NIC order post-clone, revisit it.
 
-## Why everything runs in a scheduled task
+## Why not just cloudbase-init (or guest customization) all the way down?
 
-The recurring oddity in this design: OS commands aren't run *by*
-cloudbase-init, they're delegated to **Windows Scheduled Tasks under an
-explicit identity** — local admin for the join and the pull, SYSTEM for the
-build master. That's not incidental complexity. Once the machine joins the
-domain, Group Policy applies, and in this environment it blocks script
-execution in the context cloudbase-init runs in natively. Anything at or
-after the join boundary can't rely on that context surviving.
+The obvious design is the one we started with: let the platform do the
+guest. vCenter guest customization for hostname, IP and domain join, then
+one cloudbase-init userdata that installs the agents, patches, and
+reports back. No scheduled tasks, no pulled engine, no state machine. It
+works on a workgroup machine. It stops working the moment the machine
+joins a real domain, and it stops in a way that is easy to misread.
 
-A task under a named identity at highest run level, with
-`-ExecutionPolicy Bypass` per invocation, runs in a context policy
-permits. It also brings two things the design *depends on*: a per-task
-execution ceiling (1 h pull, 2 h build) that contains hung runs, and —
-critically — an **at-startup trigger**, which is what makes a multi-reboot
-state machine possible after cloudbase-init has been uninstalled. Even if
-the GPO were relaxed, don't simplify the wrappers away.
+**The domain join changes the rules mid-build.** Everything up to the
+join runs as a fresh, local, un-managed Windows install: local
+Administrator, default execution policy, no central policy. At the join
+the machine lands in its target OU, and on the next policy refresh (which
+the reboot guarantees) **Group Policy applies**. In this environment the
+policy set for member servers includes the usual security baseline:
+script-execution controls, restrictions on what may run from where and
+under which accounts, and hardening of the local administrator context.
+None of that is negotiable, and none of it should be — it is the same
+policy every production server gets.
+
+**What that does to a first-boot pipeline.** cloudbase-init runs its
+plugins as a service, as LocalSystem, executing scripts from its own
+directory. Before the join that context can do anything. After the join
+it is exactly the kind of context the baseline is designed to constrain,
+so the parts of the build that come *after* the join — the installer
+pulls, the agent installs, the reboots, the validation — either fail
+outright or, worse, quietly do nothing: cloudbase-init logs the plugin as
+executed, the script never ran anything, and the build "completes" with
+an unpatched server carrying no agents. The first few builds looked
+exactly like that.
+
+**Two ways out, one of them wrong.** You can relax policy for the build
+(a staging OU with a weaker baseline, a GPO exemption for the
+cloudbase-init path, a delayed join) — which means the server is built
+under one set of rules and delivered under another, and the join
+becomes a late step that nothing after it exercises. Or you can accept
+the policy as the environment it is, and run the post-join work in a
+context the policy *permits*.
+
+**The permitted context is a scheduled task under an explicit identity.**
+A task registered to run as a named account — a domain-joined local admin
+for the pull and the join verification, SYSTEM for the build master — at
+highest run level, with `-ExecutionPolicy Bypass` per invocation, from a
+staging path the policy allows, is an ordinary, auditable pattern that
+the baseline was written to accommodate. That is why the OS commands
+aren't run *by* cloudbase-init but delegated to tasks: cloudbase-init's
+job shrinks to "get the network up, lay out disks, join, hand off". The
+design also picks up three things it now depends on:
+
+- a **per-task execution ceiling** (1 h for the pull, 2 h for the build)
+  that contains a hung installer instead of leaving a half-built VM;
+- an **at-startup trigger**, which is what makes a multi-reboot state
+  machine possible after cloudbase-init has been uninstalled;
+- a clean **security story**: the identities that do the work are the
+  ones the domain already governs, and they stop existing on the box when
+  the build is done.
+
+**Why not Aria's own in-guest mechanisms?** Guest customization only
+covers hostname, IP and join, and having it *and* cloudbase-init own the
+same settings means two code paths fighting (hence
+`customizeGuestOs: false`). Driving the guest from outside — vRO calling
+into the VM for two hours — needs guest credentials held centrally and
+keeps a management path open for the whole build; ABX can't reach inside
+the guest at all. The platform's job is what needs platform credentials:
+the hostname from AD, the placement facts from vCenter. The guest does
+the guest, under the domain's rules, from the first reboot after the
+join.
+
+Even if the GPO were relaxed tomorrow, don't simplify the wrappers away:
+the ceiling and the startup trigger are worth having on their own.
 
 ## The hand-off: `03-init-puller`
 
