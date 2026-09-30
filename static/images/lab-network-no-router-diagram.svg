@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640" role="img" aria-labelledby="t d">
+<title id="t">One lab VPC beside a router-VM lab</title>
+<desc id="d">Left, this catalog: in the lab's VPC the VPC gateway routes sn-mgmt, sn-vmotion and sn-vsan, which are bound to the hosts' trunk subnet by VLAN tags 1610, 1611 and 1612; the jump host and dc01 sit on sn-mgmt; the VPC load balancer publishes RDP to the jump host, and the transit gateway leads to the shared binaries server. Right, the router-VM design: the VLAN subnets are bound to the trunk but not connected to the VPC gateway, and a router VM with its uplink on a private subnet routes between them, masquerades traffic out and forwards SSH and RDP that a DNAT rule on the gateway sends to it.</desc>
+<style>@keyframes nl-flow{to{stroke-dashoffset:-34}}.flow{stroke-dasharray:10 7;animation:nl-flow 1.4s linear infinite}@media(prefers-reduced-motion:reduce){.flow{animation:none}}</style>
+<defs>
+<marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#49afd9"/></marker>
+<marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5fb84a"/></marker>
+<marker id="ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#b58ad6"/></marker>
+<marker id="ay" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#e8c34a"/></marker>
+</defs>
+<rect width="1200" height="640" fill="#1b2a32"/>
+<g stroke="#34495a" stroke-width="1" opacity="0.28">
+<line x1="80" y1="0" x2="80" y2="640"/><line x1="160" y1="0" x2="160" y2="640"/><line x1="240" y1="0" x2="240" y2="640"/><line x1="320" y1="0" x2="320" y2="640"/><line x1="400" y1="0" x2="400" y2="640"/><line x1="480" y1="0" x2="480" y2="640"/><line x1="560" y1="0" x2="560" y2="640"/><line x1="640" y1="0" x2="640" y2="640"/><line x1="720" y1="0" x2="720" y2="640"/><line x1="800" y1="0" x2="800" y2="640"/><line x1="880" y1="0" x2="880" y2="640"/><line x1="960" y1="0" x2="960" y2="640"/><line x1="1040" y1="0" x2="1040" y2="640"/><line x1="1120" y1="0" x2="1120" y2="640"/>
+<line x1="0" y1="80" x2="1200" y2="80"/><line x1="0" y1="160" x2="1200" y2="160"/><line x1="0" y1="240" x2="1200" y2="240"/><line x1="0" y1="320" x2="1200" y2="320"/><line x1="0" y1="400" x2="1200" y2="400"/><line x1="0" y1="480" x2="1200" y2="480"/><line x1="0" y1="560" x2="1200" y2="560"/>
+</g>
+<text x="40" y="52" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="13" font-weight="600" letter-spacing="3" fill="#49afd9">ONE NESTED LAB &#183; TWO WAYS TO NETWORK IT</text>
+<text x="40" y="90" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="24" font-weight="700" fill="#e9eef2">The VPC gateway routes the lab&#8217;s VLANs. No VM sits in the path.</text>
+
+<!-- ============ LEFT: this catalog ============ -->
+<rect x="40" y="118" width="524" height="446" rx="12" fill="none" stroke="#49afd9" stroke-width="1.5" stroke-dasharray="7 6"/>
+<text x="58" y="144" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="12.5" font-weight="600" letter-spacing="2" fill="#49afd9">THIS CATALOG &#183; vpc-student01 &#183; 172.30.0.0/16</text>
+
+<g font-family="'Source Sans 3', 'Segoe UI', system-ui, sans-serif">
+<!-- load balancer -->
+<rect x="58" y="162" width="162" height="70" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="58" y="162" width="162" height="4" rx="2" fill="#5fb84a"/>
+<text x="72" y="186" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#e9eef2">Load balancer</text>
+<text x="72" y="205" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="12" fill="#5fb84a">192.168.144.10:3389</text>
+<text x="72" y="223" font-size="13" fill="#8fa1ad">RDP in, to the jump host</text>
+
+<!-- VPC gateway -->
+<rect x="240" y="162" width="226" height="70" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="240" y="162" width="226" height="4" rx="2" fill="#0079b8"/>
+<text x="254" y="186" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#e9eef2">VPC gateway</text>
+<text x="254" y="205" font-size="13" fill="#8fa1ad">distributed routing &#183; default SNAT</text>
+<text x="254" y="223" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="12" fill="#49afd9">gw .1 &#183; .33 &#183; .65 &#183; .97</text>
+
+<!-- gateway to the three VLAN subnets: connected -->
+<g stroke="#0079b8" stroke-width="2" fill="none">
+<line x1="300" y1="232" x2="170" y2="270"/>
+<line x1="353" y1="232" x2="312" y2="270"/>
+<line x1="420" y1="232" x2="476" y2="270"/>
+</g>
+<!-- load balancer to the jump host on sn-mgmt -->
+<line class="flow" x1="100" y1="232" x2="100" y2="266" stroke="#5fb84a" stroke-width="2.5" marker-end="url(#ag)"/>
+
+<!-- VLAN subnets -->
+<rect x="58" y="270" width="150" height="96" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="58" y="270" width="150" height="4" rx="2" fill="#5fb84a"/>
+<text x="70" y="293" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="12" fill="#49afd9">172.30.0.32/27</text>
+<text x="70" y="315" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#e9eef2">sn-mgmt</text>
+<text x="70" y="336" font-size="13" fill="#8fa1ad">VLAN 1610 &#183; vmk0</text>
+<text x="70" y="355" font-size="13" fill="#5fb84a">jump .35 &#183; dc01 .34</text>
+
+<rect x="224" y="270" width="150" height="96" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="224" y="270" width="150" height="4" rx="2" fill="#0079b8"/>
+<text x="236" y="293" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="12" fill="#49afd9">172.30.0.64/27</text>
+<text x="236" y="315" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#e9eef2">sn-vmotion</text>
+<text x="236" y="336" font-size="13" fill="#8fa1ad">VLAN 1611 &#183; vmk1</text>
+<text x="236" y="355" font-size="13" fill="#8fa1ad">.70 - .73</text>
+
+<rect x="390" y="270" width="158" height="96" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="390" y="270" width="158" height="4" rx="2" fill="#b58ad6"/>
+<text x="402" y="293" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="12" fill="#49afd9">172.30.0.96/27</text>
+<text x="402" y="315" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#e9eef2">sn-vsan</text>
+<text x="402" y="336" font-size="13" fill="#8fa1ad">VLAN 1612 &#183; vmk2</text>
+<text x="402" y="355" font-size="13" fill="#8fa1ad">.100 - .103</text>
+
+<!-- binding maps -->
+<g stroke="#49afd9" stroke-width="2" stroke-dasharray="5 5" fill="none">
+<line x1="133" y1="366" x2="133" y2="406"/>
+<line x1="299" y1="366" x2="299" y2="406"/>
+<line x1="469" y1="366" x2="469" y2="406"/>
+</g>
+<g font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="11.5" fill="#49afd9">
+<text x="141" y="391">bm-mgmt</text><text x="307" y="391">bm-vmotion</text><text x="477" y="391">bm-vsan</text>
+</g>
+
+<!-- trunk -->
+<rect x="58" y="406" width="490" height="52" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="58" y="406" width="490" height="4" rx="2" fill="#49afd9"/>
+<text x="72" y="430" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#e9eef2">sn-trunk <tspan font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="12" font-weight="400" fill="#49afd9">172.30.0.0/27</tspan></text>
+<text x="72" y="449" font-size="13" fill="#8fa1ad">every host vNIC attaches here; the VLAN tag picks the subnet</text>
+
+<!-- hosts -->
+<g stroke="#34495a" stroke-width="2"><line x1="111" y1="458" x2="111" y2="480"/><line x1="235" y1="458" x2="235" y2="480"/><line x1="359" y1="458" x2="359" y2="480"/><line x1="483" y1="458" x2="483" y2="480"/></g>
+<rect x="58" y="480" width="106" height="50" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/>
+<rect x="182" y="480" width="106" height="50" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/>
+<rect x="306" y="480" width="106" height="50" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/>
+<rect x="430" y="480" width="118" height="50" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/>
+<g font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#e9eef2"><text x="72" y="502">esx01</text><text x="196" y="502">esx02</text><text x="320" y="502">esx03</text><text x="444" y="502">esx04</text></g>
+<g font-size="12.5" fill="#8fa1ad"><text x="72" y="520">4 vNICs</text><text x="196" y="520">4 vNICs</text><text x="320" y="520">4 vNICs</text><text x="444" y="520">4 vNICs</text></g>
+<text x="58" y="552" font-size="13" fill="#8fa1ad">vmkernel traffic leaves each host tagged 1610, 1611 or 1612</text>
+</g>
+
+<!-- outside the VPC: transit gateway and shared services -->
+<g font-family="'Source Sans 3', 'Segoe UI', system-ui, sans-serif">
+<line class="flow" x1="466" y1="197" x2="574" y2="197" stroke="#b58ad6" stroke-width="2.5" marker-end="url(#ap)"/>
+<rect x="578" y="162" width="104" height="70" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="578" y="162" width="104" height="4" rx="2" fill="#b58ad6"/>
+<text x="590" y="186" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="14" font-weight="700" fill="#e9eef2">Transit</text>
+<text x="590" y="204" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="14" font-weight="700" fill="#e9eef2">gateway</text>
+<text x="590" y="223" font-size="12.5" fill="#8fa1ad">org-wide</text>
+<line class="flow" x1="630" y1="232" x2="630" y2="266" stroke="#b58ad6" stroke-width="2.5" marker-end="url(#ap)"/>
+<rect x="578" y="270" width="104" height="96" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="578" y="270" width="104" height="4" rx="2" fill="#b58ad6"/>
+<text x="590" y="294" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="14" font-weight="700" fill="#e9eef2">shared-svc</text>
+<text x="590" y="314" font-size="12.5" fill="#8fa1ad">binaries server</text>
+<text x="590" y="333" font-size="12.5" fill="#8fa1ad">HTTP and NFS</text>
+<text x="590" y="352" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="11" fill="#b58ad6">PrivateTGW</text>
+</g>
+
+<!-- ============ RIGHT: router-VM design ============ -->
+<rect x="708" y="118" width="462" height="446" rx="12" fill="none" stroke="#8fa1ad" stroke-width="1.5" stroke-dasharray="7 6"/>
+<text x="726" y="144" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="12.5" font-weight="600" letter-spacing="2" fill="#8fa1ad">THE ROUTER-VM DESIGN</text>
+
+<g font-family="'Source Sans 3', 'Segoe UI', system-ui, sans-serif">
+<rect x="726" y="162" width="196" height="70" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="726" y="162" width="196" height="4" rx="2" fill="#0079b8"/>
+<text x="740" y="186" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#e9eef2">VPC gateway</text>
+<text x="740" y="205" font-size="13" fill="#8fa1ad">DNAT to the router</text>
+<text x="740" y="223" font-size="13" fill="#8fa1ad">for SSH and RDP</text>
+
+<line class="flow" x1="922" y1="197" x2="954" y2="197" stroke="#e8c34a" stroke-width="2.5" marker-end="url(#ay)"/>
+<rect x="958" y="162" width="194" height="70" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="958" y="162" width="194" height="4" rx="2" fill="#8fa1ad"/>
+<text x="972" y="186" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#e9eef2">Private subnet</text>
+<text x="972" y="205" font-size="13" fill="#8fa1ad">the router&#8217;s uplink</text>
+<text x="972" y="223" font-size="13" fill="#8fa1ad">connected to the gateway</text>
+
+<line class="flow" x1="1055" y1="232" x2="1055" y2="266" stroke="#e8c34a" stroke-width="2.5" marker-end="url(#ay)"/>
+<rect x="958" y="270" width="194" height="96" rx="8" fill="#22343c" stroke="#e8c34a" stroke-width="1.5"/><rect x="958" y="270" width="194" height="4" rx="2" fill="#e8c34a"/>
+<text x="972" y="295" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#e9eef2">Router VM</text>
+<text x="972" y="316" font-size="13" fill="#8fa1ad">routes between the VLANs</text>
+<text x="972" y="335" font-size="13" fill="#8fa1ad">masquerades out, forwards in</text>
+<text x="972" y="355" font-size="13" fill="#e8c34a">an image to build and keep</text>
+
+<rect x="726" y="270" width="196" height="96" rx="8" fill="#1b2a32" stroke="#8fa1ad" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="740" y="295" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#e9eef2">VLAN subnets</text>
+<text x="740" y="316" font-size="13" fill="#8fa1ad">bound to the trunk</text>
+<text x="740" y="335" font-size="13" fill="#e5605a">not connected to</text>
+<text x="740" y="354" font-size="13" fill="#e5605a">the gateway</text>
+<line x1="824" y1="232" x2="824" y2="270" stroke="#8fa1ad" stroke-width="2" stroke-dasharray="4 5"/>
+<line x1="815" y1="242" x2="833" y2="260" stroke="#e5605a" stroke-width="3.5"/><line x1="833" y1="242" x2="815" y2="260" stroke="#e5605a" stroke-width="3.5"/>
+
+<line x1="824" y1="366" x2="824" y2="406" stroke="#49afd9" stroke-width="2" stroke-dasharray="5 5"/>
+<text x="832" y="391" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="11.5" fill="#49afd9">binding maps</text>
+<line class="flow" x1="1055" y1="366" x2="1055" y2="402" stroke="#e8c34a" stroke-width="2.5" marker-end="url(#ay)"/>
+<text x="1045" y="391" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="11.5" fill="#e8c34a" text-anchor="end">subinterfaces</text>
+
+<rect x="726" y="406" width="426" height="52" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="726" y="406" width="426" height="4" rx="2" fill="#49afd9"/>
+<text x="740" y="430" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#e9eef2">Trunk subnet</text>
+<text x="740" y="449" font-size="13" fill="#8fa1ad">the router&#8217;s downlink and the hosts&#8217; vNICs</text>
+
+<g stroke="#34495a" stroke-width="2"><line x1="772" y1="458" x2="772" y2="480"/><line x1="878" y1="458" x2="878" y2="480"/><line x1="984" y1="458" x2="984" y2="480"/><line x1="1090" y1="458" x2="1090" y2="480"/></g>
+<rect x="726" y="480" width="92" height="50" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/>
+<rect x="832" y="480" width="92" height="50" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/>
+<rect x="938" y="480" width="92" height="50" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/>
+<rect x="1044" y="480" width="92" height="50" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/>
+<g font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#e9eef2"><text x="740" y="502">host</text><text x="846" y="502">host</text><text x="952" y="502">host</text><text x="1058" y="502">host</text></g>
+<g font-size="12.5" fill="#8fa1ad"><text x="740" y="520">nested</text><text x="846" y="520">nested</text><text x="952" y="520">nested</text><text x="1058" y="520">nested</text></g>
+<text x="726" y="552" font-size="13" fill="#e8c34a">every packet between networks, in or out, crosses the router</text>
+</g>
+
+<text x="600" y="598" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="15" fill="#8fa1ad" text-anchor="middle">Left: NSX routes, NATs, load-balances and reaches shared services; the lab has no router of its own.</text>
+<text x="600" y="622" font-family="'Source Sans 3', 'Segoe UI', system-ui, sans-serif" font-size="13" fill="#8fa1ad" text-anchor="middle">Right: the router is the lab&#8217;s to shape, and it sits in every path. Left-hand addresses are the f06 lab plan.</text>
+</svg>
