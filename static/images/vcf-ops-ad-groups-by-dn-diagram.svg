@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 480" width="1100" height="480" role="img" aria-labelledby="t d">
+<title id="t">One field decides whether the group is linked to AD</title>
+<desc id="d">Imported with the short name in the name field, VCF Operations creates a new group of that name that is linked to nothing in AD; the group sync empties it about 105 seconds later and its members get an HTML 401 Not Authorized. Imported with the distinguished name in name and the short name in displayName, the group is the AD group itself; the sync imports its members and they sign in.</desc>
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#49afd9"/></marker>
+</defs>
+<rect width="1100" height="480" fill="#1b2a32"/>
+<g stroke="#34495a" stroke-width="1" opacity="0.28">
+<line x1="80" y1="0" x2="80" y2="480"/><line x1="160" y1="0" x2="160" y2="480"/><line x1="240" y1="0" x2="240" y2="480"/><line x1="320" y1="0" x2="320" y2="480"/><line x1="400" y1="0" x2="400" y2="480"/><line x1="480" y1="0" x2="480" y2="480"/><line x1="560" y1="0" x2="560" y2="480"/><line x1="640" y1="0" x2="640" y2="480"/><line x1="720" y1="0" x2="720" y2="480"/><line x1="800" y1="0" x2="800" y2="480"/><line x1="880" y1="0" x2="880" y2="480"/><line x1="960" y1="0" x2="960" y2="480"/><line x1="1040" y1="0" x2="1040" y2="480"/>
+<line x1="0" y1="80" x2="1100" y2="80"/><line x1="0" y1="160" x2="1100" y2="160"/><line x1="0" y1="240" x2="1100" y2="240"/><line x1="0" y1="320" x2="1100" y2="320"/><line x1="0" y1="400" x2="1100" y2="400"/>
+</g>
+<text x="60" y="58" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="13" font-weight="600" letter-spacing="3" fill="#49afd9">POST /suite-api/api/auth/usergroups &#183; IMPORTING AN AD GROUP</text>
+<text x="60" y="98" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="24" font-weight="700" fill="#e9eef2">One field decides whether the group is linked to AD</text>
+
+<!-- lane 1: short name -->
+<g font-family="'Source Sans 3', 'Segoe UI', system-ui, sans-serif">
+<rect x="60" y="130" width="300" height="124" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="60" y="130" width="300" height="4" rx="2" fill="#e5605a"/>
+<text x="80" y="160" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600" letter-spacing="2" fill="#8fa1ad">WHAT OUR BUILD SENT</text>
+<text x="80" y="190" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="15" fill="#e9eef2">name: "gg_vcf_ops_readonly"</text>
+<text x="80" y="216" font-size="14" fill="#8fa1ad">the short name</text>
+
+<rect x="400" y="130" width="300" height="124" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="400" y="130" width="300" height="4" rx="2" fill="#e5605a"/>
+<text x="420" y="160" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600" letter-spacing="2" fill="#8fa1ad">VCF OPERATIONS</text>
+<text x="420" y="190" font-size="16" font-weight="600" fill="#e9eef2">creates a new group of that name</text>
+<text x="420" y="214" font-size="14" fill="#8fa1ad">tied to the lab domain&#8217;s source,</text>
+<text x="420" y="234" font-size="14" fill="#8fa1ad">linked to nothing in AD</text>
+
+<rect x="740" y="130" width="300" height="124" rx="8" fill="#22343c" stroke="#e5605a" stroke-width="1.5"/><rect x="740" y="130" width="300" height="4" rx="2" fill="#e5605a"/>
+<text x="760" y="160" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600" letter-spacing="2" fill="#8fa1ad">GROUP SYNC</text>
+<text x="760" y="190" font-size="16" font-weight="600" fill="#e5605a">no members in AD: emptied</text>
+<text x="760" y="214" font-size="14" fill="#8fa1ad">about 105 s after the import</text>
+<text x="760" y="234" font-size="14" fill="#e5605a">sign-in: HTML 401 Not Authorized</text>
+</g>
+
+<!-- lane 2: distinguished name -->
+<g font-family="'Source Sans 3', 'Segoe UI', system-ui, sans-serif">
+<rect x="60" y="290" width="300" height="124" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="60" y="290" width="300" height="4" rx="2" fill="#5fb84a"/>
+<text x="80" y="320" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600" letter-spacing="2" fill="#8fa1ad">WHAT THE API ASKS FOR</text>
+<text x="80" y="348" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="13.5" fill="#e9eef2">name: "CN=gg_vcf_ops_readonly,</text>
+<text x="80" y="368" font-family="JetBrains Mono, Cascadia Mono, Consolas, monospace" font-size="13.5" fill="#e9eef2">  OU=Lab Groups,DC=acme,DC=lab"</text>
+<text x="80" y="396" font-size="14" fill="#8fa1ad">displayName: the short name</text>
+
+<rect x="400" y="290" width="300" height="124" rx="8" fill="#22343c" stroke="#34495a" stroke-width="1.5"/><rect x="400" y="290" width="300" height="4" rx="2" fill="#5fb84a"/>
+<text x="420" y="320" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600" letter-spacing="2" fill="#8fa1ad">VCF OPERATIONS</text>
+<text x="420" y="350" font-size="16" font-weight="600" fill="#e9eef2">imports the AD group itself</text>
+<text x="420" y="374" font-size="14" fill="#8fa1ad">linked by its distinguished name</text>
+
+<rect x="740" y="290" width="300" height="124" rx="8" fill="#22343c" stroke="#5fb84a" stroke-width="1.5"/><rect x="740" y="290" width="300" height="4" rx="2" fill="#5fb84a"/>
+<text x="760" y="320" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600" letter-spacing="2" fill="#8fa1ad">GROUP SYNC</text>
+<text x="760" y="350" font-size="16" font-weight="600" fill="#5fb84a">reads the members from AD</text>
+<text x="760" y="374" font-size="14" fill="#8fa1ad">bob imported within a second</text>
+<text x="760" y="394" font-size="14" fill="#5fb84a">signs in; follows AD after each sync</text>
+</g>
+
+<g stroke="#49afd9" stroke-width="2" fill="none" marker-end="url(#ah)">
+<line x1="362" y1="192" x2="396" y2="192"/>
+<line x1="702" y1="192" x2="736" y2="192"/>
+<line x1="362" y1="352" x2="396" y2="352"/>
+<line x1="702" y1="352" x2="736" y2="352"/>
+</g>
+
+<text x="60" y="452" font-family="'Source Sans 3', 'Segoe UI', system-ui, sans-serif" font-size="14.5" font-style="italic" fill="#8fa1ad">API reference: "if you try to import a non-existing group, a new one will be created with the specified authSourceId."</text>
+</svg>
