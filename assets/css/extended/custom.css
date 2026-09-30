@@ -188,8 +188,8 @@ code, pre, kbd {
 .post-content td, .post-content th { border-color: var(--border); }
 .post-content hr { border-top: 1px solid var(--border); margin: 36px 0; }
 
-/* "Rules learned" block — the last h2 before the footer rule */
-.post-content h2:last-of-type + ul {
+/* "Rules learned" block — by its heading's id, since a "Broadcom documentation" section may follow it (1 Oct) */
+.post-content h2#rules-learned + ul {
     background: var(--entry);
     border: 1px solid var(--nl-accent-hi);
     border-radius: var(--radius);
