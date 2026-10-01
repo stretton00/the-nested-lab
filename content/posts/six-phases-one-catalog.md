@@ -260,6 +260,24 @@ student03-p6-208       <api service account> default-proje 6 AD integration  3 h
 The header answers the question to ask before requesting another lab. The
 fullest vSAN disk and the free memory decide whether it fits.
 
+Both numbers earned their place in one week in September. On the 23rd, five
+VMs froze, each asking a question that began "There is no more space for
+virtual disk", while the datastore reported 1,113 GiB free. Both were true. A
+host added that morning had 100 GiB capacity disks where its peers had
+400 GiB, and it had quietly filled up on its own.
+
+The next day I requested two test labs at once, on the theory that the
+platform would cope. It didn't. Their disks were thick-provisioned back then,
+and the fullest vSAN disks reached 94 to 100 per cent. Seven management VMs
+froze where they stood, VCF Automation among them, and vCenter's database went
+read-only. Two hours of recovery later, the storage policy was thin and the
+rule was one lab at a time.
+
+Memory had its turn on the 28th. A small Phase 1 lab nudged DRS into packing
+one host to 127 of its 127 GiB, and VCF Automation's own node was squeezed
+until it stopped answering. Hence watching the second number as closely as
+the first.
+
 ## Rebuild instead of repair
 
 There's no reset button, and for once that's a decision rather than something
