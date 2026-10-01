@@ -15,7 +15,7 @@ cover:
   image: "/images/post27-hero-vsan-join.svg"
   alt: "The esxcli tags say vmk2, the host's vSAN view still says vmk0, and vCenter joins the host from the view; setting the vSAN network with UpdateVsan before the join fixes it"
   hidden: false
-summary: "The build tagged vmk2 for vSAN on every nested host and checked it again seconds before each join. Three of four hosts still joined vSAN on vmk0. vCenter does not read the tags when a host joins; it reads the host's vSAN view, and that view was nearly three hours old."
+summary: "The build tagged vmk2 for vSAN and rechecked it seconds before each join. Three of four hosts still joined on vmk0: vCenter reads the host's vSAN view, not its tags, and that view was nearly three hours old."
 ---
 
 Our lab builds finish with a vCenter, four nested ESXi hosts and a vSAN ESA

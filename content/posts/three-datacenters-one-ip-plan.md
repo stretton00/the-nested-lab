@@ -16,7 +16,7 @@ cover:
   image: "/images/post4-hero-pods.svg"
   alt: "Three VPC pods with byte-identical addressing and no route between them"
   hidden: false
-summary: "Three nested-ESXi pods, byte-identical addressing — same subnets, same VLANs, same host IPs, even the same MACs — with zero reachability between them. How overlapping VPC CIDRs and deterministic subnet realization turn cookie-cutter environments into a first-class feature."
+summary: "Three nested-ESXi pods with byte-identical addressing, down to the MACs, and no route between them. How overlapping VPC address ranges turn cookie-cutter environments into a feature."
 ---
 
 Here are three hosts, all answering to `vmk0 = 172.30.0.40`:

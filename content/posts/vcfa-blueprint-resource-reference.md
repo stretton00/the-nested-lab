@@ -16,7 +16,7 @@ cover:
   image: "/images/post40-hero-blueprint-reference.svg"
   alt: "The blueprint designer's palette, Supervisor Namespace, VPC and Workload groups, unfolding into five YAML types and the Kubernetes kinds behind each item"
   hidden: false
-summary: "A complete guide to the blueprint designer in VCF Automation 9.1 All Apps organizations: every palette item, the YAML type and kind behind it, every field the platform accepts, recipes for the common jobs, and the traps we found by deploying them. The field lists come from the platform's own schemas, and every snippet was validated, dry-run or deployed on a live 9.1 platform."
+summary: "A complete guide to the VCF Automation 9.1 blueprint designer: every palette item, the YAML behind it, every field the platform accepts, recipes and traps. Every snippet validated, dry-run or deployed."
 ---
 
 The blueprint designer in a VCF Automation 9.1 All Apps organization offers

@@ -15,7 +15,7 @@ cover:
   image: "/images/post14-hero-vllm-ops.svg"
   alt: "Telegraf runs the script every 60 s; the script's stdout is one integer; the integer is the health of the integration"
   hidden: false
-summary: "The design from part 1 is only useful if it runs every minute, forever, and tells you when it stops. The stdout contract that lets Telegraf monitor the integration itself, batched pushes, log rotation, the four alerts to configure on day one, and the offline test mode that lets you build all of this without a GPU."
+summary: "Part 1's design only helps if it runs every minute, for ever, and says when it stops. Self-monitoring through Telegraf, batched pushes, the four alerts for day one, and an offline test mode."
 ---
 
 [Part 1](/posts/vllm-metrics-vcf-ops-part-1/) was about *what* to push.

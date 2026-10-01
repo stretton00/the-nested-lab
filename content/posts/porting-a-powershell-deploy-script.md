@@ -15,7 +15,7 @@ cover:
   image: "/images/post22-hero-porting.svg"
   alt: "Left: an interactive script's menu prompts. Right: where each one went — inputs, actions, template expressions, subscriptions."
   hidden: false
-summary: "esxihostdeploy.ps1 was 400 lines of ovftool and PowerCLI behind a menu. It became a cloud template, two vRO actions and two subscriptions — and the interesting part is deciding where each behaviour belongs. The full mapping, four non-obvious decisions, and the 'yes' that isn't 'true'."
+summary: "A 400-line menu-driven PowerShell script became a cloud template, two vRO actions and two subscriptions. Where each behaviour belongs, four non-obvious decisions, and the 'yes' that isn't 'true'."
 ---
 
 Every lab has one: the script that builds the nested hosts. Ours was

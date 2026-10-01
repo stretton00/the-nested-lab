@@ -14,7 +14,7 @@ cover:
   image: "/images/post9-hero-vmapps-allapps.svg"
   alt: "Two provisioning paths side by side: IaaS engine to vCenter, vs blueprint to supervisor reconciliation"
   hidden: false
-summary: "VCF Automation 9.1 ships two provisioning architectures, as two types of org. I ran the same use cases through both — Linux and Windows VMs, ISO attach, multi-NIC, isolated pods, nested ESXi, shared services, a catalog item. The honest scorecard, and how each use case is actually achieved."
+summary: "VCF Automation 9.1 has two provisioning models, as two kinds of organisation. I ran the same use cases through both, from Windows VMs to nested ESXi. The honest scorecard, and how each case is done."
 ---
 
 VCF Automation 9.1 has two ways to build things, side by side, as two types

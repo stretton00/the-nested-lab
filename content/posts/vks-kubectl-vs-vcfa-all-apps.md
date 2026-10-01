@@ -16,7 +16,7 @@ cover:
   image: "/images/post10-hero-vks-two-ways.svg"
   alt: "The same Cluster manifest applied by kubectl and requested through the catalog — and what the second path adds for free"
   hidden: false
-summary: "I built the same VKS cluster twice on the same supervisor: once with kubectl apply, once as a VCF Automation All Apps request. The Cluster object is identical. Everything around it isn't — and the payoff table is what you get for free the second way: catalog, quota class, org RBAC, VCF Operations visibility."
+summary: "The same VKS cluster built twice: once with kubectl, once as a VCF Automation request. The Cluster object is identical. Everything around it isn't, and the difference is what you get for free."
 ---
 
 The `Cluster` manifest is the same. That's the point of this post, and

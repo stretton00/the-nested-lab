@@ -16,7 +16,7 @@ cover:
   image: "/images/post8-hero-gotchas.svg"
   alt: "ContentValid: False — and the seven reasons why"
   hidden: false
-summary: "Everything that made the nested-esxi-pod blueprint fail validation before it worked: ${input} inside flow mappings, name vs generateName, flat zones, contentSources, one-published-version, validation-in-status, and the image-sync race. Short, specific, and each one cost me a cycle."
+summary: "Seven ways the nested-ESXi pod blueprint failed validation before it worked, from ${input} inside flow mappings to an image-sync race. Short, specific, and each one cost me a cycle."
 ---
 
 The [nested-esxi-pod blueprint](/posts/nested-esxi-via-vcfa-all-apps/)

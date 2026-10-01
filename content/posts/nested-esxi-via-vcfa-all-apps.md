@@ -16,7 +16,7 @@ cover:
   image: "/images/post6-hero-blueprint.svg"
   alt: "One blueprint: namespace, trunk topology, two nested hosts, two VIPs — requested as a catalog item"
   hidden: false
-summary: "The whole isolated pod — namespace, trunk subnets, binding maps, two dual-NIC nested ESXi hosts with an ISO attached, SSH/HTTPS VIPs — as one VCF Automation blueprint, published to the catalog. Anatomy of the blueprint, the ordering it enforces, and the three things it can't express."
+summary: "The whole isolated pod, nested ESXi hosts and all, as one VCF Automation blueprint in the catalog. How the blueprint is built, the order it enforces, and the three things it can't express."
 ---
 
 Everything in this series so far was built with `kubectl` and API calls.

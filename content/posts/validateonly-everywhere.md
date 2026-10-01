@@ -15,7 +15,7 @@ cover:
   image: "/images/post18-hero-validateonly.svg"
   alt: "One checkbox on every form: validateOnly. Tick everything, plan the whole stack, change nothing."
   hidden: false
-summary: "Terraform has plan. Kubernetes has --dry-run. Your vRO workflows have nothing — unless you give them a validateOnly input and make the wrapper cascade it. A short argument for the single most valuable checkbox in the lab factory, with the failures it caught."
+summary: "Terraform has plan. Kubernetes has --dry-run. Your vRO workflows have nothing, unless you give them a validateOnly input and pass it down. The most valuable checkbox in the lab factory."
 ---
 
 Terraform has `plan`. Kubernetes has `--dry-run=server`. Ansible has

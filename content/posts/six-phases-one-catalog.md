@@ -15,7 +15,7 @@ cover:
   image: "/images/post37-hero-six-phases.svg"
   alt: "Six catalog items as six restore points, from a jump host with blank hosts to a lab with vCenter, VCF Operations and Active Directory sign-in; students request Phases 1 and 2, trainers build any phase for any student"
   hidden: false
-summary: "A student signs in, sees two catalog items, makes two decisions on a form and gets a complete nested lab: an RDP address, a README with the lab's facts and, from Phase 3, a start page that follows the build. A trainer uses the same catalog to build or rebuild any student's lab and pre-builds the long phases. The six phases as restore points, what each takes on f06, and how everyone can tell when a lab is ready."
+summary: "A student makes two choices on a form and gets a complete nested lab with an RDP address and a start page. Trainers pre-build the long phases. Six restore points, and how to tell a lab is ready."
 ---
 
 `student01` is an Organization User in VCF Automation and a member of one

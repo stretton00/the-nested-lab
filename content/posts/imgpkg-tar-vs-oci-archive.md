@@ -14,7 +14,7 @@ cover:
   image: "/images/post12-hero-imgpkg.svg"
   alt: "Two tarballs that look the same: manifest.json vs oci-layout"
   hidden: false
-summary: "Two tarballs, both '.tar', both full of container images, both destined for the same Harbor. One loads with imgpkg; the other is rejected. The layout difference nobody explains, what actually survives a copy (tags, digests, platforms), and the three tools that can bridge the gap."
+summary: "Two tarballs full of container images, both bound for the same Harbor. imgpkg loads one and rejects the other. The layout difference nobody explains, what survives a copy, and three ways across."
 ---
 
 You've staged 40 container images for a dark site. The VKS bundle loads

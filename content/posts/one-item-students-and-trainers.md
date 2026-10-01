@@ -15,7 +15,7 @@ cover:
   image: "/images/post28-hero-trainers.svg"
   alt: "A Phase 1 request with Lab: student04 meets one check on the server, whether env.requestedBy is on the trainers list in nestedLabSite: a trainer's lab lands in vpc-student04, everyone else's in their own VPC"
   hidden: false
-summary: "Students request their own labs; trainers build a lab for any student. We kept two copies of each student blueprint to do it, and sharing one catalog item across projects did not reach the students on VCF Automation 9.1. Now one blueprint per phase decides on the server, from a trainers list in a property group, where each lab lands. The expression, the proof, and three test requests on f06."
+summary: "Students request their own labs; trainers build a lab for any student. One blueprint per phase now decides where each lab lands, from a trainers list in a property group. The expression, the proof and three test requests."
 ---
 
 Phase 1 of our lab catalog existed twice, and so did Phase 2. That's one more

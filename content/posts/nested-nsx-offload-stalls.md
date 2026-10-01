@@ -15,7 +15,7 @@ cover:
   image: "/images/post25-hero-offloads.svg"
   alt: "A nested ESXi host sends Geneve TSO super-frames the outer layer drops, and receives LRO-merged frames its driver rejects; the fix is encapOffload=0 rxInnerOffload=0 disableLRO=1"
   hidden: false
-summary: "Tunnels up, BFD green, big don't-fragment pings fine - and bulk TCP across the overlay died per connection. Two offload faults between nested ESXi and the layer below, one in each direction, and the counter pair that found the second one in minutes."
+summary: "Tunnels up, BFD green, big pings fine, and bulk TCP across the overlay still died, one connection at a time. Two offload faults, one in each direction, and the counter pair that caught the second."
 ---
 
 Every tunnel was up. BFD was green, and 1572-byte don't-fragment pings

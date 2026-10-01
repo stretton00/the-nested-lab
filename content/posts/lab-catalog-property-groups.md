@@ -15,7 +15,7 @@ cover:
   image: "/images/post26-hero-catalog-v2.svg"
   alt: "One site file generates both the blueprints and two property groups; at deploy time the blueprints read every site value from the groups"
   hidden: false
-summary: "Our nested-lab blueprints worked, and had one platform written all over them: 59 values from the region to every lab address. How they now read all of it from two VCF Automation property groups, what I proved before trusting it, and the lint that keeps literals out."
+summary: "Our lab blueprints had one platform written all over them: 59 site values. Now they read everything from two property groups. How it works, what I proved first, and the lint that keeps literals out."
 ---
 
 Our nested-lab catalog worked. It had six phase items and two dev items, each

@@ -15,7 +15,7 @@ cover:
   image: "/images/post17-hero-report.svg"
   alt: "A build report: scorecard, software cards, network table, provisioning Gantt with a shaded reboot"
   hidden: false
-summary: "A self-contained HTML build report — scorecard, per-agent checks, network and storage audits, vCenter placement, an SVG Gantt with reboots detected. Plus the Session-0 traps — vmtoolsd argument mangling, ISO ejection with no Explorer — that cost real hours."
+summary: "A self-contained HTML build report, down to a Gantt chart that spots the reboots. Plus the Session 0 traps, like mangled vmtoolsd arguments and ejecting an ISO with no Explorer, that cost real hours."
 ---
 
 Most provisioning pipelines end with "Deployment completed". This one ends

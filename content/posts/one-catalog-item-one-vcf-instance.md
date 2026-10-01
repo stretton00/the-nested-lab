@@ -15,7 +15,7 @@ cover:
   image: "/images/post3-hero-factory.svg"
   alt: "The lab factory: stage 1 nested hosts, stage 2 bringup, day-N items, one wrapper form"
   hidden: false
-summary: "How an interactive PowerShell script grew into a catalog-driven factory that stands up complete nested VCF 9.1 instances — hosts, bringup, supervisor, fleet components — from a single request form. The design rules that made it survivable, and the traps that shaped them."
+summary: "How an interactive PowerShell script grew into a catalog item that builds complete nested VCF 9.1 instances from one request form. The design rules that made it survivable, and the traps behind them."
 ---
 
 Every nested VCF lab starts the same way: a heroic PowerShell script.
