@@ -63,7 +63,8 @@ It realized as `172.31.0.0/27`. A VM on it, `svc-repo01` at `172.31.0.2`,
 serving HTTP, became the shared repo. Not the most glamorous job in the lab,
 but somebody has to do it.
 
-![Architecture: VPC per pod, transit gateway, shared-services VPC](/images/product-02-architecture.jpg)
+![Three pod VPCs with identical 172.30.0.0/16 Private subnets reach the shared-svc VPC's repo at 172.31.0.2 through the transit gateway, each SNATed to its own address; pods can't reach each other, and the repo can't route back to a pod](/images/diagrams/shared-services-hub.svg)
+*One way by construction: the pods reach the hub, and nothing reaches a pod.*
 
 ## The test that matters is directional
 

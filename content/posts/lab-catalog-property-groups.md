@@ -65,6 +65,9 @@ The second run is the important one. It's a round trip through the API that
 changes nothing, so a later difference means someone edited a group in the
 UI.
 
+![Build time: the site file feeds the generator, which writes eight blueprints with references and two property groups with values. Request time: VCF Automation resolves the references from the request's inputs and the groups, and builds the lab](/images/diagrams/property-groups-flow.svg)
+*Values live in the groups and references in the blueprints, so changing a site value is a sync, not a new version.*
+
 ## What a reference looks like
 
 Wherever a blueprint used to say `domain-c9` or `172.30.0.40`, it now says where

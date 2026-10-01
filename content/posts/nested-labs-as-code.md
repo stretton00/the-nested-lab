@@ -210,6 +210,9 @@ requested again, and about 1 h 50 min later the student carries on with a
 working vCenter. On f06, every phase has been requested from scratch, which
 is all a restore is.
 
+![Six phase cards, each holding everything before it: DC build about 5 min, domain about 15 min, ESXi hosts about 20 min, vCenter about 1 h 50 min, VCF Operations about 3 h 15 min, AD sign-in about 3 h 30 min](/images/diagrams/six-phases-restore-points.svg)
+*Each phase is the one before it plus one layer, so any phase is a restore point. Times are request to ready on f06.*
+
 ### Every student gets the same lab
 
 Each lab has a VPC of its own, with

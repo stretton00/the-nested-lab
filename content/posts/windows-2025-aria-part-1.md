@@ -46,20 +46,8 @@ is the validation report and the details that hurt.
 
 ## Three layers, three reasons
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│ 1. Aria Automation + Orchestrator         (control plane)            │
-│    cloud template · Event Broker → vRO at Allocation / Post-Provision │
-│    hostname from AD · placement metadata → guestinfo · notifications  │
-├──────────────────────────────────────────────────────────────────────┤
-│ 2. cloudbase-init                          (first boot, template-owned)│
-│    multipart userdata: network · disks · domain join · pull engine    │
-├──────────────────────────────────────────────────────────────────────┤
-│ 3. File-share build engine                 (guest state machine)      │
-│    stage payloads · install across reboots · validate · report · self-│
-│    destruct                                                           │
-└──────────────────────────────────────────────────────────────────────┘
-```
+![Three layers: Aria Automation and vRO allocate the hostname and pass placement data into the guest; cloudbase-init sets the network, the disks and the domain join and pulls the engine across two reboots; the file-share engine stages, installs, validates, reports and removes itself](/images/diagrams/windows-pipeline-three-layers.svg)
+*Each layer owns what only it can do, and no vCenter or AD-admin credential ever enters the guest.*
 
 Each seam exists for a reason you can state in one sentence:
 

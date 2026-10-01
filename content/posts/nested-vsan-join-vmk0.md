@@ -117,6 +117,9 @@ view.
 
 ## The fix: set it the way vCenter reads it
 
+![Before: the vmknic tags say vmk2 but hostd's vSAN view still says vmk0, and the join reads the view, so vSAN lands on vmk0. After: UpdateVsan sets vmk2 in the configuration and the view before Move-VMHost, and vSAN joins on vmk2](/images/diagrams/vsan-view-vs-tags.svg)
+*Two places hold a host's vSAN network, and the join only asks one of them.*
+
 The check before the join now sets the vSAN network through the [vSAN API](https://techdocs.broadcom.com/us/en/vmware-cis/vsan/vsan-sdk/8-0/setting-up-a-vsan-cluster/configuring-vmkernel-netowkring-for-vsan.html),
 instead of relying on the tags. `UpdateVsan` writes the host's configuration
 and its view in one call:

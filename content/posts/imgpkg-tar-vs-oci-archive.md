@@ -47,6 +47,9 @@ converter: `imgpkg push -f <dir>` would wrap the OCI directory as a new
 image *layer*, not replicate the original image. If your staging pipeline
 pulled with anything other than imgpkg, imgpkg won't load it. Full stop.
 
+![Two tarballs: an imgpkg tar (manifest.json, sha256-*.tar.gz) loads with imgpkg copy --tar; an OCI image layout (oci-layout, index.json, blobs) does not, and loads with crane push or skopeo instead. imgpkg's copy keeps tags, digests and platforms, and drops cosign signatures unless both ends ask for them](/images/diagrams/imgpkg-which-tool.svg)
+*Same tool, same command, different archive. `tar -tf` tells you which one you've got.*
+
 ## Three ways out
 
 **1. Re-pull with imgpkg** (chosen, when you still have internet somewhere):
