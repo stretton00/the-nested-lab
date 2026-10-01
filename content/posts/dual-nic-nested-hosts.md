@@ -22,7 +22,7 @@ summary: "VCF wants two pNICs per host. In a nested lab the second vNIC adds no 
 "Naturally, a VCF host has at least two NICs. Are we testing that, or have
 you virtualised it away?"
 
-Fair question, and the honest answer has two halves. In a nested lab, the
+Fair question, and like most fair questions it has an irritating two-part answer. In a nested lab, the
 outer host provides the *physical* redundancy: its vDS and its NSX uplinks.
 A second vNIC on the nested VM adds exactly none of that.
 
@@ -35,7 +35,8 @@ and the VCF Installer's
 only bites single-pNIC hosts that use an NFS datastore.
 
 So our nested hosts get two vNICs, both on the trunk subnet. Which leaves the
-fun question: does failover between them actually work inside a VPC?
+fun question (for a given value of fun): does failover between them actually
+work inside a VPC?
 
 ![The failover test end to end: an SSH session through the NSX load balancer into the trunk subnet and esx01's two vNICs; vmnic0 fails and every VLAN moves to vmnic1](/images/diagrams/dual-nic-failover.svg)
 *The whole test on one page. The session I'm typing in rides the very path I break.*
@@ -50,7 +51,7 @@ Both vNICs sit on the same `sn-trunk` subnet
 
 vSwitch0 teams them active/active with the default originating-port-ID
 policy. Every port group inherits it: Management 1610, vMotion 1611 and
-vSAN 1612. Nothing you wouldn't do on metal.
+vSAN 1612. Nothing you wouldn't do on metal. Thrilling stuff, I know.
 
 ## The test: pull a NIC while watching from inside
 
@@ -60,7 +61,8 @@ watching from.
 I'm SSH'd into `esx01` **through its public VIP**. So my session runs through
 the NSX load balancer, the VPC, the trunk port and whichever vmnic happens to
 carry vmk0. If failover breaks anything, it breaks the terminal I'm typing
-in. Low effort, high stakes: the best kind of test.
+in: the networking equivalent of sawing off the branch you're sitting on.
+Low effort, high stakes: the best kind of test.
 
 ```
 [root@esx01-a:~] esxcli network nic list
@@ -89,7 +91,8 @@ vmnic1  ...  Up            Up           10000  04:50:56:00:68:00
 {{< /fold >}}
 
 Every VLAN moved to vmnic1. Zero loss on vMotion and vSAN. And the
-management session, the one *most* likely to notice, never blinked.
+management session, the one *most* likely to notice, never blinked. Slightly
+disappointing, if I'm honest; I'd prepared a dramatic paragraph.
 
 ## Why this is a real result, not a party trick
 
@@ -153,7 +156,8 @@ call with confidence is worth more than the test itself.
   costs nothing. Before a VCF Installer bringup, leave vmnic1 off vSwitch0
   (KB 415469).
 - Test failover **from a session that depends on it** (SSH through the VIP).
-  Pings passing while your terminal dies is not success.
+  Pings passing while your terminal dies is not success, however much the
+  change ticket would like it to be.
 - The trunk subnet tolerates **a vmk MAC moving between ports mid-flow**.
   Standard subnets lack that property, and nested vSphere needs it.
 - Be precise in the write-up: nested dual-NIC gives *policy* realism, not
