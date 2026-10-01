@@ -3,7 +3,9 @@ title: "The load balancer that must exist before the namespace"
 date: 2026-09-16T08:10:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, supervisor, ncp, troubleshooting]
+products: ["NSX", "vSphere and vSAN"]
 series: ["The VPC Pod Papers"]
+seriesPart: 3
 cover:
   image: "/images/post2-hero-ordering.svg"
   alt: "The ordering rule: VPC, VPCAttachment, LoadBalancer, then the namespace - swap steps 3 and 4 and VIPs pend forever"

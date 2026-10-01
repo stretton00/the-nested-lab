@@ -3,7 +3,9 @@ title: "No VLANs to request, no router to run: the network inside a lab VPC"
 date: 2026-11-11
 draft: false
 tags: [vcf, nsx, vpc, nested-esxi, vcf-automation, training-labs]
+products: ["NSX", "VCF Automation"]
 series: ["Nested Labs as Code"]
+seriesPart: 3
 cover:
   image: "/images/post36-hero-no-router.svg"
   alt: "A lab VPC whose gateway routes the management, vMotion and vSAN subnets that binding maps carry to the nested hosts' trunk, with the load balancer in front of the jump host and the transit gateway to the shared binaries server"

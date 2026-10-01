@@ -3,7 +3,9 @@ title: "Nested ESXi inside an NSX VPC: the trunk-subnet design"
 date: 2026-09-16T08:20:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, nested-esxi, homelab, vsphere-supervisor]
+products: ["NSX", "vSphere and vSAN"]
 series: ["The VPC Pod Papers"]
+seriesPart: 2
 cover:
   image: "/images/post1-hero-trunk.svg"
   alt: "The trunk-subnet design: one trunk vNIC, binding maps demux VLANs 1610/1611/1612 into VPC subnets"

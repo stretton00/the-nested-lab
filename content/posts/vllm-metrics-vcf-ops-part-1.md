@@ -3,7 +3,9 @@ title: "vLLM metrics into VCF Operations, part 1: don't ship the histogram"
 date: 2026-09-30
 draft: false
 tags: [vllm, llm, observability, vcf-operations, prometheus, powershell, gpu]
+products: ["VCF Operations", "Private AI"]
 series: ["LLM Ops on VCF"]
+seriesPart: 1
 cover:
   image: "/images/post13-hero-vllm.svg"
   alt: "Prometheus histogram buckets in; flat P50/P95/P99 gauges out"

@@ -3,7 +3,9 @@ title: "Windows Server 2025 via Aria Automation, part 2: a state machine that su
 date: 2026-09-17T06:20:00+01:00
 draft: false
 tags: [aria-automation, windows, powershell, state-machine, cloudbase-init]
+products: ["VCF Automation"]
 series: ["The Windows Build Pipeline"]
+seriesPart: 2
 cover:
   image: "/images/post16-hero-statemachine.svg"
   alt: "Boot → check kill switch → skip flagged steps → run next step → reboot if required → repeat"

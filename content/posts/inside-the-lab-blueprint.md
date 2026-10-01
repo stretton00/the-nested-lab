@@ -3,7 +3,9 @@ title: "Inside the blueprint: generated from one file, built by the lab itself"
 date: 2026-11-25
 draft: false
 tags: [vcf, vcf-automation, blueprints, cci, nested-esxi, automation, homelab]
+products: ["VCF Automation"]
 series: ["Nested Labs as Code"]
+seriesPart: 5
 cover:
   image: "/images/post38-hero-blueprint.svg"
   alt: "The generator turns the site file into eight blueprints; one phase is 25 resources (a namespace, four subnets, three binding maps, six VMs, eight disks and a load balancer); the jump host then builds the rest from scripts on the binaries server, and every release goes through validate, version and release"

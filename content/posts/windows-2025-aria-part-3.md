@@ -3,7 +3,9 @@ title: "Windows Server 2025 via Aria Automation, part 3: validation as a product
 date: 2026-09-17T06:30:00+01:00
 draft: false
 tags: [aria-automation, windows, powershell, validation, reporting, session-0]
+products: ["VCF Automation"]
 series: ["The Windows Build Pipeline"]
+seriesPart: 3
 cover:
   image: "/images/post17-hero-report.svg"
   alt: "A build report: scorecard, software cards, network table, provisioning Gantt with a shaded reboot"

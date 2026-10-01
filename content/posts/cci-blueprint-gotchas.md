@@ -3,7 +3,9 @@ title: "Blueprinting the supervisor: seven CCI blueprint gotchas"
 date: 2026-09-16T07:10:00+01:00
 draft: false
 tags: [vcf, vcf-automation, all-apps, cci, blueprint, troubleshooting]
+products: ["VCF Automation"]
 series: ["The VPC Pod Papers"]
+seriesPart: 9
 cover:
   image: "/images/post8-hero-gotchas.svg"
   alt: "ContentValid: False — and the seven reasons why"

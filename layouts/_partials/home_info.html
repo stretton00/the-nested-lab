@@ -1,0 +1,53 @@
+{{- /* The theme's home intro, then a Browse panel (1 Oct 2026, Adam: "a tree of blog posts by month or by VCF product
+       for easier navigation"): every post reachable from the first page by product, by series or by month, without
+       paging through the list. Product terms come from each post's `products:` line (tools/set_products.py). */ -}}
+{{- with site.Params.homeInfoParams }}
+<article class="first-entry home-info">
+    <header class="entry-header">
+        <h1>{{ .Title | markdownify }}</h1>
+    </header>
+    <div class="entry-content md-content">
+        {{ $opts := dict "display" "block" }}
+        {{ .Content | $.Page.RenderString $opts }}
+    </div>
+    <footer class="entry-footer">
+        {{ partial "social_icons.html" (dict "align" site.Params.homeInfoParams.AlignSocialIconsTo) }}
+    </footer>
+</article>
+{{- end -}}
+{{- $posts := where site.RegularPages "Type" "in" site.Params.mainSections }}
+<section class="nl-browse" aria-labelledby="nl-browse-title">
+  <h2 id="nl-browse-title" class="nl-browse-title">Browse the lab notes</h2>
+  <div class="nl-browse-grid">
+    <div class="nl-browse-col">
+      <h3>By VCF product</h3>
+      <ul class="nl-chips">
+        {{- range site.Taxonomies.products.ByCount }}
+        <li><a href="{{ .Page.RelPermalink }}">{{ .Page.Title }}<span class="nl-count">{{ .Count }}</span></a></li>
+        {{- end }}
+      </ul>
+      <h3>By series</h3>
+      <ul class="nl-chips nl-chips-series">
+        {{- range site.Taxonomies.series.ByCount }}
+        <li><a href="{{ .Page.RelPermalink }}">{{ .Page.Title }}<span class="nl-count">{{ .Count }}</span></a></li>
+        {{- end }}
+      </ul>
+    </div>
+    <div class="nl-browse-col">
+      <h3>By month</h3>
+      <div class="nl-months">
+        {{- range $i, $m := $posts.GroupByDate "January 2006" }}
+        <details{{ if eq $i 0 }} open{{ end }}>
+          <summary><span class="nl-month">{{ .Key }}</span><span class="nl-count">{{ len .Pages }}</span></summary>
+          <ul>
+            {{- range .Pages }}
+            <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+            {{- end }}
+          </ul>
+        </details>
+        {{- end }}
+      </div>
+      <p class="nl-browse-more"><a href="{{ "archives/" | relURL }}">Full archive</a> · <a href="{{ "search/" | relURL }}">Search</a></p>
+    </div>
+  </div>
+</section>

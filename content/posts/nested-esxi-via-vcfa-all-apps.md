@@ -3,7 +3,9 @@ title: "A datacenter in a catalog tile: nested ESXi pods via VCF Automation All 
 date: 2026-09-16T07:40:00+01:00
 draft: false
 tags: [vcf, vcf-automation, all-apps, cci, blueprint, nested-esxi, vpc]
+products: ["VCF Automation", "NSX"]
 series: ["The VPC Pod Papers"]
+seriesPart: 6
 cover:
   image: "/images/post6-hero-blueprint.svg"
   alt: "One blueprint: namespace, trunk topology, two nested hosts, two VIPs — requested as a catalog item"

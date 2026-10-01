@@ -3,7 +3,9 @@ title: "Custom request forms in VCF Automation 9.1: two tabs, a text box, and th
 date: 2027-01-27
 draft: false
 tags: [vcf, vcf-automation, blueprints, custom-forms, self-service, homelab]
+products: ["VCF Automation"]
 series: ["The Lab Factory"]
+seriesPart: 8
 cover:
   image: "/images/post29-hero-forms.svg"
   alt: "The blueprint's formId points at the custom form with its Your lab and Trainer options tabs; each new version copies it as <name>/<version> with a formId of its own, and the request page shows the released version's copy; a CCI content update clears formId, so the release tool puts it back before versioning"

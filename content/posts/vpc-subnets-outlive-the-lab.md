@@ -3,7 +3,9 @@ title: "The subnets that outlive the lab: why a quick re-request never boots"
 date: 2027-01-06
 draft: false
 tags: [vcf, nsx, vpc, vm-service, ipam, training-labs, troubleshooting]
+products: ["NSX", "VCF Automation"]
 series: ["The VPC Pod Papers"]
+seriesPart: 11
 cover:
   image: "/images/post31-hero-subnets.svg"
   alt: "A deleted lab's subnet still holds the first block of the VPC, so each new subnet moves up one /27 and the domain controller's fixed address 172.30.0.34 no longer fits sn-mgmt"

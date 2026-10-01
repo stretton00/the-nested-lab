@@ -3,7 +3,9 @@ title: "Porting a PowerShell deploy script to a catalog item: the mapping table 
 date: 2026-09-16T06:20:00+01:00
 draft: false
 tags: [vcf-automation, vm-apps, vro, powershell, powercli, ovftool, nested-esxi, refactoring]
+products: ["VCF Automation"]
 series: ["The Lab Factory"]
+seriesPart: 3
 cover:
   image: "/images/post22-hero-porting.svg"
   alt: "Left: an interactive script's menu prompts. Right: where each one went — inputs, actions, template expressions, subscriptions."

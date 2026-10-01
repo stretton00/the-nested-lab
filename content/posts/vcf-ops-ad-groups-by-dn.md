@@ -3,7 +3,9 @@ title: "VCF Operations forgot our AD users two minutes after the build"
 date: 2026-12-30
 draft: false
 tags: [vcf, vcf-operations, active-directory, ldap, rbac, troubleshooting, homelab]
+products: ["VCF Operations"]
 series: ["Observability on VCF"]
+seriesPart: 4
 cover:
   image: "/images/post30-hero-ops-ad.svg"
   alt: "An AD group imported into VCF Operations by its short name becomes a new, unlinked group that the group sync empties; imported by its distinguished name, the sync fills it from AD"

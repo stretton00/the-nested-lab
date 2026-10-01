@@ -65,6 +65,7 @@ Posts arrive in series; start with [The VPC Pod Papers](/series/the-vpc-pod-pape
 [taxonomies]
 tag = "tags"
 series = "series"
+product = "products"      # the VCF components a post covers (1 Oct 2026; tools/set_products.py)
 
 [menus]
   [[menus.main]]
@@ -76,8 +77,12 @@ series = "series"
   url = "/series/"
   weight = 20
   [[menus.main]]
-  name = "Tags"
-  url = "/tags/"
+  name = "Products"
+  url = "/products/"
+  weight = 25
+  [[menus.main]]
+  name = "Archive"
+  url = "/archives/"
   weight = 30
   [[menus.main]]
   name = "Search"

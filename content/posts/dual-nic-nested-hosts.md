@@ -3,7 +3,9 @@ title: "Dual-NIC nested hosts: what redundancy means when the fabric is virtual"
 date: 2026-09-16T07:30:00+01:00
 draft: false
 tags: [vcf, nested-esxi, nsx, vpc, networking, vsphere]
+products: ["NSX", "vSphere and vSAN"]
 series: ["The VPC Pod Papers"]
+seriesPart: 7
 cover:
   image: "/images/product-03-failover.jpg"
   alt: "Fail a NIC. Nothing blinks."

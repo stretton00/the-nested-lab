@@ -3,7 +3,9 @@ title: "One VKS cluster, two ways: kubectl vs VCF Automation All Apps"
 date: 2026-09-16T06:50:00+01:00
 draft: false
 tags: [vcf, vks, kubernetes, vcf-automation, all-apps, vcf-operations]
+products: ["VKS", "VCF Automation"]
 series: ["All Apps in Practice"]
+seriesPart: 1
 cover:
   image: "/images/post10-hero-vks-two-ways.svg"
   alt: "The same Cluster manifest applied by kubectl and requested through the catalog — and what the second path adds for free"
