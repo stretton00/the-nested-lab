@@ -15,7 +15,7 @@ cover:
   image: "/images/post39-hero-make-it-yours.svg"
   alt: "A site file filled in with the wizard passes site_check.py and is installed step by step by the install runner; afterwards a new release is a library item plus one entry in nestedLabMedia, and a new trainer is one line in nestedLabSite, with no new blueprint version"
   hidden: false
-summary: "Everything that ties our nested-lab catalog to one platform sits in a single site file. What that file holds and the check that reads it, which changes are a property-group sync rather than a new blueprint version, how a release, a size or the IP plan changes, how updates reach a dark site, where a new phase plugs in, and two tools that make a first install easier still."
+summary: "Everything that ties our lab catalog to a platform lives in one site file. What it holds, which changes need only a sync, and how new releases, sizes, address plans and dark sites fit in."
 ---
 
 On 28 September we rebuilt the binaries server, the machine the labs fetch

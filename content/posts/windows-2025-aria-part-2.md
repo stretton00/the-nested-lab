@@ -15,7 +15,7 @@ cover:
   image: "/images/post16-hero-statemachine.svg"
   alt: "Boot → check kill switch → skip flagged steps → run next step → reboot if required → repeat"
   hidden: false
-summary: "05-build-master.ps1 runs at every startup until the build is done. Flag files make each step run once; a persisted state file keeps true timings across reboots; a kill-switch flag makes a stray run a no-op. Then it cleans up, validates, publishes — and deletes itself."
+summary: "One script runs at every startup until the build is done. Flag files make each step run once, a state file keeps true timings across reboots, and at the end it cleans up, reports and deletes itself."
 ---
 
 [Part 1](/posts/windows-2025-aria-part-1/) ended with a startup scheduled

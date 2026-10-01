@@ -16,7 +16,7 @@ cover:
   image: "/images/post5-hero-tgw.svg"
   alt: "Hub-and-spoke: three private pods reach one shared-services VPC over the transit gateway; the service cannot reach back"
   hidden: false
-summary: "Three pods with identical private addressing all need the same WSUS, repo and AD. One shared-services VPC with a PrivateTGW subnet serves all of them over the transit gateway — and can't reach back into any of them. The directional test, and why SNAT is what makes it work."
+summary: "Three pods with identical addressing all need the same repo, WSUS and AD. One shared-services VPC serves them all through the transit gateway, and can't reach back into any of them."
 ---
 
 The pods from [the last post](/posts/three-datacenters-one-ip-plan/) are

@@ -16,7 +16,7 @@ cover:
   image: "/images/post19-hero-fluentbit.svg"
   alt: "Two fluent-bit shippers — a VKS package and a Windows service — converging on one Ops for Logs endpoint"
   hidden: false
-summary: "The same log pipeline for two very different worlds: fluent-bit as a VKS package (values secret, CFAPI output, verified 200s per batch) and fluent-bit as a Windows service on Server 2025 shipping the event log to the same VCF Operations for Logs endpoint. One backend, two configs, and what each side taught me."
+summary: "One log pipeline, two very different worlds: fluent-bit as a VKS package and as a Windows Server 2025 service, both shipping to the same VCF Operations for Logs. One backend, two configs, lessons from both."
 ---
 
 Logs from a Kubernetes cluster and logs from a Windows server end up in

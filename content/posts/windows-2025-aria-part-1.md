@@ -15,7 +15,7 @@ cover:
   image: "/images/post15-hero-winpipe.svg"
   alt: "Three layers: Aria control plane, cloudbase-init first boot, file-share build engine"
   hidden: false
-summary: "One catalog request, one fully-built domain-joined Windows Server 2025 with a standard agent stack, a validation report, and no trace of the tooling that built it. The three-layer design — Aria/vRO control plane, cloudbase-init first boot, a pulled build engine — and the reasoning behind each seam."
+summary: "One catalog request, one fully built, domain-joined Windows Server 2025 with its agents, a validation report, and no trace of the tooling that built it. The three-layer design, and why each seam is where it is."
 ---
 
 A user fills in a form: environment, size, disks, networks, tags. Some time

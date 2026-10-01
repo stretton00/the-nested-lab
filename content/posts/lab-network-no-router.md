@@ -15,7 +15,7 @@ cover:
   image: "/images/post36-hero-no-router.svg"
   alt: "A lab VPC whose gateway routes the management, vMotion and vSAN subnets that binding maps carry to the nested hosts' trunk, with the load balancer in front of the jump host and the transit gateway to the shared binaries server"
   hidden: false
-summary: "Every lab in our catalog gets management, vMotion and vSAN networks, a way in, a way out and a route to a shared server, and nobody requests a VLAN or runs a router. The VPC gateway routes the lab's VLAN subnets, and NSX does the NAT, the load balancing and the addressing. How it is built, the receipts from f06, and a fair comparison with VLANs and with a router VM."
+summary: "Every lab gets management, vMotion and vSAN networks, a way in and a way out, with no VLAN requests and no router VM. The VPC gateway does the routing, and NSX does the rest."
 ---
 
 A student's jump host traced its route to the class's binaries server, which

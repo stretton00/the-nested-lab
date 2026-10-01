@@ -16,7 +16,7 @@ cover:
   image: "/images/post0-hero-pacman.svg"
   alt: "Pac-Man inside a VPC boundary; a LoadBalancer VIP is the one door out"
   hidden: false
-summary: "Part 0 of the Pod Papers: an NSX VPC explained with a running game. Private by default, one deliberate door out — and a self-inflicted outage that taught me five green layers can hide one wrong integer."
+summary: "Part 0 of the Pod Papers: an NSX VPC explained with a running game of Pac-Man. Private by default, one deliberate door out, and a self-inflicted outage where five green layers hid one wrong integer."
 ---
 
 Before this series gets into trunk subnets and binding maps, it's worth ten

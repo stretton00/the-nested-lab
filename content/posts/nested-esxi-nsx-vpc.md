@@ -16,7 +16,7 @@ cover:
   image: "/images/post1-hero-trunk.svg"
   alt: "The trunk-subnet design: one trunk vNIC, binding maps demux VLANs 1610/1611/1612 into VPC subnets"
   hidden: false
-summary: "Plain VPC subnets silently blackhole a nested ESXi host. Here's why — and the trunk subnet + binding map design that makes nested labs work as an ordinary NSX VPC tenant, verified end to end."
+summary: "Plain VPC subnets silently blackhole a nested ESXi host. Why, and the trunk subnet and binding map design that makes nested labs work as an ordinary NSX VPC tenant."
 ---
 
 The host booted clean. Management IP configured, services up, DCUI happy.

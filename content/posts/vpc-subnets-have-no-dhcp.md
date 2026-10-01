@@ -16,7 +16,7 @@ cover:
   image: "/images/post7-hero-nodhcp.svg"
   alt: "Three bootstrap paths into a VPC subnet: cloud-init, sysprep, vAppConfig"
   hidden: false
-summary: "The nested-ESXi appliance sat at 'waiting for DHCP' forever. Our VPC subnets don't hand out addresses — the VM Service does, through bootstrap providers. cloud-init for Linux, sysprep for Windows, OVF guestinfo for appliances, and the per-vmk gateway detail that makes the Host Client tell the truth."
+summary: "The nested ESXi appliance sat at 'waiting for DHCP' for ever. VPC subnets don't hand out addresses: the VM Service does, through cloud-init, sysprep or OVF guestinfo, depending on the guest."
 ---
 
 The second trap from [part 1](/posts/nested-esxi-nsx-vpc/) deserves its own

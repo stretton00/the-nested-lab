@@ -15,7 +15,7 @@ cover:
   image: "/images/post20-hero-telegraf.svg"
   alt: "The support matrix says no; the agent status says Install Success"
   hidden: false
-summary: "The VCF Operations agent support matrix doesn't list Windows Server 2025. Add one missing Windows component (WMIC) and the ordinary UI-driven install works: agent running, checks green, metrics flowing. What 'unsupported' really means, the one prerequisite, and what to watch because of it."
+summary: "The VCF Operations agent matrix doesn't list Windows Server 2025. Add one missing Windows component, WMIC, and the normal install just works. What 'unsupported' really means, and what to watch."
 ---
 
 Two facts, both true, and a little awkward in the same room:

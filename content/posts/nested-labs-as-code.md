@@ -15,7 +15,7 @@ cover:
   image: "/images/post34-hero-labs-as-code.svg"
   alt: "site-f06.yaml feeds gen_lab_blueprint.py, which writes eight blueprints and two property groups; each request builds a lab in its own VPC with a jump host, dc01, four nested hosts, vCenter, VCF Operations and AD, routed by the VPC gateway with no router VM"
   hidden: false
-summary: "A catalog in VCF Automation 9.1 that builds a complete nested VCF lab per request, from a jump host to VCF Operations, each in its own VPC. How it differs from capturing a hand-built vPod, the two ideas we borrowed from that route, and six things building from code gives us, each shown on f06."
+summary: "A VCF Automation 9.1 catalog that builds a complete nested VCF lab per request, each in its own VPC. How it differs from capturing a hand-built lab, and what building from code buys you."
 ---
 
 On a Sunday morning, our lab catalog took one request, made as the student

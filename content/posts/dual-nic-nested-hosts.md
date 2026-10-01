@@ -16,7 +16,7 @@ cover:
   image: "/images/product-03-failover.jpg"
   alt: "Fail a NIC. Nothing blinks."
   hidden: false
-summary: "VCF wants two pNICs per host. In a nested lab the second vNIC adds no physical redundancy — so why add it? Because we expected bringup validation and uplink teaming to want it, and because the failover test tells you something real about the trunk. vmnic0 down, 0% loss, and the SSH session watching it never dropped."
+summary: "A second vNIC on a nested host adds no physical redundancy, so why add it? We expected bringup to want one, and pulling vmnic0 mid-SSH proved the trunk copes: 0% loss, session intact."
 ---
 
 "Naturally, a VCF host has at least two NICs. Are we testing that, or have

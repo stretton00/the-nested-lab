@@ -15,7 +15,7 @@ cover:
   image: "/images/post41-hero-validate-blueprints.svg"
   alt: "Three checks before a request: the blueprint validation call, a Supervisor dry run of each manifest, and the released version diffed with the generator's output"
   hidden: false
-summary: "One VCF Automation API call checks a blueprint without saving anything: a misspelt resource type, a missing input, an absent property group or a broken expression, anywhere in it. What that call does not check, and the three small checks we run beside it before a catalog goes anywhere."
+summary: "One VCF Automation API call checks a whole blueprint without saving a thing. What it catches, what it misses, and the three small checks we run beside it."
 ---
 
 The first person to find a typo in a blueprint is usually whoever requests it.

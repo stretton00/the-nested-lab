@@ -16,7 +16,7 @@ cover:
   image: "/images/post2-hero-ordering.svg"
   alt: "The ordering rule: VPC, VPCAttachment, LoadBalancer, then the namespace - swap steps 3 and 4 and VIPs pend forever"
   hidden: false
-summary: "VIPs pending forever, a retryable error that never stops retrying, and an ordering rule the docs don't tell you: in a self-service NSX VPC, the LBService must exist before the namespace that will use it."
+summary: "Addresses pending for ever, a retryable error that never stops retrying, and an ordering rule the docs don't tell you: in a self-service NSX VPC, the load balancer must exist before the namespace that uses it."
 ---
 
 Everything was green. The VPC: realized. The namespace: ready. The VMs:

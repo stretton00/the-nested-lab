@@ -15,7 +15,7 @@ cover:
   image: "/images/post29-hero-forms.svg"
   alt: "The blueprint's formId points at the custom form with its Your lab and Trainer options tabs; each new version copies it as <name>/<version> with a formId of its own, and the request page shows the released version's copy; a CCI content update clears formId, so the release tool puts it back before versioning"
   hidden: false
-summary: "We built a friendlier request form for our lab catalog: two tabs and a text box with the rules. The form service saved it, its renderer served it, and the request page kept showing the generated form. How VCF Automation 9.1 actually picks a request form, why our release tool wiped it on every release, and the upkeep a custom form brings."
+summary: "We built a friendlier request form. It was saved, served and ignored: the request page kept showing the generated one. How VCF Automation 9.1 really picks a form, and the upkeep a custom one brings."
 ---
 
 The form was saved. The form service said so. Its renderer, asked for the form

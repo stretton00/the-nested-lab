@@ -15,7 +15,7 @@ cover:
   image: "/images/post13-hero-vllm.svg"
   alt: "Prometheus histogram buckets in; flat P50/P95/P99 gauges out"
   hidden: false
-summary: "vLLM exposes ~200 Prometheus series per model. Pushing them raw into VCF Operations is a cardinality bomb. The design of a pipeline that interpolates percentiles client-side, computes live rates statefully, derives a saturation score and drops what can't be graphed."
+summary: "vLLM exposes about 200 Prometheus series per model, and pushing them raw into VCF Operations is a cardinality bomb. A pipeline that computes the useful numbers client-side and drops what can't be graphed."
 ---
 
 vLLM's `/metrics` endpoint is generous. Every model instance exposes a few

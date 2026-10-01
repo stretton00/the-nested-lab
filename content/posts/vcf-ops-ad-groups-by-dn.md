@@ -15,7 +15,7 @@ cover:
   image: "/images/post30-hero-ops-ad.svg"
   alt: "An AD group imported into VCF Operations by its short name becomes a new, unlinked group that the group sync empties; imported by its distinguished name, the sync fills it from AD"
   hidden: false
-summary: "The lab build signed alice in to VCF Operations as its last check, and passed. Five minutes later she was refused. Two wrong turns, a workaround I didn't like, and the one field in the API reference that explained it: AD groups are imported by distinguished name."
+summary: "The lab build signed alice in to VCF Operations as its last check, and passed. Five minutes later she was refused. Two wrong turns, and the one API field that explained it."
 ---
 
 The last thing our Phase 6 lab build does is prove that the lab's Active

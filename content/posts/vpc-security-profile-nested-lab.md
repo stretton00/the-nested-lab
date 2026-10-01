@@ -15,7 +15,7 @@ cover:
   image: "/images/post32-hero-secprofile.svg"
   alt: "The region's default VPC security profile allows DNS, DHCP, NTP and ICMP and traffic between VM ports, and drops the rest; a nested lab's hosts, vCenter and VCF Operations sit behind trunk ports, and its binaries server and RDP load balancer sit outside the VPC"
   hidden: false
-summary: "No lab of ours ever failed on this. VCF Automation attaches every new VPC to the region's default security profile. On our platform that was isolation with essential services, not the None that Broadcom ships; check which one yours has. Where vDefend's distributed firewall enforces, that profile only lets a VPC's own VM ports talk to each other. A nested lab's hosts are not VM ports. How reading the policy found it, why our hosts never enforced it, and the one-field change that removes it."
+summary: "No lab of ours ever failed on this. VCF Automation gives every new VPC a default security profile, and under vDefend's firewall ours would drop most of a nested lab's traffic. Check yours, and the one-field fix."
 ---
 
 No lab of ours ever failed because of this, which is exactly why it's worth

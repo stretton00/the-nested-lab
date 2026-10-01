@@ -16,7 +16,7 @@ cover:
   image: "/images/post11-hero-demo-apps.svg"
   alt: "Seven demo apps behind seven VIPs on one VCFA-deployed VKS cluster"
   hidden: false
-summary: "KubeDoom, KubeInvaders, kube-ops-view, Pac-Man with persistent MongoDB, podinfo, Goldpinger and a Prometheus stack — deployed onto a VCFA-provisioned VKS cluster in a tenant VPC, each behind its own NSX VIP. The proper tenanted path (not the supervisor shortcut), what the platform does for free, and the traps."
+summary: "Seven demo apps, Pac-Man and KubeDoom among them, on a VKS cluster that VCF Automation built in a tenant VPC, each with its own NSX virtual IP. The proper tenanted path, what you get for free, and the traps."
 ---
 
 Every platform needs a demo stack: something that looks alive on a

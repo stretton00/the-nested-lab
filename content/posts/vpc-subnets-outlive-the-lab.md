@@ -15,7 +15,7 @@ cover:
   image: "/images/post31-hero-subnets.svg"
   alt: "A deleted lab's subnet still holds the first block of the VPC, so each new subnet moves up one /27 and the domain controller's fixed address 172.30.0.34 no longer fits sn-mgmt"
   hidden: false
-summary: "I deleted a test lab, got 'clean', and requested the next one into the same VPC eleven seconds later. It never booted: NSX still held the old lab's subnets. Why fixed addresses need a clean slate, and tooling that waits for NSX instead of a timer."
+summary: "I deleted a test lab, got 'clean', and requested the next one into the same VPC eleven seconds later. It never booted: NSX still held the old subnets. Now the tooling waits for NSX, not a timer."
 ---
 
 Our delete tool said the old lab was gone, and it sounded very sure of

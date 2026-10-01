@@ -15,7 +15,7 @@ cover:
   image: "/images/post35-hero-use-cases.svg"
   alt: "One lab catalog, four of its uses: a class with the same lab for every student, a demo on a Phase 6 built ahead, a new release side by side, and an offline rehearsal of an install; each lab is requested, built, used, deleted and requested again"
   hidden: false
-summary: "A catalog that builds a complete nested VCF lab per request is more than a classroom tool. Five uses, each with who gains and the catalog feature that makes it work: a class, a demo, a new release side by side, an offline install rehearsal, and testing tools against a real vCenter and VCF Operations. What we ran on f06, and what the design supports that we have not run yet."
+summary: "A catalog that builds a nested VCF lab per request is more than a classroom tool. Five uses, who gains from each and what makes it work, with an honest note of what we haven't run yet."
 ---
 
 On a Sunday morning, two hours after it was requested and with nobody laying

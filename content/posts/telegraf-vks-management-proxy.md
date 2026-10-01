@@ -16,7 +16,7 @@ cover:
   image: "/images/post24-hero-telegraf-vks.svg"
   alt: "Telegraf pods stuck in FailedMount until the Supervisor Management Proxy exists; then a domainless service URL until serviceDomain is set"
   hidden: false
-summary: "On VCF 9.1 the supported route installs Telegraf in new VKS clusters for you, once VCF Operations, the Metrics Aggregator and the add-on repository are in place. Underneath sits a dependency the package's README doesn't mention: two secrets that only the Supervisor Management Proxy puts into guest clusters. Without them every Telegraf pod sits in FailedMount. The supported route first, then the manual path on f06 and what each hop showed."
+summary: "On VCF 9.1, the supported route installs Telegraf in new VKS clusters for you. Underneath sits a dependency the README never mentions, two secrets from the Supervisor Management Proxy, and without them every Telegraf pod is stuck."
 ---
 
 The [Windows half of this series](/posts/telegraf-windows-2025/) was about

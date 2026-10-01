@@ -14,7 +14,7 @@ cover:
   image: "/images/post21-hero-darksite.svg"
   alt: "Everything that has to cross the airlock: images, signatures, node OVAs, kernel headers, licences"
   hidden: false
-summary: "Upgrading VKS, the Kubernetes release and the NVIDIA GPU Operator with no internet is five supply chains that all have to arrive intact — images, cosign signatures, node OVAs, kernel headers, licences. Each has a trap that passes every check until activation. This is the map."
+summary: "Upgrading VKS, Kubernetes and the NVIDIA GPU Operator with no internet means five supply chains arriving intact. Each has a trap that passes every check until activation. This is the map."
 ---
 
 A dark-site upgrade of VKS, a Kubernetes release and the GPU Operator looks

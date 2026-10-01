@@ -15,7 +15,7 @@ cover:
   image: "/images/post23-hero-installer.svg"
   alt: "Spec derived from X, validated by the installer, bringup started, task id returned; a second run polls without the catalog's leash"
   hidden: false
-summary: "Stage 2 of the lab factory: a vRO workflow that turns an environment number into a complete VCF 9.1 deployment spec, runs the installer's own validation, starts bringup and hands back a task id — because the request dies long before the eight-hour build does. Plus how the wrapper slips the two-hour leash."
+summary: "Stage 2 of the lab factory: a vRO workflow turns an environment number into a VCF 9.1 deployment spec, validates it and starts bringup, because the request dies long before the eight-hour build does."
 ---
 
 The [nested hosts exist](/posts/porting-a-powershell-deploy-script/). Now

@@ -15,7 +15,7 @@ cover:
   image: "/images/post38-hero-blueprint.svg"
   alt: "The generator turns the site file into eight blueprints; one phase is 25 resources (a namespace, four subnets, three binding maps, six VMs, eight disks and a load balancer); the jump host then builds the rest from scripts on the binaries server, and every release goes through validate, version and release"
   hidden: false
-summary: "Our Phase 5 blueprint is 1,232 lines of YAML that nobody typed: 25 resources, 11 form fields and 246 property-group references, all generated from one site file. What a phase is made of, what the requester decides, how the lab keeps building itself after VCF Automation reports success, two settings borrowed from Tom Fojta's capture approach, and a release pipeline that treats blueprints like any other code."
+summary: "Our Phase 5 blueprint is 1,232 lines of YAML that nobody typed. What a phase is made of, what the requester decides, how the lab builds itself, and the pipeline that releases it like code."
 ---
 
 The Phase 5 blueprint in our lab catalog is 1,232 lines of YAML. It creates 25
