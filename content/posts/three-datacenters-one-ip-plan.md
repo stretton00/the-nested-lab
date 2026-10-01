@@ -1,6 +1,7 @@
 ---
 title: "Three datacenters, one IP plan: identical isolated pods with NSX VPCs"
 date: 2026-09-16T08:00:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf, nsx, vpc, nested-esxi, multi-tenancy, training-labs]
 products: ["NSX"]

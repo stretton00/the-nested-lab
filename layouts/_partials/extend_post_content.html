@@ -22,3 +22,19 @@
 </aside>
 {{- end }}
 {{- end }}
+{{- /* Related lab notes (1 Oct 2026): three published posts that share the most products and tags with this one
+       (hugo.toml [related]), leaving out this post's own series, which the box above already lists. */ -}}
+{{- $series := slice }}
+{{- with .GetTerms "series" }}{{ $series = (index . 0).Pages }}{{ end }}
+{{- $related := where (site.RegularPages.Related .) "Section" "posts" }}
+{{- $related = first 3 (complement $series $related) }}
+{{- with $related }}
+<aside class="nl-related" aria-labelledby="nl-related-title">
+  <p class="nl-related-eyebrow" id="nl-related-title">Related lab notes</p>
+  <ul class="nl-related-list">
+    {{- range . }}
+    <li><a href="{{ .RelPermalink }}">{{ .Title }}</a><span class="nl-related-date">{{ .Date | time.Format ":date_medium" }}</span></li>
+    {{- end }}
+  </ul>
+</aside>
+{{- end }}

@@ -1,6 +1,7 @@
 ---
 title: "Seven demo apps, one request: deploying a showcase stack via VCF Automation"
 date: 2026-09-16T08:40:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf, vks, vcf-automation, all-apps, demo, kubernetes, pacman]
 products: ["VCF Automation", "VKS"]

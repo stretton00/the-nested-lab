@@ -1,0 +1,31 @@
+{{- /* The theme's post meta, plus "Updated <date>" (1 Oct 2026) when the post's text changed after it was published:
+       `lastmod:` in the front matter, written by tools/set_lastmod.py from body-changing commits only, so a front-matter
+       sweep or a [cosmetic] commit never stamps a post. Shown only when it is at least two days after the post's date. */ -}}
+{{- $scratch := newScratch }}
+
+{{- if not .Date.IsZero -}}
+    {{- $scratch.Add "meta" (slice (printf "<span title='%s'>%s</span>" (.Date) (.Date | time.Format (default ":date_long" site.Params.DateFormat)))) }}
+    {{- if and (not .Lastmod.IsZero) (ge (.Lastmod.Sub .Date).Hours 48) -}}
+        {{- $scratch.Add "meta" (slice (printf "<span class='nl-updated' title='%s'>Updated %s</span>" (.Lastmod) (.Lastmod | time.Format (default ":date_long" site.Params.DateFormat)))) }}
+    {{- end }}
+{{- end }}
+
+{{- if (.Param "ShowReadingTime") -}}
+    {{- $scratch.Add "meta" (slice (printf "<span>%s</span>" (i18n "read_time" .ReadingTime | default (printf "%d min" .ReadingTime)))) }}
+{{- end }}
+
+{{- if (.Param "ShowWordCount") -}}
+    {{- $scratch.Add "meta" (slice (printf "<span>%s</span>" (i18n "words" .WordCount | default (printf "%d words" .WordCount)))) }}
+{{- end }}
+
+{{- if not (.Param "hideAuthor") -}}
+    {{- with (partial "author.html" .) }}
+        {{- $scratch.Add "meta" (slice (printf "<span>%s</span>" .)) }}
+    {{- end }}
+{{- end }}
+
+{{/* Combine all meta information into a single string with separators and render it as HTML.*/}}
+
+{{- with ($scratch.Get "meta") }}
+    {{- delimit . "&nbsp;·&nbsp;" | safeHTML -}}
+{{- end -}}

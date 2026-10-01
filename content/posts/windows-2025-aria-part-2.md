@@ -1,6 +1,7 @@
 ---
 title: "Windows Server 2025 via Aria Automation, part 2: a state machine that survives four reboots"
 date: 2026-09-17T06:20:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [aria-automation, windows, powershell, state-machine, cloudbase-init]
 products: ["VCF Automation"]

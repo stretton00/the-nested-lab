@@ -1,6 +1,7 @@
 ---
 title: "Windows Server 2025 via Aria Automation, part 3: validation as a product, and the details that hurt"
 date: 2026-09-17T06:30:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [aria-automation, windows, powershell, validation, reporting, session-0]
 products: ["VCF Automation"]

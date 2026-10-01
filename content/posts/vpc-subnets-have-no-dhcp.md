@@ -1,6 +1,7 @@
 ---
 title: "Our VPC subnets have no DHCP — and that's fine"
 date: 2026-09-16T07:20:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf, nsx, vpc, cloud-init, ovf, esxi, bootstrap]
 products: ["NSX", "vSphere and vSAN"]

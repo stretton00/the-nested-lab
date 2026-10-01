@@ -1,6 +1,7 @@
 ---
 title: "Driving the VCF Installer API from vRO: generate, validate, start, walk away"
 date: 2026-09-16T06:10:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf, bringup, vcf-installer, vro, vcf-automation, api, nested-esxi]
 products: ["VCF Installer", "VCF Automation"]

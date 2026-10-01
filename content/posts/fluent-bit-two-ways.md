@@ -1,6 +1,7 @@
 ---
 title: "fluent-bit two ways: VKS add-on and Windows agent, one log endpoint"
 date: 2026-09-16T12:00:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [observability, fluent-bit, vks, windows, vcf-operations-for-logs, logging]
 products: ["VCF Operations", "VKS"]

@@ -1,6 +1,7 @@
 ---
 title: "VM Apps vs All Apps: a field comparison of VCF Automation's two provisioning models"
 date: 2026-09-16T07:00:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf, vcf-automation, all-apps, vm-apps, aria-automation, architecture]
 products: ["VCF Automation"]

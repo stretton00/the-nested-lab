@@ -1,6 +1,7 @@
 ---
 title: "Shared services for isolated tenants: PrivateTGW subnets"
 date: 2026-09-16T07:50:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf, nsx, vpc, transit-gateway, multi-tenancy, wsus]
 products: ["NSX"]

@@ -1,0 +1,19 @@
+{{- /* A reading path on the Start here page (1 Oct 2026): the posts named in `posts` (slugs, in reading order) that are
+       published now. A scheduled post joins its path on the day it goes live; a path with nothing published yet is
+       left out altogether.
+       {{< path id="..." title="..." intro="..." posts="slug-1 slug-2 ..." >}} */ -}}
+{{- $pages := slice }}
+{{- range split (.Get "posts") " " }}
+  {{- with . }}{{ with site.GetPage (printf "/posts/%s" .) }}{{ $pages = $pages | append . }}{{ end }}{{ end }}
+{{- end }}
+{{- with $pages }}
+<section class="nl-path" aria-labelledby="{{ $.Get "id" }}">
+  <h2 id="{{ $.Get "id" }}">{{ $.Get "title" }}</h2>
+  <p class="nl-path-intro">{{ $.Get "intro" | markdownify }}</p>
+  <ol class="nl-path-list">
+    {{- range . }}
+    <li><a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ with .Params.summary }}<span class="nl-path-sum">{{ . | plainify | truncate 150 }}</span>{{ end }}</li>
+    {{- end }}
+  </ol>
+</section>
+{{- end }}

@@ -1,6 +1,7 @@
 ---
 title: "Windows Server 2025 via Aria Automation, part 1: the pipeline"
 date: 2026-09-17T06:10:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [aria-automation, vcf-automation, vm-apps, windows, cloudbase-init, vro, powershell]
 products: ["VCF Automation"]

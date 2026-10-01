@@ -1,6 +1,7 @@
 ---
 title: "validateOnly everywhere: plan mode for infrastructure"
 date: 2026-09-16T06:30:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [automation, vro, vcf-automation, opinion, platform-engineering]
 products: ["VCF Automation"]
