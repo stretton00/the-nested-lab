@@ -149,6 +149,15 @@ them in a lab — is most of what an experienced delivery partner is for.
   `status.disks` syncs (~1–3 minutes after content library attach). Build
   the wait into your automation and both sharp edges disappear.
 
+## Broadcom documentation
+
+- [Deploying Supervisor with VCF Networking with VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/vsphere-supervisor-installation-and-configuration/supervisor-networking-with-virtual-private-clouds.html): what NCP creates for a namespace given no VPC: a VPC with its load balancer and SNAT IP.
+- [Create vSphere Namespaces on VPCs without SNAT and Load Balancer](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/vsphere-supervisor-installation-and-configuration/configuring-and-managing-vsphere-namespaces/managing-vsphere-namespaces-on-a-supervisor-with-nsx-vpc/create-and-configure-a-vsphere-namespace-on-a-supervisor-with-vpc/create-namespaces-with-vpc-nosnat-nolb.html): without the VPC's load balancer, LoadBalancer services and VirtualMachineServices cannot be deployed.
+- [Add a VPC Connectivity Profile](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-vpc-connectivity-profile.html): the transit gateway, the service gateway and default outbound NAT.
+- [Create and Configure a vSphere Namespace on a Supervisor with NSX VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/vsphere-supervisor-installation-and-configuration/configuring-and-managing-vsphere-namespaces/managing-vsphere-namespaces-on-a-supervisor-with-nsx-vpc/create-and-configure-a-vsphere-namespace-on-a-supervisor-with-vpc.html): placing a new namespace in an existing VPC.
+- [Create a Virtual Private Cloud in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/adding-and-managing-virtual-private-clouds/add-a-vpc.html): a tenant VPC, its connectivity profile and its load balancing setting.
+- [Sample Blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html): a VPC, its VPCAttachment and a namespace that depends on them, as blueprint resources.
+
 *Previously in this series: [nested ESXi inside an NSX VPC](/posts/nested-esxi-nsx-vpc/).
 Next: three datacenters, one IP plan — identical isolated pods.*
 

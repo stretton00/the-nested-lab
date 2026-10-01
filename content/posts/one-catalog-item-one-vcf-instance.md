@@ -67,9 +67,13 @@ it — it's finding the declarative home for each behaviour.
 
 ## Rule 2: never wait for anything you can watch instead
 
-The hard constraint that shaped the whole design: a VCF Automation request
-gets about **two hours** before the platform gives up on it. A full VCF
-bringup takes longer than that. So the wrapper *never waits*:
+The constraint that shaped the whole design: a VCF Automation request
+gets about **two hours** before the platform gives up on it: our runs died at
+exactly two hours with `Delegating token is not service token`. The project's
+[request timeout](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/getting-started-with-organizations-for-vm-apps-in-vcf-automation/map-head-projects-adding-and-managing-projects/projects-how-do-i-add-a-project-for-my-development-team.html)
+also defaults to two hours and its Provisioning tab can raise it; we never
+tried, because a full VCF bringup takes longer than that and should not hold
+a request open for hours anyway. So the wrapper *never waits*:
 
 - Bringup is **fire-and-forget** — the workflow authenticates to the
   installer, validates the spec, starts the task, and hands back a
@@ -167,6 +171,15 @@ way to deliver environments rather than a one-off project each time.
 - Componentise failure: one broken step re-runs alone.
 - Pre-create DNS; expect HCL friction on virtual hardware; budget for vRO's
   content-source lag.
+
+## Broadcom documentation
+
+- [Use a JSON Specification File to Deploy VMware Cloud Foundation or vSphere Foundation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/deployment/deploying-a-new-vmware-cloud-foundation-or-vmware-vsphere-foundation-private-cloud-/use-a-json-specification-to-deploy-vmware-cloud-foundation-or-vmware-vsphere-foundation.html): deploying VCF 9.1 from a JSON spec, which the installer validates first
+- [First VCF Instance FQDNs and IP addresses](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/planning-and-preparation/vcf-components-fqdns-and-ip-addresses/first-vcf-instance-fqdns-and-ip-addresses.html): the FQDNs, static IPs and forward and reverse DNS every component needs
+- [Add VCF Operations Orchestrator Client workflows to the VCF Automation catalog](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/service-broker-adding-content-to-the-catalog/service-broker-add-vrealize-orchestrator-workflows-to-the-catalog.html): vRO workflows as catalog items, through an Orchestrator content source
+- [vSAN ESA Deployment: Override HCL Validation for Non-Certified Hardware](https://knowledge.broadcom.com/external/article/408300/vsan-esa-deployment-override-hcl-validat.html): the installer's vSAN ESA disk check against the HCL, and the documented override
+- [Bill of Materials 9.1.0](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/release-notes/vmware-cloud-foundation-9-1-0-0-release-notes/vmware-cloud-foundation-bill-of-materials.html): the components and builds of VCF 9.1.0
+- [Add a project for your VCF Automation for VM Apps development team](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/getting-started-with-organizations-for-vm-apps-in-vcf-automation/map-head-projects-adding-and-managing-projects/projects-how-do-i-add-a-project-for-my-development-team.html): a project's request Timeout on its Provisioning tab, two hours by default
 
 ---
 *Lab environment; opinions my own. The automation described builds nested

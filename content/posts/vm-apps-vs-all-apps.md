@@ -7,11 +7,11 @@ cover:
   image: "/images/post9-hero-vmapps-allapps.svg"
   alt: "Two provisioning paths side by side: IaaS engine to vCenter, vs blueprint to supervisor reconciliation"
   hidden: false
-summary: "VCF Automation 9.1 ships two provisioning architectures in one org. I ran the same use cases through both — Linux and Windows VMs, ISO attach, multi-NIC, isolated pods, nested ESXi, shared services, a catalog item. The honest scorecard, and how each use case is actually achieved."
+summary: "VCF Automation 9.1 ships two provisioning architectures, as two types of org. I ran the same use cases through both — Linux and Windows VMs, ISO attach, multi-NIC, isolated pods, nested ESXi, shared services, a catalog item. The honest scorecard, and how each use case is actually achieved."
 ---
 
-VCF Automation 9.1 has two ways to build things, side by side, in the same
-organisation. If you've come from Aria Automation you'll recognise one of
+VCF Automation 9.1 has two ways to build things, side by side, as two types
+of organisation. If you've come from Aria Automation you'll recognise one of
 them immediately. The other looks like Kubernetes because it *is*
 Kubernetes. Choosing between them isn't a matter of taste — they have
 genuinely different shapes, and some use cases are natural in one and
@@ -123,9 +123,10 @@ rewriting.
   before the namespace](/posts/the-lb-that-must-exist-first/); new
   namespaces reject VMs until images sync; blueprint validation has
   [seven sharp edges](/posts/cci-blueprint-gotchas/).
-- **The tenancy layer isn't blueprintable.** VPC, VPCAttachment and
-  LoadBalancer are cluster-scoped CCI objects with no blueprint resource
-  type — scripted, not catalogued.
+- **The tenancy layer is only partly blueprintable.** VPC and VPCAttachment
+  have blueprint types (`CCI.VPC`, `CCI.VPC.Configuration`), but there is no
+  LoadBalancer kind and a blueprint-made VPC comes up with load balancing
+  off, so all three go through the VPC API — scripted, not catalogued.
 - **Two endpoints.** The CCI proxy serves tenancy objects; workload
   manifests go to the supervisor. You'll hold two kubeconfigs.
 - **Day-2 is thinner.** No event broker; extensibility means controllers
@@ -137,9 +138,9 @@ Default to **All Apps** for new build-outs. Every use case on the list —
 including the two that are genuinely hard in VM Apps — is natural in the
 VPC model, and the whole estate is version-controlled YAML. Keep **VM
 Apps** as the compatibility surface for existing vRA content and for the
-rare thing that needs direct vCenter device manipulation. They coexist per
-org, so migration is incremental and nobody has to rewrite a working
-pipeline on a deadline.
+rare thing that needs direct vCenter device manipulation. They coexist as
+organisations of different types on one platform, so migration is
+incremental and nobody has to rewrite a working pipeline on a deadline.
 
 And whichever you pick: **codify the ordering rules** into the scripts
 that provision tenancy, so the sharp edges stay encapsulated and the people
@@ -154,12 +155,13 @@ which existing templates and workflows still earn their keep, which use
 cases are genuinely better served by the VPC model, and where the
 boundaries sit — followed by a coexistence plan that moves workloads across
 opportunistically instead of on a deadline. The two architectures sharing
-one organisation is what makes that low-risk.
+one platform, as organisations of different types, is what makes that
+low-risk.
 
 ## Rules learned
 
 - Two shapes, not two skins: imperative-through-a-broker vs
-  declarative-reconciled. Pick per use case, not per org.
+  declarative-reconciled. Pick per use case, not once for the estate.
 - All Apps is structurally better at **isolation with identical
   addressing** and **nested/VLAN networks without fabric changes**.
 - VM Apps is still the home for **existing vRO/ABX content** and
@@ -167,6 +169,15 @@ one organisation is what makes that low-risk.
 - All Apps' pain is *ordering*: VPC → attachment → LB → namespace →
   subnets → image sync → workloads. Script it once.
 - They coexist; migrate opportunistically.
+
+## Broadcom documentation
+
+- [Organization Management](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management.html): the two organization types in VCF Automation 9.1, All Apps and VM Apps
+- [Bimodal Consumption Design for VM Apps and All Apps Workloads](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/design/design-library/vcf-automation-deployment-models-9-x/multi-tenancy-design-patterns/shared-tenancy-design.html): VM Apps and All Apps organizations on shared infrastructure, and a phased move between them
+- [Sample Blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html): All Apps blueprints built from `CCI.Supervisor.Namespace` and `CCI.Supervisor.Resource`
+- [Deploying and Managing Virtual Machines in vSphere Supervisor](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-1/provision-and-manage-virtual-machines/deploying-and-managing-virtual-machines-in-vsphere-iaas-control-plane.html): the VM Service, its declarative API, VM classes and images
+- [Managing Networking in VCF Automation Organizations](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/adding-and-managing-virtual-private-clouds.html): VPCs in an organization, whose private CIDRs need not be unique
+- [vSphere resource examples in VCF Automation for VM Apps](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/maphead-designing-your-deployments/other-code-examples/vsphere-resource-examples.html): VM Apps cloud templates built on `Cloud.vSphere.Machine`
 
 ---
 *Lab environment; opinions my own. Grounded in a VCF 9.1 / vSphere

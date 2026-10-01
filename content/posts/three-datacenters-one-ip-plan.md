@@ -163,6 +163,14 @@ a template.
   VPC reachable) beside the negative.
 - Expect duplicate MACs across pods from appliance images. It's fine.
 
+## Broadcom documentation
+
+- [Create a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/create-a-vpc.html): private CIDRs are local to a VPC and can overlap between VPCs.
+- [Add a Subnet to a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-subnet-for-the-vpc.html): Private subnets, and subnet CIDRs auto-allocated from the VPC's IP blocks by size.
+- [Virtual Private Clouds Overview](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview.html): the access modes, NAT, and external IPs as a way in to private workloads.
+- [Creating bindings and dependencies between resources in blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/bindings-and-dependencies.html): `dependsOn` and the build order it sets.
+- [Create a Virtual Private Cloud in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/adding-and-managing-virtual-private-clouds/add-a-vpc.html): a VPC as an organization's own object, with its own private CIDRs.
+
 *Previously: [the LB that must exist first](/posts/the-lb-that-must-exist-first/).
 Next: one WSUS for pods that can't see each other.*
 

@@ -138,6 +138,14 @@ script already handles.
 - Drop workarounds for missing state; the catalog is the state.
 - Keep the formulas. Move the plumbing.
 
+## Broadcom documentation
+
+- [vSphere resource examples in VCF Automation for VM Apps](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/maphead-designing-your-deployments/other-code-examples/vsphere-resource-examples.html): `Cloud.vSphere.Machine` with CPU and memory, several NICs, a vCenter folder and `ovfProperties`
+- [How to add image mapping in VCF Automation for VM Apps to access common operating systems](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/getting-started-with-organizations-for-vm-apps-in-vcf-automation/maphead-build-resource-infrastructure/mappings-how-to-add-image-mappings.html): image mappings, named images per cloud account and region
+- [Using VCF Operations orchestrator actions in the custom form designer in VCF Automation for VM Apps](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/service-broker-custom-forms-customize-a-request-form/service-broker-custom-forms-learn-more-about-service-broker-custom-forms/service-broker-custom-forms-using-vro-actions-in-the-custom-form-designer.html): form fields filled by a vRO action that takes other fields as inputs
+- [Event topics provided with VCF Automation for VM Apps in](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/maphead-designing-your-deployments/maphead-extensibility-in-cloud-assembly/learn-more-about-extensibilty-subscriptions/event-topics-provided-with-cloud-assembly.html): the Compute allocation topic, where resource names can still change, and Compute post provision
+- [Create an extensibility subscription](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/maphead-designing-your-deployments/maphead-extensibility-in-cloud-assembly/learn-more-about-extensibilty-subscriptions/create-an-extensibility-subscription.html): conditions on `event.data`, blocking, and the workflow a subscription runs
+
 *Part of [The Lab Factory](/series/the-lab-factory/). Next: [driving the
 VCF Installer API from vRO](/series/the-lab-factory/).*
 

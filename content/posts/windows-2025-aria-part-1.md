@@ -60,7 +60,7 @@ Each seam exists for a reason you can state in one sentence:
   payload update is how automation dies. Update a script on the share;
   every subsequent build gets it.
 
-vCenter guest customization is **disabled** (`customizeGuestOs: false`).
+vCenter guest customization is **disabled** ([`customizeGuestOs: false`](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/initialize-general/initialize-vsphere-static-ips.html)).
 One code path owns hostname, networking, disks and join; two would fight.
 
 ## The control plane: two vRO hooks that matter
@@ -248,6 +248,15 @@ is a script update on a share rather than a template re-release.
   explicit identity** — for policy, for the execution ceiling, and for the
   startup trigger.
 - Never reuse hostname gaps.
+
+## Broadcom documentation
+
+- [Cloudbase-Init commands for Windows in Automation Assembler](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/initialize-general/initialize-windows-general/initialize-cloudbase-init.html): a `cloudConfig` section of Cloudbase-Init commands in the cloud template
+- [Windows Automation Assembler image for vSphere](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/initialize-general/initialize-windows-general/initialize-windows-image-vsphere.html): the Windows template with Cloudbase-Init installed to run as LocalSystem
+- [vSphere static IP addresses in Automation Assembler](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/initialize-general/initialize-vsphere-static-ips.html): why `customizeGuestOs` must be `false` when the `cloudConfig` sets the network
+- [Event topics provided with Automation Assembler](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/maphead-extensibility-in-cloud-assembly/learn-more-about-extensibilty-subscriptions/event-topics-provided-with-cloud-assembly.html): Compute allocation, where resource names can still change, and Compute post provision
+- [How do I modify virtual machine properties using a Automation Orchestrator Client workflow subscription](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/maphead-extensibility-in-cloud-assembly/extensibility-workflow-subscriptions/how-do-i-modify-virtual-machine-properties-using-a-vro-workflow-subscription.html): an Orchestrator workflow subscribed to Compute allocation to set the VM name
+- [Query Information using GuestInfo Variable](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/tools/12-5-0/vmware-tools-administration-12-5-0/configuring-vmware-tools-components/using-vmware-tools-configuration-utility/view-virtual-machine-status-information/query-information-using-guestinfo-variable.html): reading `guestinfo` variables from inside the guest with VMware Tools
 
 *Part 2: [the state machine that survives four reboots](/posts/windows-2025-aria-part-2/).*
 

@@ -178,6 +178,13 @@ everything else — no second monitoring stack, no new team to staff it.
   alone can double your series count.
 - Name for browsing: `product | category | metric`.
 
+## Broadcom documentation
+
+- [Super Metric Functions and Operators](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/configuring-super-metrics/super-metrics-tab/super-metric-functions-and-operators.html): the functions an Ops formula can use; none of them is a percentile
+- [Using the API with VCF Operations](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/administration-sdks-cli-and-tools/understanding-the-vr-ops-api/using-the-api-with-vrealize-operations-manager.html): the REST API the pipeline pushes through, and the Swagger reference on the appliance
+- [Generate a List of All Metrics for the Object](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/administration-sdks-cli-and-tools/understanding-the-vr-ops-api/getting-started-with-the-api/generate-a-list-of-all-metrics-for-the-object.html): reading an object's stat keys back, grouped with `|` as in `mem|host_workload`
+- [Symptom Definitions in VCF Operations](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/configuring-alerts-and-actions/symptom-definitions.html): metric symptoms at Warning and Critical levels, as for the saturation score
+
 *Part 2: [running it as a service, monitoring the monitor, and the four
 alerts](/series/llm-ops-on-vcf/).*
 

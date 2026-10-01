@@ -27,8 +27,11 @@ VCF Operations for Logs ingests over its **CFAPI** on port 9543:
 https://<ops-logs>:9543/api/v2/events
 ```
 
-Auth is Ops-side (the ingestion endpoint accepts from configured sources);
-what matters for fluent-bit is the URI, the port, TLS, and a JSON body
+Auth is [enabled but optional by default](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/log-analysis/overview-of-log-management-agents/agent-authentication-for-log-ingestion.html):
+the endpoint accepts events with or without a token, unless strict
+authentication is enabled in Global Settings, which drops any request
+without a valid Bearer token. Our shippers sent no token; the lab ran the
+default. What matters for fluent-bit is the URI, the port, TLS, and a JSON body
 shaped as `{"events":[...]}`. Both shippers below produce exactly that.
 
 ## Way 1: VKS package
@@ -37,28 +40,36 @@ VKS ships fluent-bit in its standard package repository. On a cluster with
 the repo registered:
 
 ```
-kubectl get packages -A | grep fluent-bit
-  fluent-bit.fluent-bit.tanzu.vmware.com   4.0.5+vmware.1-vks.1
+kubectl ... get packages -n tkg-system 2>&1 | Select-String -Pattern 'NAME|telegraf|prometheus|fluent|cert-manager|contour' | Out-String
+NAME                                                                  PACKAGEMETADATA NAME                             VERSION                  AGE
+...
+fluent-bit.kubernetes.vmware.com.4.0.2+vmware.1-vks.1                 fluent-bit.kubernetes.vmware.com                 4.0.2+vmware.1-vks.1     55s
+fluent-bit.kubernetes.vmware.com.4.0.5+vmware.1-vks.1                 fluent-bit.kubernetes.vmware.com                 4.0.5+vmware.1-vks.1     55s
+fluent-bit.tanzu.vmware.com.2.2.3+vmware.1-tkg.2                      fluent-bit.tanzu.vmware.com                      2.2.3+vmware.1-tkg.2     56s
+fluent-bit.tanzu.vmware.com.3.1.9+vmware.1-tkg.1                      fluent-bit.tanzu.vmware.com                      3.1.9+vmware.1-tkg.1     55s
+fluent-bit.tanzu.vmware.com.3.2.7+vmware.1-tkg.1                      fluent-bit.tanzu.vmware.com                      3.2.7+vmware.1-tkg.1     55s
+...
 ```
 
 A values secret configures the output — the package's own default output
 shape targets CFAPI, so the values are short:
 
 ```yaml
+namespace: tanzu-system-logging
 fluent_bit:
   config:
     outputs: |
       [OUTPUT]
-        Name    http
-        Match   *
-        Host    f06-flt-log01.res.lab
-        Port    9543
-        URI     /api/v2/events
-        Format  json
-        tls     On
-        tls.verify Off
-        json_date_key    timestamp
-        json_date_format iso8601
+        Name          http
+        Match         *
+        Host          f06-flt-log01.res.lab
+        Port          9543
+        URI           api/v2/events
+        Format        json
+        tls.debug     4
+        tls           on
+        tls.verify    off
+        json_date_key timestamp
 ```
 
 Then a `PackageInstall` referencing it:
@@ -66,11 +77,14 @@ Then a `PackageInstall` referencing it:
 ```yaml
 apiVersion: packaging.carvel.dev/v1alpha1
 kind: PackageInstall
-metadata: {name: fluent-bit, namespace: tanzu-packages}
+metadata: { name: fluent-bit, namespace: package-installs }
 spec:
-  serviceAccountName: tanzu-packages-sa
-  packageRef: {refName: fluent-bit.fluent-bit.tanzu.vmware.com, versionSelection: {constraints: 4.0.5+vmware.1-vks.1}}
-  values: [{secretRef: {name: fluent-bit-values}}]
+  serviceAccountName: pkgi-sa
+  packageRef:
+    refName: fluent-bit.kubernetes.vmware.com
+    versionSelection: { constraints: 4.0.5+vmware.1-vks.1 }
+  values:
+  - secretRef: { name: fluent-bit-values }
 ```
 
 `Reconcile succeeded`, and the proof is in the pod logs, not the Ops UI —
@@ -105,33 +119,45 @@ explicitly on every new cluster.
 fluent-bit ships a Windows build with a `winevtlog` input. On the
 [pipeline-built W2025 server](/series/the-windows-build-pipeline/) I used the
 portable zip rather than the MSI — no installer, a folder under `C:\`, a
-service registered with `sc.exe`. The config is short and every line of it
+service registered with `sc.exe`. A small script writes the config below
+(`$LogsHost` is the appliance's FQDN, `$LogsPort` 9543); four of its lines
 turned out to matter:
 
 ```ini
+...
+
 [INPUT]
     Name          winevtlog
     Channels      System,Application,Security
-    DB            C:\fluent-bit\winevt.db        # bookmark: no replay after restart
+    Interval_Sec  5
+    DB            $root\winevt.db
     String_Inserts On
+    Tag           winevt
 
 [FILTER]
     Name    modify
     Match   *
-    Rename  Message  text                     # <- the field Ops actually indexes
-    Add     hostname TEST-W2025
+    Rename  Message  text
+    Add     hostname $hostname
     Add     appname  v-windows
+    Add     source   windows-server-2025
 
 [OUTPUT]
     Name    http
-    Host    f06-flt-log01.res.lab             # FQDN, never the IP
-    Port    9543
+    Match   *
+    Host    $LogsHost
+    Port    $LogsPort
     URI     /api/v2/events
     Format  json
-    json_date_key    timestamp
-    json_date_format epoch_ms                 # milliseconds, not ISO, not seconds
+    Header  Content-Type application/json
     tls     On
-    net.dns.resolver LEGACY                   # Windows: c-ares can't resolve
+    tls.verify Off
+    json_date_key    timestamp
+    # ISO-8601 timestamps are rejected (400: not a valid Long); the API reads the number as epoch MILLISECONDS
+    json_date_format epoch_ms
+    net.dns.resolver LEGACY
+    net.connect_timeout 20
+    Retry_Limit      5
 ```
 
 The service came up first time. Getting a single event to *land* took four
@@ -155,8 +181,10 @@ the IP gets a 404 for *every* path. Address it by FQDN.
 ```
 **3. Timestamps must be numeric.** fluent-bit's `iso8601` output is a
 string; the ingest API wants a Long. Worse: it reads that number as
-**milliseconds**, so the default `double` (epoch *seconds*) is accepted with
-a 200 and files your events in January 1970. `epoch_ms`.
+**milliseconds**, so on the Windows agent the default `double` (epoch
+*seconds*) is accepted with a 200 and files your events in January 1970.
+`epoch_ms`. Our VKS values set no format at all, and those events land on
+time.
 
 ```
 {"received":0,"message":"events ingested","status":"ok"}
@@ -164,7 +192,7 @@ a 200 and files your events in January 1970. `epoch_ms`.
 **4. The message field must be called `text`.** Anything else — `Message`
 as `winevtlog` emits it, `message`, `log` — returns 200 and
 `received: 0`. Silently dropped. Hence the `Rename` filter. Broadcom's own
-reference config for Windows carries exactly this line; I found it the hard
+[reference config for Windows](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/log-analysis/overview-of-log-management-agents/install-fluent-bit-on-windows-server-for-vcf-operations-for-logs.html) carries exactly this line; I found it the hard
 way first.
 
 Then, finally:
@@ -193,12 +221,14 @@ lab.
 | Install | `PackageInstall` | MSI / `sc.exe create` |
 | Config | values Secret | `fluent-bit.conf` |
 | Inputs | pre-wired (containers, kubelet, systemd) | `winevtlog` channels you choose |
-| Output | `http` → CFAPI :9543 `/api/v2/events` | identical |
+| Output | `http` → CFAPI :9543 `api/v2/events` | `http` → CFAPI :9543 `/api/v2/events`, `epoch_ms`, resolver and header lines |
 | Verify | pod log `HTTP status=200` | service log `HTTP status=200` — and check the *date* on what arrived |
 | Restart safety | Kubernetes | `DB` bookmark file |
 
-The output stanza is byte-identical. That's the lesson: standardise the
-*sink* and let each platform own its *source*.
+Both outputs post JSON events to the same :9543 endpoint. They differ in
+the URI form, the date handling (fluent-bit's default against `epoch_ms`)
+and the resolver and header lines only Windows carries. That's the lesson:
+standardise the *sink* and let each platform own its *source*.
 
 ## Why this matters outside the lab
 
@@ -213,17 +243,24 @@ per team.
 
 ## Rules learned
 
-- Ops for Logs ingestion = CFAPI `:9543/api/v2/events`, JSON. One output
-  stanza serves every shipper.
+- Ops for Logs ingestion = CFAPI `:9543/api/v2/events`, JSON. One endpoint
+  serves every shipper.
 - On VKS, use the **package**; decide only the output. Verify from the
   pod log — the Ops API is awkward to script against.
 - Set `serviceDomain` on every new VKS cluster; it's immutable.
 - On Windows: FQDN not IP (Host-header routing), `net.dns.resolver LEGACY`,
   `Rename Message text`, `json_date_format epoch_ms`. Each one fails
   differently and two of them fail *silently*.
-- A `200` is not proof. `received: 0` is a drop; a seconds timestamp is a
-  200 filed in 1970. Look for the event in the explorer before you call it done.
+- A `200` is not proof. `received: 0` is a drop; a seconds timestamp from
+  the Windows agent is a 200 filed in 1970. Look for the event in the explorer before you call it done.
 - Prove "one endpoint" with one explorer view showing both sources.
+
+## Broadcom documentation
+
+- [Install Fluent Bit Package](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-0/managing-vsphere-kuberenetes-service-clusters-and-workloads/installing-standard-packages-on-tkg-service-clusters/installing-standard-packages-on-tkg-cluster-using-tkr-for-vsphere-8-x/install-fluent-bit/install-fluent-bit-package.html): the VKS standard package, `fluent-bit.kubernetes.vmware.com` from 4.0.x, installed with a data values file
+- [Fluent Bit Package Reference](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-0/managing-vsphere-kuberenetes-service-clusters-and-workloads/installing-standard-packages-on-tkg-service-clusters/standard-package-reference/fluent-bit-package-reference.html): the package's values, with an `http` output to VCF Operations on port 9543
+- [Set up the Windows system to collect logs in VCF Operations](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/log-analysis/overview-of-log-management-agents/install-fluent-bit-on-windows-server-for-vcf-operations-for-logs.html): Broadcom's fluent-bit MSI and `winevtlog` config for Windows Server 2022 and 2025, `Rename Message text` and `epoch_ms` included
+- [Agent Authentication for Log Ingestion](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/log-analysis/overview-of-log-management-agents/agent-authentication-for-log-ingestion.html): optional Bearer-token authentication on HTTP ingestion, fluent-bit included
 
 *Next: [Telegraf on Windows Server 2025 — unsupported, works anyway](/series/observability-on-vcf/).*
 

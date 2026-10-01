@@ -219,6 +219,15 @@ hop tell you where.
 - Read "Rx Missed" separately. Ring overruns are a different, milder problem,
   and they were not this one.
 
+## Broadcom documentation
+
+- [Configuring advanced driver module parameters in ESX/ESXi](https://knowledge.broadcom.com/external/article/310348/configuring-advanced-driver-module-param.html): new module options replace all existing ones, and take effect at boot.
+- [What is Large Receive Offload](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/9-1/vsphere-networking/managing-network-resources/large-receive-offload.html): LRO, on by default in the VMkernel and in VMXNET3 adapters.
+- [Manage Hardware LRO for All VMXNET3 Adapters on an ESX Host](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/9-1/vsphere-networking/managing-network-resources/large-receive-offload/enable-hardware-lro-for-all-vmxnet2-and-vmxnet3-adapters-on-a-host.html): the `Net.Vmxnet3HwLRO` setting.
+- [Manage TSO on an ESX Host](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/9-1/vsphere-networking/managing-network-resources/enabling-tso/enable-tso-on-an-esxi-host.html): `Net.UseHwTSO`, and reloading the NIC driver after a change.
+- [Enhanced Data Path](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/host-switches/enhanced-datapath.html): EDP, enabled automatically in new VCF 9 workload domains.
+- [What is MAC Learning Policy](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/9-0/vsphere-networking/networking-policies/mac-learning-policy.html): MAC learning on distributed port groups, for nested hypervisors.
+
 ---
 *Lab environment; opinions my own. Everything above was captured from a live
 VCF 9.1 environment - output trimmed for length, never edited for outcome.*

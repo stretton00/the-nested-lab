@@ -158,6 +158,14 @@ What organisations do with it once they have it:
 - Read `kubectl get endpoints` as `IP:targetPort` — the port is the part
   people skim.
 
+## Broadcom documentation
+
+- [Virtual Private Clouds Overview](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview.html): the subnet access modes, and the NAT a private subnet needs to reach outside.
+- [Create a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/create-a-vpc.html): private CIDRs, local to each VPC and allowed to overlap between VPCs.
+- [Transit Gateways](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/transit-gateways.html): how VPCs reach each other and the outside network.
+- [Deploying Supervisor with VCF Networking with VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/vsphere-supervisor-installation-and-configuration/supervisor-networking-with-virtual-private-clouds.html): the VPC, load balancer and SNAT IP behind a namespace, and the LoadBalancer services NCP provides.
+- [Create vSphere Namespaces on VPCs without SNAT and Load Balancer](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/vsphere-supervisor-installation-and-configuration/configuring-and-managing-vsphere-namespaces/managing-vsphere-namespaces-on-a-supervisor-with-nsx-vpc/create-and-configure-a-vsphere-namespace-on-a-supervisor-with-vpc/create-namespaces-with-vpc-nosnat-nolb.html): without the VPC load balancer, LoadBalancer services cannot be deployed at all.
+
 *Next in the Pod Papers: [nested ESXi inside a VPC](/posts/nested-esxi-nsx-vpc/) —
 where "private by default" meets a host that fakes its own MAC address.*
 

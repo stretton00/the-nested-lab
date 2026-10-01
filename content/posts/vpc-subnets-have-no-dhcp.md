@@ -1,5 +1,5 @@
 ---
-title: "VPC subnets have no DHCP — and that's fine"
+title: "Our VPC subnets have no DHCP — and that's fine"
 date: 2026-09-16T07:20:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, cloud-init, ovf, esxi, bootstrap]
@@ -8,14 +8,17 @@ cover:
   image: "/images/post7-hero-nodhcp.svg"
   alt: "Three bootstrap paths into a VPC subnet: cloud-init, sysprep, vAppConfig"
   hidden: false
-summary: "The nested-ESXi appliance sat at 'waiting for DHCP' forever. VPC subnets don't hand out addresses — the VM Service does, through bootstrap providers. cloud-init for Linux, sysprep for Windows, OVF guestinfo for appliances, and the per-vmk gateway detail that makes the Host Client tell the truth."
+summary: "The nested-ESXi appliance sat at 'waiting for DHCP' forever. Our VPC subnets don't hand out addresses — the VM Service does, through bootstrap providers. cloud-init for Linux, sysprep for Windows, OVF guestinfo for appliances, and the per-vmk gateway detail that makes the Host Client tell the truth."
 ---
 
 The second trap from [part 1](/posts/nested-esxi-nsx-vpc/) deserves its
-own short post, because it catches everything, not just ESXi: **a VPC
-subnet has DHCP deactivated.** Drop a stock appliance onto one and it will
-boot, sit at "waiting for DHCP", and wait politely until the heat death of
-the universe.
+own short post, because it catches everything, not just ESXi: **our VPC
+subnets have DHCP deactivated.** NSX VPC subnets can run a DHCP server or
+relay ([Add a Subnet to a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-subnet-for-the-vpc.html)),
+but the subnets the Supervisor made for us, and every `Subnet` we created
+with the defaults, came up `DHCP_DEACTIVATED` with static IP allocation.
+Drop a stock appliance onto one and it will boot, sit at "waiting for
+DHCP", and wait politely until the heat death of the universe.
 
 This isn't a gap. It's the model: NSX allocates the address at the *port*
 and pins it there with address bindings; the *guest* has to be told what
@@ -136,8 +139,9 @@ to maintain and far less drift between environments.
 
 ## Rules learned
 
-- **No DHCP in VPC subnets** — by design. NSX allocates at the port; the
-  guest is told via a bootstrap provider.
+- **No DHCP in our VPC subnets** — the Supervisor's default, not a VPC
+  limit. NSX allocates at the port; the guest is told via a bootstrap
+  provider.
 - `cloudInit` (Linux), `sysprep` (Windows), `vAppConfig` (appliances) —
   typed fields on the VM, not customisation specs.
 - Appliance addresses must match the **realized** subnet; fix the order
@@ -146,6 +150,14 @@ to maintain and far less drift between environments.
   Host Client lies to you and cross-subnet traffic exits wrong.
 - A static IP plan is a feature in a lab: it's what makes screenshots,
   runbooks and pods identical.
+
+## Broadcom documentation
+
+- [Add a Subnet to a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-subnet-for-the-vpc.html): a subnet's DHCP setting: none for static addresses, a DHCP server, or DHCP relay.
+- [Understanding SpoofGuard Segment Profile](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/segments/segment-profiles/understanding-spoofguard-segment-profile.html): the port address bindings SpoofGuard enforces.
+- [Provision a VM Using Self-Service](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/vm-service/provision-a-vm-using-the-iaas-services-console-in-vcf-automation.html): the four bootstrap methods, cloud-init, Sysprep, Linuxprep and vAppConfig, and static IP allocation.
+- [Deploy VMs with Configurable OVF Properties in vSphere Supervisor](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/vm-service/deploy-vms-with-configurable-ovf-properties-vsphere-iaas-control-plane.html): OVF properties set through the VM Service's vAppConfig transport.
+- [Configure the VMkernel Adapter Gateway by Using esxcli Commands](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/9-0/vsphere-networking/setting-up-vmkernel-networking/configure-the-vmkernel-adapter-gateway-by-using-esxcli.html): a gateway per VMkernel adapter, set with esxcli.
 
 *Companion to [nested ESXi inside an NSX VPC](/posts/nested-esxi-nsx-vpc/).*
 

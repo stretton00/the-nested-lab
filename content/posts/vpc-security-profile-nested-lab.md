@@ -8,16 +8,20 @@ cover:
   image: "/images/post32-hero-secprofile.svg"
   alt: "The region's default VPC security profile allows DNS, DHCP, NTP and ICMP and traffic between VM ports, and drops the rest; a nested lab's hosts, vCenter and VCF Operations sit behind trunk ports, and its binaries server and RDP load balancer sit outside the VPC"
   hidden: false
-summary: "No lab of ours ever failed on this. VCF Automation attaches every new VPC to the region's default security profile, and where vDefend's distributed firewall enforces, that profile only lets a VPC's own VM ports talk to each other. A nested lab's hosts are not VM ports. How reading the policy found it, why our hosts never enforced it, and the one-field change that removes it."
+summary: "No lab of ours ever failed on this. VCF Automation attaches every new VPC to the region's default security profile. On our platform that was isolation with essential services, not the None that Broadcom ships; check which one yours has. Where vDefend's distributed firewall enforces, that profile only lets a VPC's own VM ports talk to each other. A nested lab's hosts are not VM ports. How reading the policy found it, why our hosts never enforced it, and the one-field change that removes it."
 ---
 
 No lab of ours ever failed because of this, which is why it is worth writing
 down. Every VPC that VCF Automation created for our nested labs came with a
 distributed firewall policy that would drop most of what a lab does: the jump
 host talking to the nested hosts, the hosts talking to each other, the
-downloads from the binaries server, very likely RDP too. On our platform the
+downloads from the binaries server, very likely RDP too. The policy came from
+the region's default security profile, which on our platform was isolation
+with essential services, not the None that Broadcom ships as the default:
+check which one yours has. On our platform the
 policy did nothing, because our hosts do not enforce the distributed firewall.
-On one with vDefend, it would have been the first thing a class met.
+On one with vDefend and the same default, it would have been the first thing
+a class met.
 
 The question was simple: what happens to a nested lab where the distributed
 firewall does enforce? I answered it by reading the profile, the policy NSX
@@ -164,7 +168,10 @@ PATCH: 200
 Then I made the None profile the region's default in the organization portal:
 **Manage & Govern** > **Firewall** > **Security Profiles**, the region, and
 the **⋮** menu on the row whose **Security Strategy** is `none`. That covers
-every VPC created afterwards. Existing VPCs can keep their old profile, so I
+every VPC created afterwards. (Broadcom's
+[NSX-side page](https://techdocs.broadcom.com/us/en/vmware-security-load-balancing/vdefend/vdefend-firewall/9-1/secure-vpc-projects/implementing-distributed-firewall-security-strategies/configure-dfw-security-strategies.html)
+says None can't be made the default there, in NSX Manager; the organization
+portal took it.) Existing VPCs can keep their old profile, so I
 moved those as well. The **VPC Applied To** column counts the VPCs on each
 profile: on f06 the None row ended at 8, the six student VPCs, `shared-svc`
 and the organization's default VPC. Afterwards the tool had nothing left to
@@ -213,9 +220,9 @@ proven does not enforce the distributed firewall, say so in the handover.
 ## Rules learned
 
 - VCF Automation attaches every new VPC to its region's default security
-  profile. On our VCF 9.1 platform that was isolation with essential services,
-  not None. Check `securityprofileattachments` before trusting a VPC's
-  behaviour.
+  profile. On our VCF 9.1 platform that was isolation with essential services;
+  Broadcom ships None as the default. Check which one yours has, and
+  `securityprofileattachments`, before trusting a VPC's behaviour.
 - That profile passes DNS, DHCP, NTP and ICMP from anywhere and other traffic
   only between members of the VPC's group, and drops the rest.
 - The group is the addresses NSX allocated to ports. Nested hosts' vmk
@@ -227,6 +234,14 @@ proven does not enforce the distributed firewall, say so in the handover.
   and between the API, NSX and the UI.
 - Make None the region's default before the VPCs exist, move the older ones,
   and record the choice in the site file rather than defaulting it in a tool.
+
+## Broadcom documentation
+
+- [VPC Security Profiles](https://techdocs.broadcom.com/us/en/vmware-security-load-balancing/vdefend/vdefend-firewall/9-1/secure-vpc-projects/implementing-distributed-firewall-security-strategies/vpc-security-key-concepts.html): the five profiles each project gets, one profile per VPC, and the default.
+- [Supported VPC Security Strategies](https://techdocs.broadcom.com/us/en/vmware-security-load-balancing/vdefend/vdefend-firewall/9-1/secure-vpc-projects/implementing-distributed-firewall-security-strategies/supported-vpc-security-strategies-and-transit-gateway-topologies.html): what each strategy allows, isolation with essential services included.
+- [Rule Application and Precedence Model](https://techdocs.broadcom.com/us/en/vmware-security-load-balancing/vdefend/vdefend-firewall/9-1/secure-vpc-projects/implementing-distributed-firewall-security-strategies/rule-application-and-precedence-model.html): the Environment category, and the Jump to Application action.
+- [Define Default Security Posture for VPCs](https://techdocs.broadcom.com/us/en/vmware-security-load-balancing/vdefend/vdefend-firewall/9-1/vcf-automation-integration-with-vdefend-firewall/defining-the-security-posture-for-virtual-private-clouds/define-default-security-posture-for-vpcs.html): setting a region's default profile in VCF Automation.
+- [Apply a Security Profile to VPCs](https://techdocs.broadcom.com/us/en/vmware-security-load-balancing/vdefend/vdefend-firewall/9-1/vcf-automation-integration-with-vdefend-firewall/defining-the-security-posture-for-virtual-private-clouds/apply-a-security-profile-to-existing-vpcs.html): moving existing VPCs to another profile in VCF Automation.
 
 ---
 *Lab environment; opinions my own. Everything above was captured from a live

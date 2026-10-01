@@ -173,6 +173,13 @@ publish proof — transfers to any provisioning pipeline, Windows or not.
 - Fix the two timing bugs: the early requester email, and the hostname
   race under parallel deployments.
 
+## Broadcom documentation
+
+- [Event topics provided with Automation Assembler](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/maphead-extensibility-in-cloud-assembly/learn-more-about-extensibilty-subscriptions/event-topics-provided-with-cloud-assembly.html): Compute post provision against Deployment completed, for the requester's email
+- [Create an extensibility subscription](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/maphead-extensibility-in-cloud-assembly/learn-more-about-extensibilty-subscriptions/create-an-extensibility-subscription.html): subscribing an Orchestrator workflow to an event topic, with a filter and blocking
+- [Query Information using GuestInfo Variable](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/tools/12-5-0/vmware-tools-administration-12-5-0/configuring-vmware-tools-components/using-vmware-tools-configuration-utility/view-virtual-machine-status-information/query-information-using-guestinfo-variable.html): `vmtoolsd --cmd` with `info-get` and `info-set` for `guestinfo` variables
+- [Windows Automation Assembler image for vSphere](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/initialize-general/initialize-windows-general/initialize-windows-image-vsphere.html): how Cloudbase-Init is installed on the template, before the build removes it
+
 *Previously: [the state machine](/posts/windows-2025-aria-part-2/). This VM
 is also where the [Telegraf](/posts/telegraf-windows-2025/) and
 [fluent-bit](/posts/fluent-bit-two-ways/) Windows agents land.*

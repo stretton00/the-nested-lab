@@ -101,7 +101,7 @@ tags and the addresses come from the site's property group, so the blueprint
 carries no address or VLAN of its own. The jump host and `dc01` are ordinary
 VMs on `sn-mgmt`: VM Operator asks NSX for their fixed addresses, .35 and
 .34, and hands them the gateway, because
-[VPC subnets have no DHCP](/posts/vpc-subnets-have-no-dhcp/).
+[our VPC subnets have no DHCP](/posts/vpc-subnets-have-no-dhcp/).
 
 ## The gateway is the VPC's own router
 

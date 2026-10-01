@@ -72,8 +72,11 @@ specified", which at least is a clear message.
 ## 4. A new namespace has no content library
 
 Deploy the namespace, deploy a VM, and get: no `VirtualMachineImage`
-found. A VCFA-created namespace attaches **no** content libraries by
-default. The fix is one block:
+found. Our libraries were plain vCenter libraries, and a VCFA-created
+namespace attached **none** of them. (The 9.1 docs say a
+[namespace class](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-projects-in-vcfa/create-a-namespace-class.html)
+is assigned a content library automatically, and provider libraries are
+shared with every namespace.) The fix is one block:
 
 ```yaml
 contentSources:
@@ -128,16 +131,22 @@ catalog item has no released version. Do it when nobody's requesting.
 
 ## Bonus: the things that aren't blueprint problems
 
-Three prerequisites have **no blueprint resource type** and have to exist
-before the request — VPC, VPCAttachment, LoadBalancer, [in that
-order](/posts/the-lb-that-must-exist-first/). The blueprint's `vpcName`
-input says "must exist and be Realized", and it means it. Nothing in the
+Three prerequisites have to exist before the request — VPC,
+VPCAttachment, LoadBalancer, [in that
+order](/posts/the-lb-that-must-exist-first/). VCF Automation 9.1 has
+blueprint types for the first two, `CCI.VPC` and `CCI.VPC.Configuration`
+with `kind: VPCAttachment` (see its
+[sample blueprints](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html)),
+but none for the load balancer, and a VPC created that way comes up with
+load balancing off. So we create all three before the request. The
+blueprint's `vpcName` input says "must exist and be Realized", and it
+means it. Nothing in the
 blueprint fails if they're missing; the deployment just never gets a VIP.
 
 ## Why this matters outside the lab
 
-VCF Automation's All Apps model is new, and new platforms have edges. None
-of these seven are documented; all of them stall a first project by days if
+VCF Automation's All Apps model is new, and new platforms have edges. Most
+of these seven are not documented; all of them stall a first project by days if
 you meet them cold. The value of a delivery partner who has already built
 on the platform isn't the YAML — it's that a customer's first blueprint
 publishes on day one instead of week two, and that the sharp edges are
@@ -149,10 +158,19 @@ them.
 - Expressions need **block-style YAML**; flow mappings don't get parsed.
 - `generateName`, and reference the namespace by `${resource.x.id}`.
 - `zones` and `storageClasses` are **flat** and zones are required.
-- `contentSources` on the namespace, or nothing can be deployed.
+- `contentSources` on the namespace for vCenter libraries, or nothing can
+  be deployed.
 - Wait for image `status.disks` before the first VM (1–3 min).
 - Check `status.contentValid` — the HTTP code lies by omission.
 - One released version per blueprint: unrelease, then release.
+
+## Broadcom documentation
+
+- [Sample Blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html): a new namespace with `generateName`, and resources placed in it with `context`.
+- [Create a Namespace Class in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-projects-in-vcfa/create-a-namespace-class.html): VM and storage classes, per-zone limits, and the content libraries a namespace gets.
+- [Creating and Managing Content Libraries for Stand-Alone VMs in vSphere Supervisor](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-1/provision-and-manage-virtual-machines/deploying-and-managing-virtual-machines-in-vsphere-iaas-control-plane/creating-and-managing-content-libraries-for-stand-alone-vms-in-iaas-platform.html): associating VM content libraries with a namespace.
+- [Creating bindings and dependencies between resources in blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/bindings-and-dependencies.html): `dependsOn`, the explicit build order.
+- [Versioning Blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/blueprint-versioning.html): versions, and releasing one to the catalog.
 
 *Companion to [a datacenter in a catalog tile](/posts/nested-esxi-via-vcfa-all-apps/).*
 

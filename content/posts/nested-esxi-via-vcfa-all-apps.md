@@ -66,9 +66,13 @@ namespace:
 ```
 
 `contentSources` is the line that closes the gap a lot of first attempts
-hit: a VCFA-created namespace has **no content library**, so there are no
-`VirtualMachineImage`s and nothing can be deployed. Declaring the libraries
-here attaches them at creation.
+hit: our libraries were plain vCenter libraries, and a VCFA-created
+namespace got **none of them**, so there were no `VirtualMachineImage`s and
+nothing could be deployed. Declaring the libraries here attaches them at
+creation. (The 9.1 docs say a
+[namespace class](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-projects-in-vcfa/create-a-namespace-class.html)
+is assigned a content library automatically, and provider libraries are
+shared with every namespace.)
 
 ### The topology — ordered on purpose
 
@@ -136,18 +140,26 @@ command, not a scavenger hunt.
 
 ## What the blueprint cannot express (yet)
 
-Three cluster-scoped objects have **no blueprint resource type**, and they
-must exist *before* the request — [in this order](/posts/the-lb-that-must-exist-first/):
+Three cluster-scoped objects must exist *before* the request — [in this order](/posts/the-lb-that-must-exist-first/):
 
 1. `VPC` — `privateIPs: 172.30.0.0/16`, same in every pod
 2. `VPCAttachment` — connectivity profile with the service gateway; the LB
    creation fails loudly without it
 3. `LoadBalancer` — silently, permanently required before the namespace
 
+VCF Automation 9.1 does have blueprint types for the first two: `CCI.VPC`,
+and `CCI.VPC.Configuration` with `kind: VPCAttachment` (one of its
+[sample blueprints](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html)
+uses both). There is none for the third. A later test confirmed it:
+`CCI.VPC.Configuration` rejects a `LoadBalancer` kind, and a VPC created
+that way comes up with load balancing off, so its namespace's VIPs would
+pend.
+
 Today that's a short script or a runbook step per pod. The honest framing:
 the blueprint is the *pod*; the VPC is the *tenancy*, and tenancy is
-still created one layer up. I'd expect that layer to become blueprintable;
-until then, keep the three calls next to the blueprint in version control.
+still created one layer up. I'd expect the load balancer to become
+blueprintable too; until then, keep the three calls next to the blueprint
+in version control.
 
 ## Publishing: one version at a time
 
@@ -191,6 +203,15 @@ partner.
   blueprint**, in that order, before every request.
 - One published version per blueprint; validation in `status`, not the
   HTTP response.
+
+## Broadcom documentation
+
+- [Sample Blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html): `CCI.Supervisor.Namespace` and `CCI.Supervisor.Resource` examples, with `generateName` and `context`.
+- [Creating bindings and dependencies between resources in blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/bindings-and-dependencies.html): `dependsOn` and property bindings, which set the build order.
+- [Specifying formatVersion in Blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/specifying-formatversion-in-your-blueprints.html): what `formatVersion: 2` adds, outputs included.
+- [Versioning Blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/blueprint-versioning.html): blueprint versions, and releasing one to the catalog.
+- [Creating and Managing Content Libraries for Stand-Alone VMs in vSphere Supervisor](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-1/provision-and-manage-virtual-machines/deploying-and-managing-virtual-machines-in-vsphere-iaas-control-plane/creating-and-managing-content-libraries-for-stand-alone-vms-in-iaas-platform.html): VM content libraries and the namespaces they are associated with.
+- [Deploy VMs with Configurable OVF Properties in vSphere Supervisor](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/vm-service/deploy-vms-with-configurable-ovf-properties-vsphere-iaas-control-plane.html): OVF properties set through the VM Service's vAppConfig transport.
 
 *Previously: [shared services for isolated tenants](/posts/shared-services-for-isolated-tenants/).
 This closes the Pod Papers' core arc — the companion posts on

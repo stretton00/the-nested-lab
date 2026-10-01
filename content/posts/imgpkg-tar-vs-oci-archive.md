@@ -144,6 +144,14 @@ part on the day.
 - Stage `imgpkg` *and* `crane` binaries with the tarballs. One of them
   will be the wrong tool for something.
 
+## Broadcom documentation
+
+- [Push Standard Packages to a Private Harbor Registry](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-0/managing-vsphere-kuberenetes-service-clusters-and-workloads/using-private-registries-with-tkg-service-clusters/push-standard-packages-to-a-private-harbor-registry.html): `imgpkg copy --to-tar` on the connected side, `--tar ... --to-repo` into Harbor
+- [Supporting Private Registries](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-1/vcf-services-development-guide/supervisor-services-carvel-private-registry.html): relocating Carvel bundles, and why omitting `--cosign-signatures` leaves a bundle untrusted
+- [Upgrade VKS from a Private Registry](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-0/managing-vsphere-kubernetes-service/installing-and-upgrading-the-tkg-service/upgrade-tkg-service-from-a-private-registry.html): the VKS bundle copied with `--cosign-signatures` on both copies
+- [vSphere kubernetes service upgrade failed with "kapp: error waiting on reconcile packageinstall"](https://knowledge.broadcom.com/external/article/431379/vsphere-kubernetes-service-upgrade-faile.html): the untrusted-namespace denial when the signatures were dropped
+- [Script to mirror resources for VPAIF-N AI workloads in air-gapped environment](https://knowledge.broadcom.com/external/article/388470): Broadcom's Docker-based script for mirroring Private AI container images, Helm charts and models into Harbor
+
 ---
 *Lab environment; opinions my own. Verified against a local registry with
 real multi-arch images; digests shown are truncated.*

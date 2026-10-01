@@ -16,12 +16,12 @@ they need to become a VCF instance: vCenter, NSX, SDDC Manager, the fleet
 components. The VCF 9.1 Installer appliance does that from a deployment
 spec — a few hundred lines of JSON — through an API. This post is the vRO
 workflow that drives it, and the three design constraints that shaped it:
-nobody edits the spec by hand, the request can't outlive two hours, and
+nobody edits the spec by hand, the request gets two hours by default, and
 nested hosts fail hardware validation.
 
 Unlike stage 1 this isn't VM provisioning, so it's not a cloud template.
 It's a **vRO workflow published directly as a catalog item** through an
-Orchestrator content source.
+[Orchestrator content source](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/service-broker-adding-content-to-the-catalog/service-broker-add-vrealize-orchestrator-workflows-to-the-catalog.html).
 
 ## The spec is generated, never edited
 
@@ -84,7 +84,11 @@ a prerequisite, not a step.
 ## The two-hour leash, and how to slip it
 
 A request from the catalog carries a token with a roughly **two-hour**
-lifetime, and a bringup takes around **eight**. So by default the workflow
+lifetime, and a bringup takes around **eight**: when it runs out, the
+workflow dies with `Delegating token is not service token`. The project's
+[request timeout](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/getting-started-with-organizations-for-vm-apps-in-vcf-automation/map-head-projects-adding-and-managing-projects/projects-how-do-i-add-a-project-for-my-development-team.html)
+also defaults to two hours and its Provisioning tab can raise it; we never
+tried, because eight hours is too long to hold a request open. So by default the workflow
 is fire-and-forget: `waitForCompletion=false`, return the task id, watch
 progress in the installer UI. A `watchTaskId` input lets you re-attach
 later and poll an already-running bringup from a new request.
@@ -161,6 +165,15 @@ between a VCF deployment being a project and being a procedure.
   after adding inputs.
 - On a fresh instance, give NSX an hour before you expect DVS
   compatibility.
+
+## Broadcom documentation
+
+- [Use a JSON Specification File to Deploy VMware Cloud Foundation or vSphere Foundation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/deployment/deploying-a-new-vmware-cloud-foundation-or-vmware-vsphere-foundation-private-cloud-/use-a-json-specification-to-deploy-vmware-cloud-foundation-or-vmware-vsphere-foundation.html): the deployment spec, its validation and retrying failed tasks; points to the VCF Installer API reference
+- [First VCF Instance FQDNs and IP addresses](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/planning-and-preparation/vcf-components-fqdns-and-ip-addresses/first-vcf-instance-fqdns-and-ip-addresses.html): the FQDNs and forward and reverse DNS records to plan for every component
+- [vSAN ESA Deployment: Override HCL Validation for Non-Certified Hardware](https://knowledge.broadcom.com/external/article/408300/vsan-esa-deployment-override-hcl-validat.html): the installer's vSAN ESA HCL check, and the documented override for non-certified disks
+- [Add VCF Operations Orchestrator Client workflows to the VCF Automation catalog](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/service-broker-adding-content-to-the-catalog/service-broker-add-vrealize-orchestrator-workflows-to-the-catalog.html): a vRO workflow as a catalog item, through an Orchestrator content source
+- [Bill of Materials 9.1.0](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/release-notes/vmware-cloud-foundation-9-1-0-0-release-notes/vmware-cloud-foundation-bill-of-materials.html): the component versions and builds of VCF 9.1.0
+- [Add a project for your VCF Automation for VM Apps development team](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/getting-started-with-organizations-for-vm-apps-in-vcf-automation/map-head-projects-adding-and-managing-projects/projects-how-do-i-add-a-project-for-my-development-team.html): a project's request Timeout on its Provisioning tab, two hours by default
 
 *Part of [The Lab Factory](/series/the-lab-factory/). Previously:
 [porting the host script](/posts/porting-a-powershell-deploy-script/).*
