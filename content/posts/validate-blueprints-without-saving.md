@@ -19,20 +19,23 @@ summary: "One VCF Automation API call checks a blueprint without saving anything
 ---
 
 The first person to find a typo in a blueprint is usually whoever requests it.
-In our lab catalog that can be a trainer at eight in the morning with a class
-waiting, and depending on the mistake the failure turns up when they submit, or
-a few minutes in, after the namespace already exists. Our eight lab blueprints are written by a generator
-from a site file, so a new platform means eight new blueprints at once. I
-wanted proof that they resolve before anyone imports them, and without leaving
-drafts behind in somebody's catalog.
+In our lab catalog, that can be a trainer at eight in the morning with a class
+waiting, which is not when I want my typos found. Depending on the mistake, the
+failure turns up when they submit, or a few minutes in, after the namespace
+already exists.
 
-VCF Automation 9.1 will do that for you in one API call. This post is what the
-call catches, what it does not, and the three checks we now run beside it.
+Our eight lab blueprints are written by a generator from a site file, so a new
+platform means eight new blueprints at once. I wanted proof that they resolve
+before anyone imports them, without leaving drafts behind in somebody's
+catalog.
+
+VCF Automation 9.1 will do that for you in one API call. This post covers what
+the call catches, what it doesn't, and the three checks we now run beside it.
 
 ## One call, nothing saved
 
-The blueprint service validates a blueprint you send it and stores nothing: no
-blueprint, no draft, no version. The body is the YAML as a string and the
+The blueprint service validates a blueprint you send it, and stores nothing:
+no blueprint, no draft, no version. The body is the YAML as a string, plus the
 project to resolve it in. Our tools wrap the organization token in a small
 session helper, so the call is one line:
 
@@ -51,7 +54,8 @@ Against our generated Phase 6 blueprint, 1,238 lines and 25 resources:
 }
 ```
 
-Nothing is left behind. Three calls later, even with a `name` in the body:
+Nothing is left behind. I counted, being the trusting sort. Three calls
+later, even with a `name` in the body:
 
 ```text
 == blueprints before 9, after three validation calls 9; new: none; changed: none
@@ -59,7 +63,8 @@ Nothing is left behind. Three calls later, even with a `name` in the body:
 
 ## What it catches
 
-Then copies of the same blueprint, one mistake each:
+Then copies of the same blueprint, each with one mistake. Deliberate ones, for
+once:
 
 | Mistake | `message` | `path` |
 |---|---|---|
@@ -78,7 +83,7 @@ included.
 
 ## What it does not catch
 
-Two gaps showed up.
+Two gaps showed up, and both pass with flying colours.
 
 **A property that a group does not have.** `propgroup.nestedLabSite.labDomian`,
 one letter swapped, in a group that exists:
@@ -133,9 +138,9 @@ virtualmachine.vmoperator.vmware.com/dryrun-dc01 created (server dry run)
 ```
 
 `created (server dry run)` means the request also went through the VM
-Operator's admission checks in that namespace, with nothing created. Two
-catches: the dry run needs a namespace that exists (any lab's will do), and a
-manifest full of `${...}` has to be rendered first. We fill the expressions
+Operator's admission checks in that namespace, with nothing created. There are
+two catches. The dry run needs a namespace that exists (any lab's will do), and
+a manifest full of `${...}` has to be rendered first. We fill the expressions
 with the property groups' values and sample inputs.
 
 ## Is the catalog running what the generator writes?
@@ -176,8 +181,8 @@ releases        identical apart from 'encrypted': True
 == DELETE: HTTP 204
 ```
 
-The server adds `encrypted: false` to every property, and everything else comes
-back as sent. Compare with that one key ignored.
+The server adds `encrypted: false` to every property, just to be sure.
+Everything else comes back as sent, so compare with that one key ignored.
 
 ## The order we run them
 
@@ -193,14 +198,15 @@ so all five can sit in one script beside the generator.
 
 ## Why this matters outside the lab
 
-A blueprint is code that runs against a shared platform, and testing it by
+A blueprint is code that runs against a shared platform. Testing it by
 requesting it costs a namespace, quota, a few minutes and sometimes a
-clean-up. These checks cost a handful of API calls and leave nothing behind,
-so they fit wherever blueprints change: a pipeline on every commit, a review
+clean-up. These checks cost a handful of API calls and leave nothing behind.
+So they fit wherever blueprints change: a pipeline on every commit, a review
 before a release, or a new site's generated catalog before it is imported.
+
 The split is the useful part to remember. VCF Automation knows the blueprint's
-references; the Supervisor knows the manifests' schemas; only you know what you
-meant to release.
+references. The Supervisor knows the manifests' schemas. Only you know what
+you meant to release.
 
 ## Rules learned
 

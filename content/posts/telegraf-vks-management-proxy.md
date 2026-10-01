@@ -19,19 +19,19 @@ cover:
 summary: "On VCF 9.1 the supported route installs Telegraf in new VKS clusters for you, once VCF Operations, the Metrics Aggregator and the add-on repository are in place. Underneath sits a dependency the package's README doesn't mention: two secrets that only the Supervisor Management Proxy puts into guest clusters. Without them every Telegraf pod sits in FailedMount. The supported route first, then the manual path on f06 and what each hop showed."
 ---
 
-The [Windows half of this series](/posts/telegraf-windows-2025/) was a
-story about an agent that works on an OS the vendor hasn't listed. This
-one is the opposite: a package on a fully supported platform that does
-nothing at all, silently, because of a dependency its own documentation
-doesn't mention. The supported route comes first; the rest is the path
-underneath, as it ran on f06 (VCF 9.1).
+The [Windows half of this series](/posts/telegraf-windows-2025/) was about
+an agent that works on an OS the vendor hasn't listed. This one is the
+opposite: a package on a fully supported platform that does nothing,
+silently, because of a dependency its own documentation doesn't mention.
+
+The supported route comes first. The rest is the path underneath, as it
+ran on f06 (VCF 9.1).
 
 ## The symptom
 
 Install the Telegraf package on a VKS cluster with the metric proxy flag
-set (`isMetricProxyConfigured: true`, which is what you want if the
-metrics are going to VCF Operations) and every Telegraf pod stays in
-`ContainerCreating`:
+set (`isMetricProxyConfigured: true`, which you want when metrics go to
+VCF Operations). Every Telegraf pod then stays in `ContainerCreating`:
 
 ```
 NAME           PACKAGE NAME                         PACKAGE VERSION         DESCRIPTION                                                            AGE   PAUSED
@@ -51,7 +51,7 @@ telegraf-g4qlm            0/1     ContainerCreating   0          15m
 telegraf-h2pcq            0/1     ContainerCreating   0          15m
 ```
 
-Describe one and the reason is `FailedMount`: two secrets don't exist.
+Describe one, and the reason is `FailedMount`: two secrets don't exist.
 
 ```
 ...
@@ -60,8 +60,8 @@ Describe one and the reason is `FailedMount`: two secrets don't exist.
 ```
 
 Nothing creates them. The package doesn't. The cluster doesn't. The
-PackageInstall reports `ReconcileFailed` and backs off, and that's where
-it stays.
+PackageInstall reports `ReconcileFailed` and backs off, and there it
+stays, waiting for two secrets that aren't coming.
 
 ## The supported route first
 
@@ -76,23 +76,23 @@ prerequisites, and how to check each:
    Advanced Settings, true by default. Look for a vSphere Supervisor
    adapter instance and VKS Cluster objects in the inventory.
 2. **The Metrics Aggregator runs on the Supervisor.** VCF Automation
-   installs it by default; check the Supervisor's services in vCenter.
+   installs it by default. Check the Supervisor's services in vCenter.
 3. **The add-on repository offers Telegraf and Prometheus**:
    `AddonRepository`, `Addon` and `AddonConfigDefinition` resources on
    the Supervisor.
 
 On 9.0.1 and later, Tom Fojta's [Monitoring VKS Cluster in VCF
 Automation](https://fojta.wordpress.com/2026/02/03/monitoring-vks-cluster-in-vcf-automation/)
-installs the same two packages as add-on tiles in VCF Automation, after
+installs the same two packages as add-on tiles in VCF Automation, once
 the provider enables the Supervisor Management Proxy. His notes include a
 Telegraf failure over an existing `metrics-proxy-tls-config` secret: the
 mirror image of the one above.
 
 f06 took neither route on 23 August. It ran 9.1, but its VCF Automation
-arrived the next day; Ops had a vSphere Supervisor adapter instance, the
-Metrics Aggregator wasn't registered, and nobody looked for add-ons. The
-lab's catalog item installed the standard package itself, following
-Christian Ferber's [vrealize.it
+arrived the next day. Ops had a vSphere Supervisor adapter instance, the
+Metrics Aggregator wasn't registered, and nobody looked for add-ons. By
+nobody, I mean me. The lab's catalog item installed the standard package
+itself, following Christian Ferber's [vrealize.it
 write-up](https://vrealize.it/2025/10/24/monitoring-vks-clusters-in-vcf-operations/)
 for 9.0.1. That path is the rest of this post.
 
@@ -113,7 +113,7 @@ tanzu-system-telegraf                Active   11s
 ```
 
 The rebuilt demo01 had them too, before the catalog item's package stage
-ran, so the item's PackageInstalls collided with another kapp app:
+ran. So the item's PackageInstalls collided with another kapp app:
 
 ```
 === telegraf ===
@@ -122,18 +122,19 @@ kapp: Error: Ownership errors: - Resource 'clusterrole/telegraf-kubelet-metric-a
 ```
 
 I didn't inspect what installed them (the Supervisor was serving the
-`addons.kubernetes.vmware.com` API by then): a footprint, not a test.
-Check for Telegraf before you install it.
+`addons.kubernetes.vmware.com` API by then). It's a footprint, not a
+test. Check for Telegraf before you install it.
 
 ## What sits underneath
 
 The two secrets come from the **Supervisor Management Proxy**, a
 Supervisor Service on the Supervisor, not in the guest. It runs envoy
-behind a load balancer on port 10093. Each guest cluster gets a headless
-Service, `supervisor-management-proxy` in `default`, pointing at it, plus
-the two secrets in `kube-system`, each with a `SecretExport`. The
-package's `SecretImport`s copy them into `tanzu-system-telegraf`, and
-Telegraf posts to
+behind a load balancer on port 10093.
+
+Each guest cluster gets a headless Service pointing at it
+(`supervisor-management-proxy` in `default`), plus the two secrets in
+`kube-system`, each with a `SecretExport`. The package's `SecretImport`s
+copy them into `tanzu-system-telegraf`, and Telegraf posts to
 `https://supervisor-management-proxy.default.svc.<serviceDomain>:10093/arc/tkgs/metric`.
 
 ![Diagram: the secrets, the headless Service and the proxy's load balancer on f06, with the onward path to VCF Operations dashed](/images/telegraf-vks-management-proxy-diagram.svg)
@@ -141,14 +142,14 @@ Telegraf posts to
 
 The manual path needs a Supervisor with a load balancer, registry access
 to `projects.packages.broadcom.com`, vCenter rights to register
-Supervisor Services and cluster-admin in the guest. The cluster is
-`demo01`: one control-plane node, two workers.
+Supervisor Services, and cluster-admin in the guest. The cluster is
+`demo01`: one control-plane node and two workers.
 
 ## 1. Install the Supervisor Management Proxy
 
 The lab's catalog item that deploys a Supervisor has an
 `installMgmtProxy` tick box: register the service, then install it.
-Every attempt was refused, and the definition shows why:
+Every attempt was refused. The definition shows why:
 
 ```yaml
 apiVersion: data.packaging.carvel.dev/v1alpha1
@@ -164,8 +165,8 @@ spec:
   version: 0.4.1
 ```
 
-The proxy asks for the **system VPC**, and vCenter only places services
-there that it can verify as Broadcom-published:
+The proxy asks for the **system VPC**. vCenter only places services there
+that it can verify as published by Broadcom:
 
 ```
 === install on supervisor domain-c9 ===
@@ -176,8 +177,8 @@ there that it can verify as Broadcom-published:
 ...
 ```
 
-Registered through the API as Carvel YAML, even byte-identical to
-Broadcom's download, it never passed. The other Carvel services here
+Registered through the API as Carvel YAML, it never passed, even
+byte-identical to Broadcom's download. The other Carvel services here
 carry no such annotation and installed fine:
 
 ```
@@ -189,7 +190,7 @@ velero                       1.9.0-embedded+25369333  no system-vpc annotation  
 That check is doing its job, and I won't show how the lab got past it.
 On a platform you care about, install the proxy the way Broadcom's
 proxy page (linked at the end) describes, so vCenter can verify what it
-places on the system VPC. Whichever way it goes in, **check it** on the
+places on the system VPC. However it goes in, **check it** on the
 Supervisor:
 
 ```
@@ -199,7 +200,7 @@ Supervisor:
 ...
 ```
 
-and in vCenter, where the install record holds only the namespace the
+Then check it in vCenter. The install record holds only the namespace the
 platform chose (the base64 is `namespace: svc-supervisor-management-proxy-acqyd`):
 
 ```
@@ -220,7 +221,7 @@ platform chose (the base64 is `namespace: svc-supervisor-management-proxy-acqyd`
 ## 2. Create the cluster with serviceDomain
 
 `clusterNetwork.serviceDomain` can't be added later (step 7). The catalog
-item now sets it on every demo cluster; demo01 as rebuilt:
+item now sets it on every demo cluster. Here's demo01 as rebuilt:
 
 ```
 {
@@ -285,9 +286,9 @@ Two values matter, from the package's own schema:
 ...
 ```
 
-The catalog item installs it the Carvel way, in a `package-installs`
-namespace whose service account has cluster-admin: a values Secret, then
-a PackageInstall.
+The catalog item installs it the Carvel way: a values Secret, then a
+PackageInstall, in a `package-installs` namespace whose service account
+has cluster-admin.
 
 ```js
     function pkgSecret(name, valuesYml) {
@@ -323,7 +324,7 @@ plus one Deployment pod.
 
 This is the dependency. Within two minutes of the proxy reporting
 `CONFIGURED`, the secrets and their `SecretExport`s were in demo01's
-`kube-system`, and the `SecretImport`s had copied them across:
+`kube-system`. The `SecretImport`s had copied them across:
 
 ```
 --- secrets + secretimports in tanzu-system-telegraf ---
@@ -346,7 +347,8 @@ The pods came up on their own:
 ```
 
 After an hour and forty minutes of `FailedMount`, all four were Running
-four minutes after the proxy went `CONFIGURED`.
+four minutes after the proxy went `CONFIGURED`. I'd quite like that hour
+and forty minutes back.
 
 ## 6. Clear the stale backoff
 
@@ -381,7 +383,7 @@ Telegraf still wasn't delivering. Its log, one error a minute:
 ...
 ```
 
-Note the trailing dot and nothing after `svc`. The name is that headless
+Note the trailing dot, and nothing after `svc`. The name is that headless
 Service:
 
 ```
@@ -395,7 +397,7 @@ Service:
 ```
 
 The domain part follows the cluster's `serviceDomain`, which demo01
-lacked; the package's own `domainName` was `cluster.local` all along and
+lacked. The package's own `domainName` was `cluster.local` all along, and
 made no difference. Adding the field later was refused:
 
 ```
@@ -406,11 +408,10 @@ patch rejected:  { "kind": "Status", "apiVersion": "v1", "metadata": {}, "status
 Two fixes, both applied:
 
 - **Every new cluster:** `serviceDomain: cluster.local` in the spec
-  (step 2). Every add-on that constructs a service URL is assuming it's
-  there.
+  (step 2). Every add-on that builds a service URL assumes it's there.
 - **Live cluster:** a CoreDNS `rewrite` rule in the guest's `coredns`
-  ConfigMap that maps the domainless name onto the real one. Ugly,
-  effective, documented in the cluster's notes; the `reload` plugin
+  ConfigMap, mapping the domainless name onto the real one. Ugly,
+  effective, and documented in the cluster's notes. The `reload` plugin
   picked it up:
 
 ```
@@ -428,7 +429,8 @@ Two fixes, both applied:
 
 ## 8. Leave the proxy's values alone
 
-The error moved on: the name resolves, and nothing answers:
+The error moved on, which counts as progress around here. The name resolves now,
+and nothing answers:
 
 ```
 checked at (UTC): 19:35:38
@@ -437,7 +439,7 @@ telegraf-26ppl: STILL FAILING (4 errors)
 ...
 ```
 
-In 9.1 terms a prerequisite was missing: the Metrics Aggregator, which
+In 9.1 terms, a prerequisite was missing. The Metrics Aggregator, which
 terminates the cluster's TLS in that design, didn't exist on f06 yet. I
 tried pointing the proxy at Ops by hand, with a value from its
 definition:
@@ -479,11 +481,12 @@ PUT -> 204
   [90s] CONFIGURED
 ```
 
-and Telegraf timed out as before. Broadcom's proxy page is blunt: "No
+Telegraf timed out as before. Broadcom's proxy page is blunt: "No
 additional configuration values for the Supervisor Management Proxy
-service are required in this case." Set at install time, the value did
-harm: with no `tlsClientSecretName` the package renders a nameless
-`SecretImport`, and kapp refuses it:
+service are required in this case."
+
+Set at install time, the value did harm. With no `tlsClientSecretName`,
+the package renders a nameless `SecretImport`, and kapp refuses it:
 
 ```
 === supervisor-management-proxy.vmware.com ===
@@ -491,9 +494,9 @@ Reason: ReconcileFailed. Message: kapp: Error: Validation errors:
 - Expected 'metadata.name' on resource 'secretimport/ (secretgen.carvel.dev/v1alpha1) namespace: svc-supervisor-management-proxy-htarg' to be non-empty (stdin doc 5).
 ```
 
-The next day the Supervisor was rebuilt onto the lab's planned address
-range, and the catalog item installed the proxy and the Metrics
-Aggregator with no values. Both went `CONFIGURED`:
+The next day, the Supervisor was rebuilt onto the lab's planned address
+range. The catalog item installed the proxy and the Metrics Aggregator
+with no values, and both went `CONFIGURED`:
 
 ```
 --- ALL LoadBalancer VIPs on the rebuilt supervisor ---
@@ -503,7 +506,7 @@ Aggregator with no values. Both went `CONFIGURED`:
 ```
 
 demo01 was recreated on that Supervisor with `serviceDomain` set. This
-check read a Telegraf pod's last two minutes of log; the broken state had
+check read a Telegraf pod's last two minutes of log. The broken state had
 logged an error a minute:
 
 ```
@@ -524,7 +527,7 @@ wasn't mine.
 ## 9. VCF Operations
 
 Broadcom's consumption docs show the result in VCF Automation (Manage
-and Govern → Kubernetes Management → Clusters) and in a Workload
+and Govern > Kubernetes Management > Clusters) and in a Workload
 Management Activated Cluster Summary tab in VCF Operations. The 9.0.1
 write-up adds a switch on the VKS Cluster object, which the catalog item
 still names at the end of each run:
@@ -533,53 +536,55 @@ still names at the end of each run:
 ... | Ops manual step: set 'Pod And Container Monitoring Enabled' on VKS Cluster demo01 in VCF Operations inventory; ...
 ```
 
-This record has neither: the switch was never set, and my one capture
+This record has neither. The switch was never set, and my one capture
 of a VKS Cluster object (vks-demo01, 1 September, in the [two-ways
 post](/posts/vks-kubectl-vs-vcfa-all-apps/)) counts 0 pods, deployments
 and DaemonSets. The last hop I can show is Telegraf writing without
-errors.
+errors. Not the grand finale I'd hoped for, but an honest one.
 
 ## Clean-up and repeatability
 
 - **One owner per add-on.** Where add-on management installs Telegraf,
-  don't add your own PackageInstall; to run it yourself, set the cluster
-  label `addons.kubernetes.vmware.com/automated-monitoring` to `disabled`
-  first. The catalog item's answer to the ownership errors,
+  don't add your own PackageInstall. To run it yourself, first set the
+  cluster label `addons.kubernetes.vmware.com/automated-monitoring` to
+  `disabled`. The catalog item's answer to the ownership errors,
   `--dangerous-override-ownership-of-existing-resources=true`, only hands
   the objects to a second owner.
 - **Supervisor Service API on 9.1:** service
   `carvel_spec.version_spec.content`, version `carvel_spec.content`,
   install `{supervisor_service, version}`, values
   `PUT {version, yaml_service_config}`, removal
-  `PATCH …?action=deactivate` then `DELETE`. New definition bytes need a
+  `PATCH …?action=deactivate`, then `DELETE`. New definition bytes need a
   new service record.
 - **A definition outlives the Supervisor.** What you register lives on
   vCenter's service record, so a rebuilt Supervisor installs the same
   definition again. Replacing it means deactivating and deleting that
   record first.
-- **Services break later.** In September the proxy, the aggregator and
+- **Services break later.** In September, the proxy, the aggregator and
   four other Supervisor Services went to `ERROR` when the platform
-  replaced their kapp service accounts; recreating the old ones fixed all
+  replaced their kapp service accounts. Recreating the old ones fixed all
   six within two minutes.
 
 ## Why this matters outside the lab
 
 On VCF 9.1, Kubernetes metrics in VCF Operations are meant to be a
-platform setting, not a job per cluster: get three prerequisites right
-and new clusters arrive monitored. The layer underneath still matters,
-because every failure here had the same shape: a generic symptom
-(`FailedMount`, a name that won't resolve, a timeout) caused by a
-decision made somewhere else. For a customer that means a Supervisor
-built for observability before any cluster asks, a cluster baseline with
-the fields add-ons assume, and one owner per add-on: exactly what a
-standard cluster class and a supervisor build checklist exist to
-encode.
+platform setting, not a job per cluster. Get three prerequisites right,
+and new clusters arrive monitored.
+
+The layer underneath still matters, because every failure here had the
+same shape: a generic symptom (`FailedMount`, a name that won't resolve,
+a timeout) caused by a decision made somewhere else.
+
+For a customer, that means a Supervisor built for observability before
+any cluster asks, a cluster baseline with the fields add-ons assume, and
+one owner per add-on. That's exactly what a standard cluster class and a
+Supervisor build checklist exist to encode.
 
 ## Rules learned
 
 - On 9.1, start with the supported route: Ops collecting the Supervisor,
-  the Metrics Aggregator, the add-on repository. Then check for Telegraf
-  before installing it.
+  the Metrics Aggregator and the add-on repository. Then check for
+  Telegraf before installing it.
 - On VKS, the Telegraf package **hard-depends on the Supervisor
   Management Proxy** whenever the metric proxy flag is set. `FailedMount`
   on two `metrics-proxy-*` secrets is the tell.

@@ -18,15 +18,17 @@ cover:
 summary: "Tunnels up, BFD green, big don't-fragment pings fine - and bulk TCP across the overlay died per connection. Two offload faults between nested ESXi and the layer below, one in each direction, and the counter pair that found the second one in minutes."
 ---
 
-Every tunnel was up. BFD was green, 1572-byte don't-fragment pings crossed the
-overlay without complaint, the edges were healthy and the alarm list was
-nearly empty. Meanwhile a download from the shared binaries server inside the
-pod crawled at 2-15 MB/s, SFTP sessions reset halfway, a nested vCenter's
-disk import took 64 minutes, and nested vSAN logged "Setting pulse failed".
+Every tunnel was up. BFD was green, and 1572-byte don't-fragment pings
+crossed the overlay without complaint. The edges were healthy, and the alarm
+list was nearly empty.
 
-This is how that looked from a test client on the morning I started
-measuring properly: six paced connections to the same server, then one
-stream that reconnects whenever it stalls:
+Meanwhile, a download from the shared binaries server inside the pod crawled
+at 2-15 MB/s. SFTP sessions reset halfway. A nested vCenter's disk import
+took 64 minutes, and nested vSAN logged "Setting pulse failed".
+
+This is how it looked from a test client on the morning I started measuring
+properly. Six paced connections to the same server, then one stream that
+reconnects whenever it stalls:
 
 ```text
 == baseline 10:10:46
@@ -40,44 +42,52 @@ conn 6: dead from the start after 0 MB
 ```
 
 It hit flows, not hosts. A retry often landed on a working path, so for days
-it read as "the lab is a bit slow" rather than as an outage.
+it read as "the lab is a bit slow" rather than as an outage. In my defence,
+"a bit slow" is how I describe most disasters.
 
 ## The setup
 
 The pod is a VCF 9.1 instance whose six ESXi hosts are themselves VMs on an
-outer vSphere cluster. The pod runs NSX with VPCs, so traffic between its
-workloads is Geneve-encapsulated by the nested hosts and then carried by the
-outer layer: each nested host's vmxnet3 vNIC, a plain vSphere distributed
-switch with MAC learning on the trunk port group, and Broadcom `bnxtnet` 10G
-NICs. VCF 9.1 runs the nested NSX uplinks in Enhanced Datapath mode, so they
-use the `nvmxnet3_ens` driver.
+outer vSphere cluster. The pod runs NSX with VPCs, so the nested hosts
+encapsulate the traffic between its workloads in Geneve. The outer layer
+then carries it: each nested host's vmxnet3 vNIC, a plain vSphere
+distributed switch with MAC learning on the trunk port group, and Broadcom
+`bnxtnet` 10G NICs.
+
+VCF 9.1 runs the nested NSX uplinks in Enhanced Datapath mode, so they use
+the `nvmxnet3_ens` driver.
 
 Two layers of virtual networking, each offering the other help with big
 packets. That turned out to be the whole story, twice.
 
 ## Fault 1: the send side
 
-`nvmxnet3_ens` has an `encapOffload` parameter that defaults to Auto: it takes
-whatever the vmxnet3 device's backend recommends. The outer hosts recommended
-Geneve offload, so every nested host activated `GENEVE_OFFLOAD` and
-`TSO256k` on its uplinks. From then on a nested host handed each TCP burst to
-its vNIC as one Geneve-encapsulated super-frame, 64 KB and more, and trusted
-the layer below to cut it into MTU-sized frames.
+`nvmxnet3_ens` has an `encapOffload` parameter that defaults to Auto: it
+takes whatever the vmxnet3 device's backend recommends. The outer hosts
+recommended Geneve offload. So every nested host activated `GENEVE_OFFLOAD`
+and `TSO256k` on its uplinks.
 
-Packet captures on both ends settled it. With `pktcap-uw` on the uplinks of
-the server's host and the client's host, and a small parser to strip the
-Geneve header, the server's data frames left at up to 9 KB and over 64 KB.
-Only frames of 1,600 bytes or less arrived. The SYN-ACK always made it; the
-data behind it did not. Small packets are never offloaded, which is why
-pings, BFD and handshakes looked perfect.
+From then on, a nested host handed each TCP burst to its vNIC as one
+Geneve-encapsulated super-frame, 64 KB and more. It trusted the layer below
+to cut that into MTU-sized frames. This is Geneve TSO (TCP segmentation
+offload).
 
-Setting `encapOffload=0` and rebooting the host took the same copy between
-the same two hosts from 2-15 MB/s to 235-273 MB/s. The reboot is not
-optional: a runtime `Net.UseHwTSO=0` plus an uplink reset, tried first, did
-nothing, because the Enhanced Datapath keeps its offload capabilities until
-the driver reloads at boot.
+Packet captures on both ends settled it. I ran `pktcap-uw` on the uplinks of
+the server's host and the client's host, with a small parser to strip the
+Geneve header. The server's data frames left at up to 9 KB and over 64 KB.
+Only frames of 1,600 bytes or less arrived.
 
-I rolled the option to all six hosts and ran the full test set again:
+The SYN-ACK always made it; the data behind it did not. Small packets are
+never offloaded, which is why pings, BFD and handshakes looked perfect.
+
+Setting `encapOffload=0` and rebooting the host took the same copy, between
+the same two hosts, from 2-15 MB/s to 235-273 MB/s.
+
+The reboot is not optional. I tried a runtime `Net.UseHwTSO=0` plus an
+uplink reset first, and it did nothing. That's because the Enhanced Datapath
+keeps its offload capabilities until the driver reloads at boot.
+
+I rolled the option out to all six hosts and ran the full test set again:
 
 ```text
 == outside, en02 active 14:22:30
@@ -92,14 +102,15 @@ conn 6: no stall in 25 s after 11 MB
 
 Two of the six connections kept moving, at well under 1 MB/s. The other four
 still died, and four parallel streams managed 7.4 MB/s between them.
+Progress, of a sort.
 
 ## Fault 2: the receive side
 
 The second fault only showed up once I stopped timing transfers and started
 counting drops at both ends of the hop. The nested driver keeps per-queue
-counters under `vsish`, and the outer distributed switch keeps per-port
-counters for each vNIC. For one test, on the receiving nested host and on its
-port on the outer switch:
+counters under `vsish`. The outer distributed switch keeps per-port counters
+for each vNIC. Here is one test, read on the receiving nested host and on
+its port on the outer switch:
 
 ```text
 === esx03 RX deltas
@@ -108,24 +119,28 @@ port on the outer switch:
 esx03 nic1  ... in 292408 pk 125.5 MB drop 1 | out 408391 pk 462.5 MB drop 267
 ```
 
-267 packets dropped on the way out of the outer switch, 267 receive errors in
-the nested driver. The next run was 590 and 590, the one after 430 and 430.
-The counters matched one for one every time, which put the loss exactly on
-the vNIC boundary.
+That's 267 packets dropped on the way out of the outer switch, and 267
+receive errors in the nested driver. The next run was 590 and 590, the one
+after 430 and 430. The counters matched one for one every time, which put
+the loss exactly on the vNIC boundary. Two counters agreeing that neatly is
+about as close to a confession as networking gets.
 
-The cause is LRO. The outer hosts merge consecutive TCP segments heading into
-a VM (`Net.Vmxnet3HwLRO=1`, `Net.Vmxnet3SwLRO=1`) and skip that only for
-promiscuous ports (`Net.VmxnetPromDisableLro=1`). The pod's trunk port group
-uses MAC learning, not promiscuous mode, so its nested hosts get merged
-frames. For plain TCP, such as vSAN or vMotion, the nested driver takes a
-merged frame without complaint. A merged *Geneve* frame completes with an
-error instead. The first one or two packets of a burst arrive before merging
-starts; the rest is lost as one. A dead connection's first 16-17 data packets
-left the server's host and two arrived, TCP backed off, and the flow looked
-stalled.
+The cause is LRO, large receive offload. The outer hosts merge consecutive
+TCP segments heading into a VM (`Net.Vmxnet3HwLRO=1`, `Net.Vmxnet3SwLRO=1`).
+They skip that only for promiscuous ports (`Net.VmxnetPromDisableLro=1`).
+The pod's trunk port group uses MAC learning, not promiscuous mode, so its
+nested hosts get merged frames.
 
-The tests that pinned it down, each six downloads with both counters read
-before and after:
+For plain TCP, such as vSAN or vMotion, the nested driver takes a merged
+frame without complaint. A merged *Geneve* frame completes with an error
+instead. The first one or two packets of a burst arrive before merging
+starts; the rest is lost as one.
+
+A dead connection's first 16-17 data packets left the server's host, and two
+arrived. TCP backed off, and the flow looked stalled.
+
+These are the tests that pinned it down. Each one was six downloads, with
+both counters read before and after:
 
 | Test on the receiving host | Nested rx errors | Outer port drops | Downloads |
 | --- | --- | --- | --- |
@@ -138,30 +153,33 @@ before and after:
 
 The UDP row is the tell. Same frame size, same burst pattern, zero errors,
 because LRO only merges TCP. Whether the outer NIC or the outer kernel does
-the merging, I never determined; the fix does not depend on it.
+the merging, I never found out. The fix does not depend on it.
 
 ## The fix
 
-Three options on both vmxnet3 drivers of every nested host that carries NSX
-overlay traffic, then a reboot:
+Three options go on both vmxnet3 drivers of every nested host that carries
+NSX overlay traffic, followed by a reboot:
 
 ```bash
 esxcli system module parameters set -m nvmxnet3_ens -p "encapOffload=0 rxInnerOffload=0 disableLRO=1"
 esxcli system module parameters set -m nvmxnet3     -p "encapOffload=0 rxInnerOffload=0 disableLRO=1"
 ```
 
-`encapOffload=0` keeps segmentation in the nested host; `disableLRO=1` stops
+`encapOffload=0` keeps segmentation in the nested host. `disableLRO=1` stops
 the outer layer handing it merged frames. `rxInnerOffload=0` was part of the
 tested set, although on its own it changed nothing. `parameters set`
 replaces the module's whole option string, so always send all three.
 
-For hosts already in a vSAN cluster I went one at a time: set the options,
-maintenance mode with "Ensure accessibility", save the config with
-`auto-backup.sh`, then `reboot -f`. A graceful reboot of a nested host can
-hang in the vSAN shutdown handler; in maintenance mode the forced reboot was
-safe and the host was back in about two minutes. After boot, check that
-`vsish -e get /net/pNics/vmnic0/properties` no longer lists
-`GENEVE_OFFLOAD` as an activated hardware capability, and that
+For hosts already in a vSAN cluster, I went one at a time. Set the options,
+enter maintenance mode with "Ensure accessibility", save the config with
+`auto-backup.sh`, then `reboot -f`.
+
+A graceful reboot of a nested host can hang in the vSAN shutdown handler,
+which makes it rather less graceful than the name suggests. In maintenance mode the
+forced reboot was safe, and the host was back in about two minutes.
+
+After boot, check that `vsish -e get /net/pNics/vmnic0/properties` no longer
+lists `GENEVE_OFFLOAD` as an activated hardware capability. Then check that
 `pkts rx err` stays flat under load.
 
 The same tests after all six hosts had the options:
@@ -180,17 +198,18 @@ TOTAL (delta) rx 16382394, rx err 0, OOB 2565, LRO pkts 0
 ```
 
 Zero receive errors in 16.4 million packets. The 2,565 left over are
-receive-ring overruns on the host running the busy edge, the ordinary "host
-briefly too busy" kind that TCP absorbs. The next full nested lab build
-(hosts, vSAN, vCenter, VCF Operations) passed end to end in 3 hours 51
+receive-ring overruns on the host running the busy edge. They're the ordinary
+"host briefly too busy" kind, which TCP absorbs. The next full nested lab
+build (hosts, vSAN, vCenter, VCF Operations) passed end to end in 3 hours 51
 minutes.
 
 There are outer-layer alternatives: turning LRO off on the outer hosts,
 disabling Geneve offload in the outer NIC driver, or a promiscuous trunk.
-Each would cover every pod at once, and each changes shared hosts, so the
-per-host fix stays the recommendation until one of them is tested. The lab
-build automation now sets the options on every new nested host, and reboots
-it, before vSAN or vCenter exist.
+Each would cover every pod at once. Each also changes shared hosts, so the
+per-host fix stays the recommendation until one of them is tested.
+
+The lab build automation now sets the options on every new nested host, and
+reboots it, before vSAN or vCenter exist.
 
 ## Why this matters outside the lab
 
@@ -201,10 +220,10 @@ backups, file copies. People then chase the wrong layer for days, because
 every health check they know how to run is green.
 
 The same class of fault appears wherever encapsulated traffic crosses a
-virtual NIC that two layers of software both want to optimise: nested NSX,
-overlays over overlays, tunnel endpoints inside VMs. The method carries over
-too. Throughput tells you something is wrong; counters at both ends of each
-hop tell you where.
+virtual NIC that two layers of software both want to optimise. Think nested
+NSX, overlays over overlays, or tunnel endpoints inside VMs. The method
+carries over too. Throughput tells you something is wrong; counters at both
+ends of each hop tell you where.
 
 ## Rules learned
 
@@ -217,7 +236,8 @@ hop tell you where.
   Send all three every time.
 - Count, don't time. The nested `pkts rx err` (vsish, per receive queue)
   against the outer port's drops found the second fault in minutes. Refresh
-  the port state before reading the outer counters, or you get cached zeros.
+  the port state before reading the outer counters, or you get cached zeros:
+  very reassuring, and completely wrong.
 - A UDP burst at the same frame size is the cheapest discriminator: no errors
   with UDP means a TCP-only feature such as LRO or TSO, not the MTU or the
   fabric.

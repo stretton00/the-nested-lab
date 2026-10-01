@@ -17,10 +17,10 @@ cover:
 summary: "Two tarballs, both '.tar', both full of container images, both destined for the same Harbor. One loads with imgpkg; the other is rejected. The layout difference nobody explains, what actually survives a copy (tags, digests, platforms), and the three tools that can bridge the gap."
 ---
 
-You staged 40 container images for a dark site. The VKS bundle loads
-into Harbor first time with `imgpkg copy --tar`. The GPU Operator images —
-same tool, same command — fail. Both are tarballs. Both contain the images.
-What's different?
+You've staged 40 container images for a dark site. The VKS bundle loads
+into Harbor first time with `imgpkg copy --tar`. The GPU Operator images,
+same tool and same command, fail. Both are tarballs. Both contain the
+images. What's different?
 
 ```
 $ tar -tf images/nvidia_gpu-operator__v26.3.3.tar | grep -v ^blobs/
@@ -32,7 +32,8 @@ manifest.json
 sha256-05e0b744....tar.gz
 ```
 
-That's the whole answer, and it took an afternoon to find.
+That's the whole answer. It took me an afternoon to find, which is a
+generous amount of afternoon for a couple of filenames.
 
 ## Two layouts that look the same from the outside
 
@@ -41,10 +42,10 @@ That's the whole answer, and it took an afternoon to find.
 | Written by a registry-API puller / `crane pull --format=oci` / skopeo | **OCI image layout**: `oci-layout`, `index.json`, `blobs/sha256/*` | **No** |
 | Written by `imgpkg copy --to-tar` | **imgpkg tar**: `manifest.json`, `sha256-*.tar.gz` | Yes |
 
-imgpkg reads *only* the tar format imgpkg itself writes. There is no
-converter — `imgpkg push -f <dir>` would wrap the OCI directory as a new
+imgpkg reads *only* the tar format imgpkg itself writes. There's no
+converter: `imgpkg push -f <dir>` would wrap the OCI directory as a new
 image *layer*, not replicate the original image. If your staging pipeline
-pulled with anything other than imgpkg, imgpkg will not load it, full stop.
+pulled with anything other than imgpkg, imgpkg won't load it. Full stop.
 
 ## Three ways out
 
@@ -56,27 +57,28 @@ imgpkg copy -i nvcr.io/nvidia/gpu-operator:v26.3.3 --to-tar gpu-operator.tar
 imgpkg copy --tar gpu-operator.tar --to-repo harbor02/nvidia/gpu-operator
 ```
 
-Cost: a second download, and it's **bigger** — `imgpkg copy` has no
+The cost: a second download, and it's **bigger**. `imgpkg copy` has no
 platform filter, so you get every architecture in the manifest list
-(amd64 + arm64, sometimes s390x/ppc64le). 1.1 GiB became 2.3 GiB for the
-GPU Operator set. The upside: your arm64 node pool, if you ever have one,
-won't send you back to the internet.
+(amd64 and arm64, sometimes s390x and ppc64le). For the GPU Operator set,
+1.1 GiB became 2.3 GiB. The upside: your arm64 node pool, if you ever have
+one, won't send you back to the internet.
 
-**2. crane, no re-pull.** `crane` is a static Go binary — no install, no
-root — and it reads OCI layouts natively:
+**2. crane, no re-pull.** `crane` is a static Go binary (no install, no
+root), and it reads OCI layouts natively:
 
 ```
 crane push images/nvidia_gpu-operator__v26.3.3.tar harbor02/nvidia/gpu-operator:v26.3.3
 ```
 
-Cheapest in bytes. Requires getting one more binary through the airlock.
+It's the cheapest in bytes. It does mean getting one more binary through
+the airlock.
 
 **3. skopeo**, if it happens to be there. `skopeo copy oci-archive:... docker://...`.
 Usually it isn't.
 
-(There's a fourth — stand up a local `registry:2`, crane-push into it, then
-`imgpkg copy -i localhost:5000/... --to-repo harbor02/...` — which is
-strictly more work than 1 or 2. Don't.)
+(There's a fourth: stand up a local `registry:2`, crane-push into it, then
+`imgpkg copy -i localhost:5000/... --to-repo harbor02/...`. It's strictly
+more work than 1 or 2. Don't.)
 
 ## What survives the copy (verified, not assumed)
 
@@ -97,49 +99,55 @@ crane digest --platform linux/amd64 127.0.0.1:5099/real/k8s-mig-manager:v0.13.1
   sha256:69250353...                     # identical to the OCI-archive .digest sidecar
 ```
 
-Three things that settles:
+That settles three things:
 
 1. **The human tag survives.** The destination gets `:v0.13.1` *and*
-   imgpkg's `:sha256-<hex>.imgpkg`. This matters — Helm values reference
-   images by tag. (Only `--repo-based-tags` changes the tag shape; don't
-   pass it.)
+   imgpkg's `:sha256-<hex>.imgpkg`. This matters, because Helm values
+   reference images by tag. (Only `--repo-based-tags` changes the tag
+   shape; don't pass it.)
 2. **Digests survive** at both the manifest-list and per-platform level.
 3. **The amd64 bits are identical** to the OCI archive. A re-pull is a
    re-packaging, not different content.
 
 One trap: pinning by digest (`imgpkg copy -i repo@sha256:...`) *would*
-keep it single-arch and small — but then there's no tag to carry across,
-the destination only gets `:sha256-<hex>.imgpkg`, and your Helm values
+keep it single-arch and small. But then there's no tag to carry across.
+The destination only gets `:sha256-<hex>.imgpkg`, and your Helm values
 break. Don't do that either.
 
 ## The one that bites later: signatures
 
-imgpkg **drops cosign signatures by default** at every copy. If the thing
-you're loading is a platform bundle whose consumer checks signatures —
-and VKS supervisor services on VCF 9.0.1+ do, for versions above 3.4.0
-from a private registry — every content check passes, the activation
-proceeds, and then every new control-plane pod is denied by a webhook for
-running "in an untrusted namespace". Pull and push both need
-`--cosign-signatures`. The `.sig` artifacts are separate tags
-(`sha256-<digest>.sig`), ~100 KB for a whole bundle, so if the content is
-already in the registry you can ship just the signatures.
+imgpkg **drops cosign signatures by default** at every copy. That matters
+when the thing you're loading is a platform bundle whose consumer checks
+signatures. VKS supervisor services on VCF 9.0.1+ do, for versions above
+3.4.0 from a private registry.
+
+Every content check passes and the activation proceeds, so for a while
+everyone is happy. Then every new control-plane pod is denied by a
+webhook, for running "in an untrusted namespace".
+
+Pull and push both need `--cosign-signatures`. The `.sig` artifacts are
+separate tags (`sha256-<digest>.sig`), about 100 KB for a whole bundle. So
+if the content is already in the registry, you can ship just the
+signatures.
 
 That one gets [its own post](/series/dark-site-notes/).
 
 ## Why this matters outside the lab
 
-Air-gapped customers pay for every failed transfer twice — once in the
-change window that slipped, once in the impex cycle to try again. Staging
-discipline is the whole game: knowing which tool wrote each archive, what
-survives a copy, and proving the load against a throwaway registry *before*
-anything crosses the airlock. That rehearsal is a fixed part of how we
-prepare dark-site deliveries, and it's why the loading step is the boring
-part on the day.
+Air-gapped customers pay for every failed transfer twice: once in the
+change window that slipped, and once in the import/export cycle to try
+again.
+
+Staging discipline is the whole game. Know which tool wrote each archive,
+and what survives a copy. Prove the load against a throwaway registry
+*before* anything crosses the airlock. That rehearsal is a fixed part of
+how we prepare dark-site deliveries, and it's why the loading step is the
+boring part on the day. Boring is underrated at a dark site.
 
 ## Rules learned
 
-- `tar -tf x.tar | head` before anything else. `manifest.json` = imgpkg;
-  `oci-layout` = OCI archive. They are not interchangeable.
+- Run `tar -tf x.tar | head` before anything else. `manifest.json` means
+  imgpkg; `oci-layout` means an OCI archive. They are not interchangeable.
 - imgpkg loads **only** imgpkg tars. No converter exists.
 - OCI archives load with `crane push` (static binary) or skopeo.
 - `imgpkg copy` copies **all platforms** (bigger) and preserves tags and

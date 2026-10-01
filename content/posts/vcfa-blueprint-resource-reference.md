@@ -21,42 +21,53 @@ summary: "A complete guide to the blueprint designer in VCF Automation 9.1 All A
 
 The blueprint designer in a VCF Automation 9.1 All Apps organization offers
 sixteen items in three groups. Drag one onto the canvas and you get a few
-lines of YAML; what you may write underneath them is spread across the VM
-Service, VKS, NSX VPC and Automation guides, and for some items it is written
-down nowhere at all. This guide puts it in one place. For each item: what it
-creates, the YAML behind it, every field the platform accepts, a minimal
-snippet, recipes for the common jobs, the status fields worth reading, and the
-traps we hit.
+lines of YAML. What you may write underneath them is spread across the VM
+Service, VKS, NSX VPC and Automation guides. For some items, it's written
+down nowhere at all.
 
-Three things make it more than a list from memory:
+This guide puts it in one place. For each item, you get:
+
+- what it creates, and the YAML behind it;
+- every field the platform accepts;
+- a minimal snippet, and recipes for the common jobs;
+- the status fields worth reading;
+- the traps we hit.
+
+Three things make it more than a list from memory, which, given my memory,
+is just as well:
 
 - **The field lists come from the platform.** VCF Automation publishes the
-  schema of every blueprint resource type through its API, the designer
-  carries the schema of every palette item, the Supervisor publishes the
+  schema of every blueprint resource type through its API. The designer
+  carries the schema of every palette item. The Supervisor publishes the
   definition of every Kubernetes kind it serves, and VCF Automation's VPC API
-  publishes its own. Where they disagree, and they do, the tables follow what
-  the platform enforces.
+  publishes its own. Where they disagree (and they do), the tables follow
+  what the platform enforces.
 - **Every snippet was checked.** Each one went through VCF Automation's
-  validation API and every Kubernetes manifest through a server-side dry run
-  on the Supervisor. Five test blueprints, all of them in the downloads,
-  deployed every item for real; the remaining recipes are ones our lab
+  validation API, and every Kubernetes manifest through a server-side dry
+  run on the Supervisor. Five test blueprints (all of them in the downloads)
+  deployed every item for real. The remaining recipes are ones our lab
   catalog deploys every day.
 - **The traps are real.** Several of the most useful lines in this guide come
   from things that went wrong while testing: a NAT rule that ignored its
   port, a firewall rule that grew an "Any", a request that waits for an
   address that can never come.
 
-The platform it was checked on, f06: VCF Automation 9.1.0, a Supervisor on
-Kubernetes 1.32.9 with the VM Operator API at `v1alpha5`, VKS with ClusterClasses
-up to `builtin-generic-v3.6.0` and Kubernetes releases up to 1.35.5, and NSX
-VPCs. Names in the examples (`f06`, `nested-pod`, `vpc-student05`,
+We checked it on our lab platform, f06:
+
+- VCF Automation 9.1.0;
+- a Supervisor on Kubernetes 1.32.9, with the VM Operator API at `v1alpha5`;
+- VKS with ClusterClasses up to `builtin-generic-v3.6.0`, and Kubernetes
+  releases up to 1.35.5;
+- NSX VPCs.
+
+Names in the examples (`f06`, `nested-pod`, `vpc-student05`,
 `vsan-default-storage-policy`) are ours; use yours.
 
 In the field tables, **Values** gives a field's choices and default. Where the
 schema has neither, it gives an example, marked *e.g.*: the value from our
 tested blueprints wherever one of them set the field, otherwise a typical one.
 For an object or a list, the example is a short YAML flow value built from its
-fields (`...` marks the ones left out), and `<...>` stands for a name of yours.
+fields (`...` marks the ones left out). And `<...>` stands for a name of yours.
 
 ## The shape of a blueprint
 
@@ -113,18 +124,17 @@ What the expressions can read:
 | `${env.deploymentName}`, `${count.index}` | The deployment's name; the instance number in a counted resource. |
 | `${to_k8s_name(env.deploymentName, 63)}` | A string made safe for a Kubernetes name, as Broadcom's own samples use for `generateName`. |
 
-Each resource has, beside `type` and `properties`, `dependsOn` (an explicit
+Besides `type` and `properties`, each resource has `dependsOn` (an explicit
 order) and `allocatePerInstance` (see `count` below). `formatVersion: 2` also
-allows `metadata` and `variables`, and an output named
-`__deploymentOverview` whose Markdown value becomes the deployment's overview
-page.
+allows `metadata`, `variables`, and an output named `__deploymentOverview`,
+whose Markdown value becomes the deployment's overview page.
 
 ## How the palette maps to YAML
 
 Behind the sixteen items there are only five resource types, and one of them
-is not in the palette. Most items are a type with part of its YAML already
-filled in: a Kubernetes `apiVersion` and `kind` for the workload items, a VPC
-configuration `kind` for the VPC items.
+isn't in the palette. Most items are a type with part of its YAML already
+filled in. For the workload items, that's a Kubernetes `apiVersion` and
+`kind`; for the VPC items, it's a VPC configuration `kind`.
 
 | Palette item | YAML `type` | Pre-filled |
 |---|---|---|
@@ -151,27 +161,28 @@ configuration `kind` for the VPC items.
 Four consequences, worth knowing before any of the detail:
 
 - **Anything the Supervisor understands can go in a blueprint.** The workload
-  items are shortcuts; the generic Supervisor Resource takes any manifest the
+  items are shortcuts. The generic Supervisor Resource takes any manifest the
   namespace accepts. Our lab blueprints rely on a kind the palette doesn't
   offer, `SubnetConnectionBindingMap`, to carry VLANs.
 - **The VPC items are a closed list.** `CCI.VPC.Configuration` takes exactly
   the five kinds above. A VPC's load balancer is a sixth kind in VCF
-  Automation's VPC API, and a blueprint cannot make one; see
-  [VPC](#vpc).
+  Automation's VPC API, and a blueprint can't make one (see
+  [VPC](#vpc)).
 - **VCF Automation validates the outside, the platform the inside.** The
   validation API checks the resource type's own properties: required fields,
-  patterns, the namespace's two shapes. It does not look inside a `manifest`
-  or a `configs[].spec`; in our test `powerState: Sideways` passed
+  patterns, the namespace's two shapes. It doesn't look inside a `manifest`
+  or a `configs[].spec`: in our test, `powerState: Sideways` passed
   validation. Those are checked when the request runs.
 - **The designer's schemas are not the platform's.** The palette's forms
-  come from schemas bundled with VCF Automation; the Supervisor and the VPC
-  API check against their own. They disagree in a handful of places, listed
-  next.
+  come from schemas bundled with VCF Automation, while the Supervisor and
+  the VPC API check against their own. They disagree in a handful of
+  places, listed next.
 
 ## Where the designer and the platform disagree
 
 We compared each palette item's schema with the platform's definition of the
-same `apiVersion` and `kind`, field by field, and tested every difference:
+same `apiVersion` and `kind`. We went field by field (every bit as gripping
+as it sounds) and tested every difference:
 
 | Item | The designer offers | What the platform does |
 |---|---|---|
@@ -226,7 +237,7 @@ The deployment then holds `sec[0]` and `sec[1]`, and the namespace
 ### `wait`: when a resource is finished
 
 Without a `wait`, a Supervisor Resource is finished as soon as the Supervisor
-accepts the manifest. That is fine for a Secret and wrong for a VM whose
+accepts the manifest. That's fine for a Secret, and wrong for a VM whose
 address an output needs. `wait` takes conditions, fields, or both:
 
 ```yaml
@@ -258,14 +269,15 @@ The designer pre-fills a `wait` for some items:
 | everything else | none |
 
 The VM's default came from a 9.0 problem: VM status could come back empty,
-and Broadcom's KB 435137 gave this `wait` as the workaround. It is true
-before the VM is on, let alone has an address.
+and Broadcom's KB 435137 gave this `wait` as the workaround. That condition
+is true before the VM is even on, let alone has an address.
 
 VCF Automation also waits by itself in one place: **a Virtual Machine Service
 of type `LoadBalancer` is not finished until it has an external address**,
-with or without a `wait`. In a VPC without a load balancer that address never
-comes, and the request stays in progress until it times out. Ours was still
-`PARTIAL` after ten minutes, with the service `<pending>` on the Supervisor.
+with or without a `wait`. In a VPC without a load balancer, that address
+never comes, and the request stays in progress until it times out. Ours was
+still `PARTIAL` after ten minutes, with the service `<pending>` on the
+Supervisor.
 
 ### Reading a resource's live state
 
@@ -287,7 +299,7 @@ outputs:
 **Outputs are computed once, when the request finishes**, and not refreshed
 afterwards. A VM that waited only for `PoweredOn` finished before its guest
 reported an address, and its IP output stayed empty for good. Waiting on the
-condition that marks the guest's network as configured fixes it; this one
+condition that marks the guest's network as configured fixes it. This one
 gave the output `172.30.0.2`:
 
 ```yaml
@@ -431,8 +443,8 @@ Minimal, a new namespace with the zone and storage our class doesn't set:
 ## VPC
 
 `type: CCI.VPC`. Creates an NSX VPC in a region. Most blueprints use an
-existing VPC through the namespace's `vpcName`; this item is for a blueprint
-that brings its own network.
+existing VPC, through the namespace's `vpcName`. This item is for a
+blueprint that brings its own network.
 
 | Property | Notes |
 |---|---|
@@ -485,8 +497,8 @@ Configuration takes as `vpc`, and `name`, which a namespace takes as
 ## VPC Configuration
 
 `type: CCI.VPC.Configuration`. One item for every object that lives inside a
-VPC. You choose what with `kind`; the five palette entries below are this
-item with `kind` filled in. Each `configs[]` entry becomes one object, so one
+VPC, and `kind` chooses which. The five palette entries below are this item
+with `kind` filled in. Each `configs[]` entry becomes one object, so one
 resource can create several rules or groups of the same kind.
 
 | Property | Notes |
@@ -1457,8 +1469,8 @@ placement), `status.conditions`.
 
 `CCI.Supervisor.Resource` with `apiVersion: vmoperator.vmware.com/v1alpha5`,
 `kind: VirtualMachineService`. A Kubernetes-style service in front of VMs,
-selected by label. With `type: LoadBalancer` the VPC's load balancer gives it
-an external address, which is how a VM on a private subnet is reached from
+selected by label. With `type: LoadBalancer`, the VPC's load balancer gives
+it an external address. That's how a VM on a private subnet is reached from
 outside.
 
 | `spec` field | Notes |
@@ -1705,8 +1717,8 @@ the namespace.
 
 `CCI.Supervisor.Resource` with `apiVersion: cluster.x-k8s.io/v1beta1`,
 `kind: Cluster`. A VKS cluster, described by a ClusterClass topology. The
-designer's schema stops at `topology.variables`; what the variables can be
-comes from the ClusterClass, `builtin-generic-v3.6.0` on our platform.
+designer's schema stops at `topology.variables`. What the variables can be
+comes from the ClusterClass: `builtin-generic-v3.6.0` on our platform.
 
 | `spec` field | Notes |
 |---|---|
@@ -2143,15 +2155,18 @@ The five blueprints we deployed to test this guide, as they ran:
 
 ## Why this matters outside the lab
 
-Self-service on VCF Automation All Apps is only as good as its blueprints,
-and a blueprint is only as good as its author's knowledge of fields that
-are, for the most part, documented somewhere else or nowhere. The cost of
-not knowing shows up late: the designer saves the blueprint, the validator
-passes it, and the request fails ten minutes in, or worse, succeeds with a
-NAT rule that forwards every port or a firewall rule that allows any
-service. Knowing what the platform actually enforces turns that into a
-five-second dry run, and turns a catalog item from a demo into something a
-team can depend on.
+Self-service on VCF Automation All Apps is only as good as its blueprints.
+And a blueprint is only as good as its author's knowledge of the fields,
+which are mostly documented somewhere else, or nowhere.
+
+The cost of not knowing shows up late. The designer saves the blueprint,
+the validator passes it, and the request fails ten minutes in. Or worse, it
+succeeds, with a NAT rule that forwards every port or a firewall rule that
+allows any service.
+
+Knowing what the platform actually enforces turns that into a five-second
+dry run. It also turns a catalog item from a demo into something a team can
+depend on.
 
 ## Rules learned
 

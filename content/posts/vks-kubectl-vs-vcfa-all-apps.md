@@ -20,8 +20,10 @@ summary: "I built the same VKS cluster twice on the same supervisor: once with k
 ---
 
 The `Cluster` manifest is the same. That's the point of this post, and
-also the punchline: **VKS is VKS** whichever door you walk through. What
-differs is everything wrapped around the cluster — who can ask for it,
+also the punchline, so I've rather given away the ending. **VKS is VKS**
+whichever door you walk through.
+
+What differs is everything wrapped around the cluster: who can ask for it,
 what limits it, who can see it, and how it shows up in operations tooling.
 
 So: two clusters, one supervisor, one ClusterClass, two paths.
@@ -47,13 +49,15 @@ spec:
     variables: [ vmClass, storageClass ]
 ```
 
-Fifteen minutes later: a cluster. Requires a vSphere namespace that
-somebody (an admin) created, with a content library attached, a VM class
-assigned and quota set — all in the vSphere Client, by hand.
+Fifteen minutes later: a cluster.
+
+It does need a vSphere namespace first, and somebody (an admin) makes that
+by hand in the vSphere Client. They attach a content library, assign a VM
+class and set the quota. In this lab, that somebody is me.
 
 ## Path B: the same manifest, as a catalog request
 
-In All Apps the cluster is a `CCI.Supervisor.Resource` inside a [blueprint](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html),
+In All Apps, the cluster is a `CCI.Supervisor.Resource` inside a [blueprint](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html),
 sitting next to a `CCI.Supervisor.Namespace`:
 
 ```yaml
@@ -98,12 +102,14 @@ That last row is the one operations teams care about:
 ![VCF Operations: the VKS cluster object with gauges and time series](/images/ui/u8-ops-vks-summary.jpg)
 ![VCF Operations: topology view — the cluster and the apps on it, by name](/images/ui/u9-ops-vks-topology.jpg)
 
-The VCFA-deployed cluster appears in Ops' object model — supervisor →
-namespace → cluster → nodes → the workloads running on it — and its demo
-apps show up by name in the topology tab. The kubectl-built cluster is
-*also* visible to Ops (it's the same supervisor, after all), but it has no
-deployment, no owner, no request history and no quota lineage. It's a
-thing that exists, not a thing that was *provided*.
+The VCFA-deployed cluster appears in the Ops object model: supervisor, then
+namespace, then cluster, then nodes, then the workloads running on it. Its
+demo apps show up by name in the topology tab.
+
+The kubectl-built cluster is *also* visible to Ops (it's the same
+supervisor, after all). But it has no deployment, no owner, no request
+history and no quota lineage. It's a thing that exists, not a thing that
+was *provided*. As far as the paperwork goes, it simply turned up one day.
 
 
 ## The four gotchas, in order of how much time they cost
@@ -111,8 +117,8 @@ thing that exists, not a thing that was *provided*.
 Both paths share the same four traps on VKS 1.35 / VCF 9.1:
 
 1. **Our VCFA-created namespace had no content library.** Zero
-   `VirtualMachineImage`s → no cluster possible. `contentSources` in the
-   blueprint, or attach by hand. The 9.1 docs say a namespace class
+   `VirtualMachineImage`s means no cluster. Set `contentSources` in the
+   blueprint, or attach one by hand. The 9.1 docs say a namespace class
    [gets a content library automatically](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-projects-in-vcfa/create-a-namespace-class.html); our `large` class had none
    assigned.
 2. **`ClusterClass` lives in `vmware-system-vks-public`.** It 404s from
@@ -122,48 +128,54 @@ Both paths share the same four traps on VKS 1.35 / VCF 9.1:
    for a cluster. Use a real class: `small` 10000M/10000Mi, `medium`
    20000M, `large` 40000M.
 4. **VKS 1.35 enforces PodSecurity `restricted` by default.** Demo apps
-   that run as root get a ReplicaSet and *no pods*; the events say
+   that run as root get a ReplicaSet and *no pods*, and the events say
    `FailedCreate`. Label the app namespace
    `pod-security.kubernetes.io/enforce=privileged` (or fix the apps).
 
-Plus one that only shows up later: set `clusterNetwork.serviceDomain`
-explicitly. It's immutable after create, and a cluster without it produces
-a service DNS name that some add-ons build wrongly (`....svc.` with no
-domain). And pick a pod CIDR that doesn't shadow your VPC's external range
-— the stock `192.168.0.0/16` hid the org's `192.168.144.0/21` from inside
-the cluster.
+Plus one that waits until later to bite, as the best ones do. Set
+`clusterNetwork.serviceDomain` explicitly. It's immutable after create, and
+without it some add-ons build the service DNS name wrongly (`....svc.` with
+no domain).
+
+And pick a pod CIDR that doesn't shadow your VPC's external range. The
+stock `192.168.0.0/16` hid the org's `192.168.144.0/21` from inside the
+cluster.
 
 ## So which one?
 
 Use **kubectl** when you're the platform team proving something on a
-supervisor, or debugging. Use **All Apps** the moment a second person needs
-a cluster: the request form is the interface, the namespace class is the
-guardrail, the deployment is the audit trail, and Ops sees it as a
-provided service rather than a stray object.
+supervisor, or debugging.
+
+Use **All Apps** the moment a second person needs a cluster. The request
+form is the interface, and the namespace class is the guardrail. The
+deployment is the audit trail, and Ops sees a provided service rather than
+a stray object.
 
 The cluster's the same either way. The *service* isn't.
 
 ## Why this matters outside the lab
 
 The business case for the second path is governance without friction.
-Development teams get Kubernetes clusters on request; the platform team
-gets quotas, ownership, RBAC and a monitoring view of every cluster for
-free. That's the difference between a managed Kubernetes *service* and a
-collection of clusters nobody can account for — and it's typically the
-gap that stops organisations offering Kubernetes broadly at all. Everything
-the developers touch stays standard Kubernetes; the control lands around
-it, not on it.
+Development teams get Kubernetes clusters on request. The platform team
+gets quotas, ownership, RBAC and a monitoring view of every cluster, for
+free.
+
+That's the difference between a managed Kubernetes *service* and a
+collection of clusters nobody can account for. It's typically the gap that
+stops organisations offering Kubernetes broadly at all. Everything the
+developers touch stays standard Kubernetes; the control lands around it,
+not on it.
 
 ## Rules learned
 
-- The `Cluster` object is identical across paths — All Apps wraps it, it
+- The `Cluster` object is identical across paths. All Apps wraps it; it
   doesn't change it.
 - What All Apps adds: catalog RBAC, class-based quota, library attach,
   VPC pinning, deployment history, and a place in the Ops object model.
 - Four traps on 1.35: no library on our namespace class, `classNamespace`,
   tiny default quota, PodSecurity `restricted`.
-- Set `serviceDomain` and a non-shadowing pod CIDR at create; both are
-  immutable.
+- Set `serviceDomain` and a non-shadowing pod CIDR at create time. Both
+  are immutable.
 
 ## Broadcom documentation
 

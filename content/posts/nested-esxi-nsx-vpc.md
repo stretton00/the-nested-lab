@@ -20,33 +20,35 @@ summary: "Plain VPC subnets silently blackhole a nested ESXi host. Here's why �
 ---
 
 The host booted clean. Management IP configured, services up, DCUI happy.
-And every single packet it sent — ARP included — died silently.
+And every single packet it sent, ARP included, died silently. The host was
+having a lovely time; it just couldn't tell anyone.
 
-That's how my first attempt at running nested ESXi inside an NSX VPC ended,
-and the failure mode is nasty precisely because nothing *looks* wrong. If
-you're trying to build nested vSphere labs on VCF 9 with VPC networking,
-this post is the map of the minefield — and the design that gets you across
-it, verified live.
+That's how my first attempt at running nested ESXi inside an NSX VPC ended.
+The failure is nasty precisely because nothing *looks* wrong. If you're
+building nested vSphere labs on VCF 9 with VPC networking, this post is the
+map of the minefield. It's also the design that gets you across it, verified
+live.
 
 ## The setup
 
-VCF 9.1, vSphere Supervisor with NSX VPC networking. The goal: deploy nested
-ESXi hosts as ordinary VM Service VMs inside a tenant's VPC — no physical
-fabric changes, no provider tickets, no special treatment. The kind of thing
-you want for training pods, cert-study labs, or reproducing customer issues.
+VCF 9.1, with the vSphere Supervisor on NSX VPC networking. The goal was to
+deploy nested ESXi hosts as ordinary VM Service VMs inside a tenant's VPC.
+No physical fabric changes, no provider tickets, no special treatment. It's
+the kind of thing you want for training pods, cert-study labs, or
+reproducing customer issues.
 
-Nested ESXi needs what physical ESXi needs: a management network, vMotion,
-vSAN — traditionally VLANs trunked to every host. But a VPC is an overlay
-world. There are no VLANs to trunk. So what happens if you just attach the
-nested host's vNIC to a normal VPC subnet?
+Nested ESXi needs what physical ESXi needs: a management network, vMotion
+and vSAN. Traditionally, those are VLANs trunked to every host. But a VPC is
+an overlay world, and there are no VLANs to trunk. So what happens if you
+just attach the nested host's vNIC to a normal VPC subnet?
 
 ## Failure #1: the silent blackhole
 
-Here's the trap. A standard VPC subnet port gets **address bindings**: NSX
-pins the exact IP + MAC it allocated to that vNIC, and SpoofGuard drops
+Here's the trap. A standard VPC subnet port gets **address bindings**. NSX
+pins the exact IP and MAC it allocated to that vNIC, and SpoofGuard drops
 everything else.
 
-ESXi's vmk0 doesn't use the vNIC's MAC. It synthesises its own:
+ESXi's vmk0 doesn't use the vNIC's MAC. It makes up its own:
 
 ```
 vmk0
@@ -54,38 +56,38 @@ vmk0
 ```
 
 So every frame the management interface sends carries a MAC the port doesn't
-own. NSX drops it all — ARP, ping, everything — while the host itself boots
-green and reports healthy. There is no error anywhere. You just can't reach
-it, ever.
+own. NSX drops all of it (ARP, ping, everything), while the host itself boots
+green and reports healthy. There's no error anywhere, which is somehow worse
+than a bad one. You just can't reach it, ever.
 
 ![Standard VPC subnet port: SpoofGuard pins one IP+MAC; vmk0's synthesised MAC loses, silently](/images/post1-blackhole.svg)
 
-(There's a second trap stacked on top: our VPC subnets run with DHCP deactivated,
-so the appliance also sits at "waiting for DHCP" unless you inject static
-addressing via OVF `guestinfo.*` properties. NSX can give a VPC subnet a
-DHCP server or relay ([Add a Subnet to a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-subnet-for-the-vpc.html));
+(There's a second trap stacked on top. Our VPC subnets run with DHCP
+deactivated, so the appliance also sits at "waiting for DHCP" unless you
+inject static addressing through OVF `guestinfo.*` properties. NSX can give a
+VPC subnet a DHCP server or relay ([Add a Subnet to a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-subnet-for-the-vpc.html));
 ours had neither. More on that below.)
 
 ## The design that works: a trunk subnet + binding maps
 
-The fix isn't a hack — it's a first-class NSX VPC construct that's barely
+The fix isn't a hack. It's a first-class NSX VPC construct that's barely
 documented in the wild: **`SubnetConnectionBindingMap`**.
 
 The idea:
 
 1. Create one ordinary VPC subnet to act as a **trunk** (`sn-trunk`). The
    nested host's vNICs attach *only* here.
-2. Create a normal VPC subnet per traditional network — `sn-mgmt`,
-   `sn-vmotion`, `sn-vsan`.
+2. Create a normal VPC subnet for each traditional network: `sn-mgmt`,
+   `sn-vmotion` and `sn-vsan`.
 3. Bind each of those to the trunk with a **binding map carrying a VLAN tag**.
-   The nested host's vSwitch tags frames exactly as it would on metal; the
+   The nested host's vSwitch tags frames exactly as it would on metal. The
    binding map strips the tag and delivers the frame into the right subnet.
 
-Pure L2 demultiplexing. One vNIC carries N VLANs, the VPC never routes on a
-tag, and the physical fabric never sees any of it (the 802.1Q header rides
-inside the Geneve overlay).
+It's pure L2 demultiplexing. One vNIC carries N VLANs, and the VPC never
+routes on a tag. The physical fabric never sees any of it, because the
+802.1Q header rides inside the Geneve overlay.
 
-All of it is tenant-creatable through the supervisor as Kubernetes objects:
+A tenant can create all of it through the supervisor, as Kubernetes objects:
 
 ```yaml
 # sn-trunk and sn-mgmt are ordinary Private Subnets; the interesting object:
@@ -98,13 +100,14 @@ spec:
   vlanTrafficTag: 1610
 ```
 
-That direction is easy to invert, so it's worth saying twice: **the binding
-map belongs to the VLAN subnet and points at the trunk**, not the other way
-round.
+That direction is easy to get backwards, so it's worth saying twice: **the
+binding map belongs to the VLAN subnet and points at the trunk**, not the
+other way round.
 
 ![NSX: sn-trunk realized once per VPC, binding maps hanging off the VLAN subnets](/images/ui/u11b-nsx-sntrunk-per-vpc.jpg)
 
-On the nested host, nothing exotic — plain VST, like physical:
+On the nested host, nothing exotic: plain virtual switch tagging (VST), just
+like physical. It never suspects a thing.
 
 ```
 Name                Virtual Switch  Active Clients  VLAN ID
@@ -117,8 +120,8 @@ vSAN                vSwitch0                     1     1612
 ![Host Client: port groups on VLANs 1610 / 1611 / 1612](/images/ui/u12a-hostclient-portgroups-vlans.jpg)
 *The same three VLANs as the nested host sees them.*
 
-And because there's no DHCP in our VPC subnets, the nested-ESXi appliance gets
-its identity through OVF properties in the VM Service spec:
+And because there's no DHCP in our VPC subnets, the nested-ESXi appliance
+gets its identity through OVF properties in the VM Service spec:
 
 ```yaml
 bootstrap:
@@ -146,52 +149,51 @@ Two nested hosts, vNICs on `sn-trunk`, three VLANs. From host one:
 ![Live capture: vmnic0 down, vMotion and vSAN VLANs still passing at 0% loss](/images/demo-c6-nic-failover.jpg)
 *The transcript that matters: fail the first NIC, and every VLAN keeps flowing on the second — captured live.*
 
-Two more results worth knowing before you design around this:
+Two more results are worth knowing before you design around this.
 
-**Untagged frames are dropped.** I put a probe vmk on the untagged
-portgroup using the address NSX itself had allocated to the trunk port:
-100% loss, empty ARP table, while tagged traffic flowed happily beside it.
-Every network your nested host uses needs a VLAN and a binding map — there
-is no untagged fallback.
+**Untagged frames are dropped.** I put a probe vmk on the untagged port
+group, using the address NSX itself had allocated to the trunk port. The
+result was 100% loss and an empty ARP table, while tagged traffic flowed
+happily beside it, as if to make a point. Every network your nested host
+uses needs a VLAN and a binding map. There is no untagged fallback.
 
-**Failover behaves like real hardware.** With two vNICs on the trunk teamed
+**Failover behaves like real hardware.** With two vNICs on the trunk, teamed
 active/active, `esxcli network nic down -n vmnic0` moved every VLAN onto
-vmnic1 with zero loss — and the SSH session I was watching from never
-dropped. The vmk MAC migrating between trunk ports mid-flow is exactly the
-scenario that MAC-pinned standard ports would blackhole; the trunk carries
-it fine.
+vmnic1 with zero loss. The SSH session I was watching from never dropped.
+A vmk MAC moving between trunk ports mid-flow is exactly what MAC-pinned
+standard ports would blackhole. The trunk carries it fine.
 
 ## Why this matters outside the lab
 
 Running whole vSphere environments *inside* a VPC turns the platform into
-something most customers never had: a way to stand up complete, isolated
-copies of infrastructure on demand, without a physical fabric change and
-without waiting for anyone. That's what makes it commercially interesting:
+something most customers never had. It's a way to stand up complete,
+isolated copies of infrastructure on demand, with no physical fabric change
+and no waiting for anyone. That's what makes it commercially interesting:
 
 - **Training and certification labs** where every learner gets a real
   vSphere environment, not a shared one.
-- **Reproducing a customer problem** on a like-for-like copy instead of on
-  the customer's estate.
+- **Reproducing a customer problem** on a like-for-like copy, rather than on
+  their own estate.
 - **Rehearsing upgrades and migrations** end to end before the change
   window, then throwing the copy away.
 - **Vendor and feature evaluations** with real behaviour, at zero risk to
   production.
 
 This is the design Comms-care uses to give every consultant a dedicated
-environment, and the same pattern scales to a classroom or a proof-of-concept
+environment. The same pattern scales to a classroom or a proof-of-concept
 factory.
 
 ## Rules learned
 
 - A nested ESXi vNIC on a **standard** VPC subnet is dead on arrival:
-  vmk0's synthesised MAC loses to SpoofGuard, silently.
-- Attach nested-host vNICs **only to a trunk subnet**; one binding map per
-  VLAN; the map lives under the VLAN subnet and points at the trunk.
-- **No DHCP in our VPC subnets** — bootstrap addressing via `guestinfo.*`
-  (appliances) or cloud-init (Linux). Static IP plans are a feature in a
-  lab anyway.
-- ESXi's default TCP/IP stack has **one** gateway — set per-vmk override
-  gateways (`esxcli ... ipv4 set -g`) so vMotion/vSAN carry their own
+  vmk0's made-up MAC loses to SpoofGuard, silently.
+- Attach nested-host vNICs **only to a trunk subnet**, with one binding map
+  per VLAN. The map lives under the VLAN subnet and points at the trunk.
+- **No DHCP in our VPC subnets**, so bootstrap addressing goes through
+  `guestinfo.*` (appliances) or cloud-init (Linux). Static IP plans are a
+  feature in a lab anyway.
+- ESXi's default TCP/IP stack has **one** gateway. Set per-vmk override
+  gateways (`esxcli ... ipv4 set -g`) so vMotion and vSAN use their own
   subnet's gateway.
 - Recreating a VM **reallocates** its NSX addresses. Pin what you depend on.
 - MTU: everything here ran at 1500. Raise the trunk and the nested vDS
@@ -206,7 +208,7 @@ factory.
 - [Deploy VMs with Configurable OVF Properties in vSphere Supervisor](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/vm-service/deploy-vms-with-configurable-ovf-properties-vsphere-iaas-control-plane.html): OVF properties set through the VM Service's vAppConfig transport.
 - [Configure the VMkernel Adapter Gateway by Using esxcli Commands](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/9-0/vsphere-networking/setting-up-vmkernel-networking/configure-the-vmkernel-adapter-gateway-by-using-esxcli.html): a gateway per VMkernel adapter, set with esxcli.
 
-Next in this series: what happens when you want *ten* of these labs — with
+Next in this series: what happens when you want *ten* of these labs, with
 byte-identical IP plans, firewalled from each other by construction. That's
 where NSX VPCs go from "workaround" to genuinely better than physical.
 

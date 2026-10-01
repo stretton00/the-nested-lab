@@ -19,7 +19,7 @@ summary: "The lab build signed alice in to VCF Operations as its last check, and
 ---
 
 The last thing our Phase 6 lab build does is prove that the lab's Active
-Directory users can sign in to VCF Operations. On the overnight test lab it
+Directory users can sign in to VCF Operations. On the overnight test lab, it
 did exactly that:
 
 ```text
@@ -32,7 +32,7 @@ did exactly that:
 03:50:06  AD sign-in: checked - alice@acme.lab signs in
 ```
 
-Five minutes later I ran the same sign-in by hand:
+Five minutes later, I ran the same sign-in by hand:
 
 ```text
 alice    sign-in: HTTP 401 <!DOCTYPE html>
@@ -40,20 +40,21 @@ carol    sign-in: HTTP 401 <!DOCTYPE html>
 bob      sign-in: HTTP 200 token issued
 ```
 
-Nothing had touched the lab in between. Two of the three groups were empty;
-bob's still held him.
+Nothing had touched the lab in between. Two of the three groups were empty,
+and bob's still held him. Lucky bob.
 
 ## The setup
 
 Phase 6 of our [lab catalog](/posts/lab-catalog-property-groups/) builds a
 lab with its own AD domain, `acme.lab` on a domain controller `dc01`, plus a
-vCenter and VCF Operations 9.1, all nested. The VCF Operations step adds the
-domain as an Active Directory authentication source
-(`POST /suite-api/api/auth/sources`) and imports three groups with a role
-each (`POST /auth/usergroups`): `gg_vcf_ops_administrators` as
-Administrator, `gg_vcf_ops_operators` as PowerUser, `gg_vcf_ops_readonly` as
-ReadOnly. alice, carol and bob sit in one group each; labadmin is a second
-administrator.
+vCenter and VCF Operations 9.1, all nested.
+
+The VCF Operations step adds the domain as an Active Directory
+authentication source (`POST /suite-api/api/auth/sources`). Then it imports
+three groups with a role each (`POST /auth/usergroups`):
+`gg_vcf_ops_administrators` as Administrator, `gg_vcf_ops_operators` as
+PowerUser and `gg_vcf_ops_readonly` as ReadOnly. Each of alice, carol and
+bob sits in one group, and labadmin is a second administrator.
 
 VCF Operations 9.1 signs in only users it has imported, so the build imported
 the members too (`POST /auth/sources/{id}/users`).
@@ -61,10 +62,10 @@ the members too (`POST /auth/sources/{id}/users`).
 ## Wrong turn one: the import that drops the groups
 
 Earlier that night, on the previous test lab, every AD user was refused. Two
-details narrowed it down. A wrong password got a JSON 401, the right one an
-HTML page titled "Not Authorized", and an LDAP bind as alice worked. So the
-password was fine and the authorisation was not. The users existed in VCF
-Operations, but only in Everyone:
+details narrowed it down. A wrong password got a JSON 401, but the right one
+got an HTML page titled "Not Authorized". And an LDAP bind as alice worked.
+So the password was fine, and the authorisation was not. The users existed
+in VCF Operations, but only in Everyone:
 
 ```text
 group Everyone: roles= perms=/all= users=5
@@ -75,16 +76,18 @@ alice sign-in: HTTP 401 <!DOCTYPE html> <html> <head> <title>Not Authorized</tit
 ```
 
 The build had imported each user with their group IDs, and VCF Operations
-had dropped them. A `PUT` on the group answered 500 "Database Error". Importing
-the same users again, this time with each user's own ID from
-`GET /auth/users`, filled the groups and all three signed in. The build got
-that second import, and a real sign-in as its last check: the check that
-passed at 03:50.
+had dropped them. A `PUT` on the group answered 500 "Database Error", which
+was honest, if not helpful. Importing the same users again, this time with
+each user's own ID from `GET /auth/users`, filled the groups, and all three
+signed in.
+
+The build got that second import, plus a real sign-in as its last check.
+That's the check that passed at 03:50.
 
 ## Wrong turn two: blame the timing
 
 After I put the members back by hand, the groups held for nine minutes. So I
-replayed the build's sequence from a clean slate and polled the groups every
+replayed the build's sequence from a clean slate, polling the groups every
 10 seconds:
 
 ```text
@@ -98,15 +101,17 @@ replayed the build's sequence from a clean slate and polled the groups every
 ```
 
 Every group emptied about 105 seconds after it was created, and the
-authentication source had its group sync (`autoSync`) on. My workaround that
-morning turned the sync off, waited until 150 seconds after the import,
-re-imported any group that came up short and signed in one member of each.
-It passed, fresh and on a re-run.
+authentication source had its group sync (`autoSync`) on.
 
-It also meant VCF Operations no longer followed AD: a user added to a group
+My workaround that morning turned the sync off, waited until 150 seconds
+after the import, re-imported any group that came up short and signed in one
+member of each. It passed, fresh and on a re-run. I was briefly pleased with
+myself.
+
+It also meant VCF Operations no longer followed AD. A user added to a group
 could not sign in until someone ran the script again. And a group mapped to
 a role should not lose its members to its own sync. Either the product was
-broken or I was using it wrong.
+broken, or I was using it wrong.
 
 ## One field
 
@@ -117,27 +122,33 @@ starts with the sentence that explained the night:
 > For LDAP/AD groups the distinguishedName should be provided in the name
 > field.
 
-The rest of the note says that `displayName` only matters at import and takes
-the value of `name` when it is left out. It also advises checking first that
-the group exists in the source, with `/api/auth/sources/{id}/usergroups/search`,
-because importing a group the source does not know is not an error: VCF
-Operations creates a new group of that name instead.
+It had been there all along, as these things usually are.
+
+The rest of the note says that `displayName` only matters at import, and
+takes the value of `name` when it is left out. It also advises checking first
+that the group exists in the source, with
+`/api/auth/sources/{id}/usergroups/search`. Importing a group the source does
+not know is not an error. VCF Operations creates a new group of that name
+instead.
 
 Our build sent `name: "gg_vcf_ops_readonly"`. No group has that
 distinguished name, so VCF Operations neither refused the call nor warned. It
 created a new group of that name, attached to the lab domain's source and
 linked to nothing in AD. The role was right, and so were the members pushed
-in by hand. Then the group sync did its job: as far as it could tell, that
-group had no members in AD, so it emptied it. The search call the note
-mentions returns the DN to use.
+in by hand.
+
+Then the group sync did its job. As far as it could tell, that group had no
+members in AD, so it emptied it. The search call the note mentions returns
+the DN to use.
 
 ![Short name: a new, unlinked group the sync empties. DN: the AD group, which the sync fills](/images/vcf-ops-ad-groups-by-dn-diagram.svg)
+*The same group, sent two ways. Only the distinguished name links it to AD, so only that one keeps its members after a sync.*
 
 ## The proof
 
-On the rehearsal lab I deleted the read-only group and bob's imported user,
-imported the group by its DN with the short name as `displayName`, switched
-the source's sync back on and started a sync:
+On the rehearsal lab, I deleted the read-only group and bob's imported user.
+Then I imported the group by its DN, with the short name as `displayName`,
+switched the source's sync back on and started a sync:
 
 ```text
 14:37:43 deleted user bob@acme.lab
@@ -150,7 +161,7 @@ the source's sync back on and started a sync:
 14:45:28  464 s  members 1: bob@acme.lab | bob@acme.lab signs in
 ```
 
-Nobody imported bob this time: the sync did, within a second, and he stayed
+Nobody imported bob this time. The sync did, within a second, and he stayed
 for eight minutes.
 
 Then the part the workaround had given up: following AD. I created a user
@@ -167,32 +178,37 @@ group:
 ```
 
 alice is in that list because an earlier test had added her to the group in
-AD. The automatic sync had not picked her up in six minutes of watching; it
-runs roughly every 45 minutes. A sync by hand makes an AD change count at
-once: `PUT /auth/sources/{id}/usergroups/synchronize`, or in the UI
+AD. The automatic sync had not picked her up in six minutes of watching. It
+runs roughly every 45 minutes.
+
+A sync by hand makes an AD change count at once. Use
+`PUT /auth/sources/{id}/usergroups/synchronize`, or in the UI go to
 **Operate** > **Administration Control Panel** > the **Authentication Sources**
 tile, select the source, then **Synchronize User Groups**.
-Another test found the last gap: the lab's `student` account, added to the
+
+Another test found the last gap. The lab's `student` account, added to the
 group, never appeared. It had no user principal name, and the source
 identifies users by `userPrincipalName`, so VCF Operations' own user search
 could not find it.
 
 ## What the build does now
 
-The VCF Operations step looks up each group's DN and members in AD over LDAP,
-then imports the group by DN, with the short name as the display name:
+The VCF Operations step looks up each group's DN and members in AD over LDAP.
+Then it imports the group by DN, with the short name as the display name:
 
 ```powershell
 $g = Invoke-Json POST "$suite/auth/usergroups" @{ authSourceId = $src.id; name = $w.dn; displayName = $gn; 'role-permissions' = @(@{ roleName = $w.role; allowAllObjects = $true }) } $auth
 ```
 
-It creates the source with the group sync on and starts a sync. It waits up
-to five minutes for the members, and imports directly any the sync missed,
+It creates the source with the group sync on, and starts a sync. It waits up
+to five minutes for the members, then imports directly any the sync missed,
 twice, because of the first-import drop. It checks 150 seconds after the
 import that the groups kept their members, and signs in one member of each
-group. A failure leaves `OPS-AD-FAILED.txt` on the jump host's desktop with
-the reason and the command that runs the step again; a run that succeeds
-removes it.
+group.
+
+A failure leaves `OPS-AD-FAILED.txt` on the jump host's desktop, with the
+reason and the command that runs the step again. A run that succeeds removes
+it.
 
 A run on a lab built before the fix replaces the short-name groups and turns
 the sync back on. The rehearsal lab still had two of them:
@@ -218,16 +234,17 @@ The sync brought every member itself.
 Connected by hand, you pick the group from a directory search, and the
 search result carries its distinguished name. Automation that types the
 group's name skips that step, and this API accepts it. Everything then looks
-right: the group exists, it has its role, the first sign-in works. It fails
-later, for the users rather than for the build.
+right: the group exists, it has its role, and the first sign-in works. It
+fails later, for the users rather than for the build.
 
-Directory-backed roles are what make access manageable and auditable: people
+Directory-backed roles are what make access manageable and auditable. People
 join and leave once, in the directory, and every tool follows. A tool that has
-quietly stopped following keeps whatever it was last told. And an API that
-turns an unknown reference into a new object instead of an error is common
-well beyond VCF Operations. The cure is the same everywhere: read back what
-you created, check it is linked to what you meant, and check again after the
-platform's background jobs have had their turn.
+quietly stopped following keeps whatever it was last told.
+
+And an API that turns an unknown reference into a new object, instead of an
+error, is common well beyond VCF Operations. The cure is the same everywhere:
+read back what you created, check it is linked to what you meant, and check
+again after the platform's background jobs have had their turn.
 
 ## Rules learned
 
@@ -236,17 +253,17 @@ platform's background jobs have had their turn.
   new, unlinked group, without an error.
   `POST /auth/sources/{id}/usergroups/search` returns the DN.
 - An unlinked group loses its members at the next group sync, here about
-  105 seconds after the import. Turning the sync off hides the bug and stops
-  VCF Operations following AD.
+  105 seconds after the import. Turning the sync off hides the bug, and
+  stops VCF Operations following AD.
 - VCF Operations 9.1 signs in imported users only. A linked group's sync
   imports its members that have the source's user name attribute, here
   `userPrincipalName`.
-- A first direct user import can drop the users' groups; importing again with
+- A first direct user import can drop the users' groups. Importing again with
   each user's `id` sets them.
-- A wrong password gets a JSON 401; a user with no role gets an HTML "Not
+- A wrong password gets a JSON 401. A user with no role gets an HTML "Not
   Authorized" page.
 - Check after the background jobs: one real sign-in per group, minutes after
-  the import, not seconds.
+  the import, not seconds. Background jobs like to have the last word.
 
 ## Broadcom documentation
 

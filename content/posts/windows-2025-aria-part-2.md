@@ -19,27 +19,28 @@ summary: "05-build-master.ps1 runs at every startup until the build is done. Fla
 ---
 
 [Part 1](/posts/windows-2025-aria-part-1/) ended with a startup scheduled
-task registered and `05-build-master.ps1` staged locally. From this point
-the machine will reboot at least twice more — Windows Updates insists, and
-the build ends with a clean reboot — and every one of those boots runs the
-same script. The script has to *converge* on a finished build no matter how
-many times it's invoked.
+task registered and `05-build-master.ps1` staged locally. From here, the
+machine reboots at least twice more. Windows Updates insists, as it tends
+to, and the build ends with a clean reboot.
+
+Every one of those boots runs the same script. So the script has to
+*converge* on a finished build, however many times it runs.
 
 That's a state machine, and it's built from three very boring mechanisms.
 
 ## The three mechanisms
 
 **1. Master kill switch.** If `100_build_complete.flag` exists, exit
-immediately. A stray task run after completion does nothing.
+straight away. A stray task run after completion does nothing.
 
 **2. Per-step flags.** Every install step writes
-`NN_<Step>_installed.flag` on success and is skipped on subsequent runs.
+`NN_<Step>_installed.flag` when it succeeds, and is skipped on later runs.
 
 **3. Persisted state.** `data-state.json` holds the provisioning start
-time and per-step timings, re-loaded on every boot. So the final report
-shows the *true* duration of every step across the whole build, not just
-the last boot — and a step re-observed as SKIPPED after a reboot never
-overwrites its real recorded duration.
+time and the timing of each step, and it's reloaded on every boot. So the
+final report shows the *true* duration of every step across the whole
+build, not just the last boot. A step seen again as SKIPPED after a reboot
+never overwrites its real recorded duration.
 
 ```
 every boot:
@@ -55,7 +56,8 @@ every boot:
 
 ## Phase 1: software, declaratively
 
-The stack is a single array — the designed extension point:
+The stack is a single array, and that array is the designed extension
+point:
 
 ```powershell
 $softwarePayload = @(
@@ -71,35 +73,37 @@ $softwarePayload = @(
 )
 ```
 
-Adding a product is adding an element. Each installer runs from the local
-staging copy with a hung-installer timeout; exit codes 0 and **3010**
-(success, reboot required) count as success. When a `Reboot=$true` step
-succeeds, the script restarts the machine and exits; on the next boot the
-task re-runs it, completed steps skip via their flags, execution resumes at
-the next step.
+Adding a product means adding an element. Each installer runs from the
+local staging copy, with a timeout in case it hangs. Exit codes 0 and
+**3010** (success, reboot required) both count as success.
 
-Post-install health isn't "installer said OK" — it's **flag present AND
+When a `Reboot=$true` step succeeds, the script restarts the machine and
+exits. On the next boot the task runs it again. The completed steps skip
+via their flags, and the run carries on at the next step.
+
+Post-install health isn't "the installer said OK". Installers say OK with
+great confidence and variable accuracy. Health is **flag present AND
 service running AND install path exists**, with a 120-second wait for
-delayed-start services. Windows Updates is flag-only; there's no service
-to check.
+delayed-start services. Windows Updates is flag-only, as there's no
+service to check.
 
 ## Phase 2: cleanup — leave nothing behind
 
-- **Eject the config-drive ISO.** In Session 0 there's no Explorer, so
-  the usual shell ejection doesn't work. A P/Invoke to `winmm`'s
+- **Eject the config-drive ISO.** Session 0 has no Explorer, so the usual
+  shell ejection doesn't work. A P/Invoke to `winmm`'s
   `mciSendString("set cdaudio door open")` does.
 - **Restore UAC.** `EnableLUA` and `FilterAdministratorToken` were relaxed
-  in the base image so the build could run unattended; re-enable both.
+  in the base image so the build could run unattended. Turn both back on.
 - **Uninstall cloudbase-init.** Stop and delete the service, kill its
-  processes, run the uninstaller silently, remove the directory. Guarded
-  by `99_cleanup_complete.flag`.
+  processes, run the uninstaller silently and remove the directory.
+  Guarded by `99_cleanup_complete.flag`.
 
-The startup task is deleted *before* validation, so the health check can
-truthfully report "no automation task remains".
+The startup task is deleted *before* validation. That way the health check
+can truthfully report "no automation task remains".
 
 ## Phase 3: collect the evidence
 
-The script assembles `data-validation.json` — the single input to the
+The script assembles `data-validation.json`, the single input to the
 report in [part 3](/posts/windows-2025-aria-part-3/):
 
 | Collector | Captures |
@@ -114,37 +118,49 @@ report in [part 3](/posts/windows-2025-aria-part-3/):
 | Installed apps | both uninstall hives (64-bit and WOW6432) |
 
 The verdict is strict: **`GuestStatus = Success` only if every software
-item is healthy *and* the machine is domain-joined.** Anything else renders
-the report banner red.
+item is healthy *and* the machine is domain-joined.** Anything else turns
+the report banner red. The report doesn't do "mostly fine".
 
 ## Phases 4 and 5: publish, then self-destruct
 
-Remap the share with the **write** account (5 × 10 s retries — a
-different account from the read-only one used for pulls; a compromised
-build guest can't tamper with the engine). Render the HTML report locally.
-Write `100_build_complete.flag` — kill switch armed. Copy the report plus
-`Data\`, `Flags\`, `Logs\` to `\\share\Builds\<image>\<HOSTNAME>\`. Stop the
-transcript *before* copying logs so the final log is complete and unlocked.
+Remap the share with the **write** account, with 5 × 10 s retries. It's a
+different account from the read-only one used for pulls, so a compromised
+build guest can't tamper with the engine.
 
-Then: delete the startup task; overwrite both share passwords in the
-on-disk payload with `*** SCRUBBED ***`; delete `Data\` and `Staging\`
-(and `Flags\`/`Logs\` if the share copy succeeded); delete the sibling
-scripts and itself; remove `Scripts\`; reboot one final time.
+Render the HTML report locally. Write `100_build_complete.flag`: kill
+switch armed. Copy the report plus `Data\`, `Flags\` and `Logs\` to
+`\\share\Builds\<image>\<HOSTNAME>\`. Stop the transcript *before* copying
+the logs, so the final log is complete and unlocked.
 
-The delivered server boots clean, domain-joined, agents running, and
-carries **no credentials, payloads or tooling**.
+Then:
+
+- delete the startup task;
+- overwrite both share passwords in the on-disk payload with
+  `*** SCRUBBED ***`;
+- delete `Data\` and `Staging\` (and `Flags\` and `Logs\`, if the share
+  copy succeeded);
+- delete the sibling scripts and itself;
+- remove `Scripts\`;
+- reboot one final time.
+
+The delivered server boots clean and domain-joined, with its agents
+running. It carries **no credentials, payloads or tooling**.
 
 ## The reboot sequence of a nominal build
 
 1. After static networking (`00`, exit 1003)
-2. After engine pull (`03`, exit 1003) — ends the cloudbase-init phase
+2. After the engine pull (`03`, exit 1003), which ends the cloudbase-init
+   phase
 3. After Windows Updates (`05`, `Reboot=$true`)
 4. Final, after publish and self-destruct
 
-The report's timeline chart finds the update reboot automatically: any gap
+Four reboots, and only one of them is Windows Updates' doing. We asked for
+the other three.
+
+The report's timeline chart finds the update reboot by itself. Any gap
 over 30 seconds between steps is shaded and labelled REBOOT.
 
-At completion the `Flags\` folder is the whole history of the build in
+When it's done, the `Flags\` folder is the whole history of the build, in
 file names:
 
 ```
@@ -170,13 +186,14 @@ And the persisted timings turn into this, in the report from [part
 
 ## Why this matters outside the lab
 
-What customers get from a reboot-safe build is predictability: every
+What customers get from a reboot-safe build is predictability. Every
 server takes the same steps in the same order, survives the reboots
-Windows insists on, and finishes clean — with no tooling, no credentials
-and no leftover tasks on the delivered machine. That last part matters to
-security reviewers as much as the first part matters to operations. And
-because every step's timing is recorded, "why did this build take twice as
-long?" has an answer instead of a guess.
+Windows insists on, and finishes clean. The delivered machine has no
+tooling, no credentials and no leftover tasks.
+
+That last part matters to security reviewers as much as the first part
+matters to operations. And because every step's timing is recorded, "why
+did this build take twice as long?" has an answer instead of a guess.
 
 ## Rules learned
 
@@ -185,8 +202,8 @@ long?" has an answer instead of a guess.
 - Treat exit **3010** as success. Let the *step* declare whether to
   reboot; the loop handles it.
 - Health = flag **and** service **and** path. Installer exit codes lie.
-- Read platform-injected metadata with **retries** — the injecting
-  workflow may land after the guest starts looking.
+- Read platform-injected metadata with **retries**. The workflow that
+  injects it may land after the guest starts looking.
 - Two share accounts: read-only for pulls, write-only for publishing.
 - Delete the task before validating, so "no task remains" is checkable.
 - Stop the transcript before you copy the logs.

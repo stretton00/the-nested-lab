@@ -19,10 +19,10 @@ cover:
 summary: "KubeDoom, KubeInvaders, kube-ops-view, Pac-Man with persistent MongoDB, podinfo, Goldpinger and a Prometheus stack — deployed onto a VCFA-provisioned VKS cluster in a tenant VPC, each behind its own NSX VIP. The proper tenanted path (not the supervisor shortcut), what the platform does for free, and the traps."
 ---
 
-Every platform needs a demo stack — something that looks alive on a
-projector and quietly exercises every layer underneath. This is the lab's:
-seven apps on a VKS cluster that VCF Automation provisioned, in a tenant
-VPC, each app behind its own load-balancer VIP.
+Every platform needs a demo stack: something that looks alive on a
+projector and quietly exercises every layer underneath. Ours is seven apps
+on a vSphere Kubernetes Service (VKS) cluster that VCF Automation
+provisioned, in a tenant VPC, each behind its own load-balancer VIP.
 
 ```
 kubedoom       192.168.144.20:5900   (VNC — yes, it kills pods)
@@ -39,26 +39,30 @@ prometheus     (in-cluster: KSM + node-exporter, 11/11 targets up)
 
 ## The path that matters: tenanted, not shortcut
 
-The first version of this stack was deployed *against the supervisor* —
-an admin kubeconfig, a vSphere namespace, `kubectl apply`. It worked and
-it was wrong, for the reason the [previous
-post](/posts/vks-kubectl-vs-vcfa-all-apps/) spells out: nothing about it
-was *provided* to anyone. So it was torn down (seven apps, cluster, VPC and
-VIPs gone in about seven minutes) and rebuilt the proper way:
+I deployed the first version of this stack *against the supervisor*: an
+admin kubeconfig, a vSphere namespace, `kubectl apply`. It worked, and it
+was wrong, for the reason the [previous
+post](/posts/vks-kubectl-vs-vcfa-all-apps/) spells out. Nothing about it
+was *provided* to anyone.
+
+So I tore it down: seven apps, cluster, VPC and VIPs, gone in about seven
+minutes. Demolition, as ever, was the quick part. Then I rebuilt it the
+proper way:
 
 ```
 dev-01 org → default-project → SupervisorNamespace (class large, region f06, VPC default-f06)
           → VKS cluster vks-demo01 → seven apps
 ```
 
-All created **through VCF Automation** — the CCI API for the namespace and
-cluster, then the apps via the cluster's own kubeconfig. Two auth facts
-worth writing down, because they cost a cycle each:
+Everything went in **through VCF Automation**: the Cloud Consumption
+Interface (CCI) API for the namespace and cluster, then the apps through
+the cluster's own kubeconfig. Two auth facts are worth writing down; each
+cost me a cycle:
 
 - A **provider** service account reaches the cloud API only. CCI
-  (`/cci/kubernetes/apis/...`) rejects provider tokens with 401 — it needs
-  an **org-scoped** service account.
-- Device-flow login uses the service account's own UUID as `client_id`
+  (`/cci/kubernetes/apis/...`) rejects provider tokens with a 401. It needs an
+**org-scoped** service account.
+- Device-flow login uses the service account's own UUID as the `client_id`
   (not its software ID), against the tenant endpoint
   `/oauth/tenant/<org>/device_authorization`.
 
@@ -66,76 +70,86 @@ worth writing down, because they cost a cycle each:
 
 ## What the platform does for free
 
-Each app is an ordinary Deployment + `Service` of type `LoadBalancer`. The
-supervisor turns each service into an NSX VPC LB virtual server and hands
-back a VIP from the org's external block. No ingress controller, no
-MetalLB, no port-forwarding — seven services, seven VIPs, done. Pac-Man's
-MongoDB asks for a PVC and gets a vSAN-backed volume through the CSI the
-supervisor already installed. Goldpinger runs as a DaemonSet across every
-node including the control plane and draws the node-to-node mesh live.
+Each app is an ordinary Deployment plus a `Service` of type `LoadBalancer`.
+The supervisor turns each service into an NSX VPC load-balancer virtual
+server, and hands back a VIP from the org's external block. No ingress
+controller, no MetalLB, no port-forwarding. Seven services, seven VIPs, done.
 
-That's three platform services (LB, storage, networking) exercised by apps
-that know nothing about VCF.
+Pac-Man's MongoDB asks for a persistent volume and gets one on vSAN,
+through the CSI driver the supervisor already installed. The high scores
+are on enterprise storage. Priorities.
+
+Goldpinger runs as a DaemonSet on every node, the control plane included,
+and draws the node-to-node mesh live.
+
+That's three platform services (load balancing, storage and networking)
+exercised by apps that know nothing about VCF.
 
 ## The traps
 
-**Supervisor refuses cluster-scoped RBAC — even to admin.** Demo apps
-that need ClusterRoles (kube-ops-view, Goldpinger, KubeDoom) *must* live
-on a guest cluster. You cannot run them as vSphere Pods on the supervisor.
+**The supervisor refuses cluster-scoped RBAC, even to admin.** Demo apps
+that need ClusterRoles (kube-ops-view, Goldpinger, KubeDoom) *must* live on
+a guest cluster. You can't run them as vSphere Pods on the supervisor.
 
 **PodSecurity `restricted` is the VKS 1.35 default.** Half the demo set
-runs as root. Symptom: Deployment shows `0 UP-TO-DATE`, ReplicaSet exists,
-zero pods, events say `FailedCreate`. Fix: label the namespace
-`pod-security.kubernetes.io/enforce=privileged` — and mention in the demo
-that you did, because it's a teaching moment.
+runs as root. The symptom: the Deployment shows `0 UP-TO-DATE`, the
+ReplicaSet exists, zero pods, and the events say `FailedCreate`. The fix:
+label the namespace `pod-security.kubernetes.io/enforce=privileged`. Then
+say so in the demo, because it's a teaching moment.
 
-**node-exporter without `hostNetwork`.** The VPC fabric blocks pod → node
-IP scrapes, so the stock DaemonSet's `hostNetwork: true` doesn't help;
-run it as a normal pod and let Prometheus scrape it in-cluster.
+**node-exporter without `hostNetwork`.** The VPC fabric blocks scrapes from
+a pod to a node IP, so the stock DaemonSet's `hostNetwork: true` doesn't
+help. Run it as a normal pod and let Prometheus scrape it in-cluster.
 
 **Docker Hub is flaky from behind a proxy.** TLS handshake timeouts put
-pods into kubelet's image-pull backoff. Deleting the stuck pods bypasses
-the backoff; a Harbor proxy-cache project fixes it properly.
+pods into kubelet's image-pull backoff, where they sit and sulk. Deleting
+the stuck pods gets round the backoff. A Harbor proxy-cache project fixes
+it properly.
 
 **Pod CIDR shadowing.** The stock `192.168.0.0/16` pod range hid the
-org's `192.168.144.0/21` external block *from inside the cluster* — apps
-couldn't reach their neighbours' VIPs. Pod CIDR is now `172.16.0.0/16`.
+org's `192.168.144.0/21` external block *from inside the cluster*, so apps
+couldn't reach their neighbours' VIPs. The pod CIDR is now `172.16.0.0/16`.
 
 ## Automation notes
 
-The whole stack is a checkbox on the lab's catalog item that deploys a
-supervisor: `installDemoApps` creates the cluster (newest compatible
-Kubernetes release, newest built-in ClusterClass, auto-detected), applies
-the seven apps, and reports their URLs in the deployment summary. Run
-integrated on a fresh environment: 16.7 minutes to `CREATE_SUCCESSFUL`.
-An immediate re-run: 3.3 minutes, all steps idempotent — which is the
-number I actually care about, because it means a broken demo is a re-run,
-not a rebuild.
+The whole stack is one checkbox on the lab's catalog item that deploys a
+supervisor. `installDemoApps` creates the cluster, with the newest
+compatible Kubernetes release and the newest built-in ClusterClass, both
+auto-detected. Then it applies the seven apps and reports their URLs in the
+deployment summary.
+
+On a fresh environment, an integrated run takes 16.7 minutes to
+`CREATE_SUCCESSFUL`. An immediate re-run takes 3.3 minutes, every step
+idempotent. That's the number I actually care about: it makes a broken demo
+a re-run, not a rebuild. Demos have an uncanny sense of when they're being
+watched.
 
 ## Why this matters outside the lab
 
-A demo stack sounds like a toy. It's actually the fastest way to make a
-platform *legible* to people who don't read YAML: a customer watches a
-request become a cluster, watches seven services get their own addresses,
-opens one and plays it. Everything underneath — self-service Kubernetes,
-load balancing, persistent storage, isolation — is being exercised in a way
-a non-technical stakeholder can see working. The same stack is what we
-put in front of a new team on day one, and the same idempotent deploy is
-what makes it safe to demonstrate live: if it breaks on stage, it re-runs
-in three minutes.
+A demo stack sounds like a toy. To be fair, one of the apps is Pac-Man.
+But it's actually the fastest way to make a platform *legible* to people who
+don't read YAML. A customer watches a request become a cluster, watches
+seven services get their own addresses, then opens one and plays it.
+
+Everything underneath gets exercised (self-service Kubernetes, load
+balancing, persistent storage, isolation), and a non-technical stakeholder
+can see it working. The same stack is what we put in front of a new team on
+day one. And the same idempotent deploy is what makes it safe to
+demonstrate live: if it breaks on stage, it re-runs in three minutes.
 
 ## Rules learned
 
-- Demo apps that need cluster-scoped RBAC **must** run on a guest cluster;
-  the supervisor won't grant it, even to admin.
-- Build the stack through the **tenanted path** (org SA → CCI → namespace
-  → cluster → apps). Same apps, but now they're provided, quota'd and
-  visible in Ops.
-- VKS 1.35: `restricted` PodSecurity by default. Label the namespace and
+- Demo apps that need cluster-scoped RBAC **must** run on a guest cluster.
+  The supervisor won't grant it, even to admin.
+- Build the stack through the **tenanted path**: org service account, then
+  CCI, then namespace, then cluster, then apps. Same apps, but now they're
+  provided, quota'd and visible in Ops.
+- VKS 1.35 has `restricted` PodSecurity by default. Label the namespace and
   say why.
-- `LoadBalancer` per app = NSX VIP per app. No ingress needed for a demo.
+- One `LoadBalancer` per app means one NSX VIP per app. No ingress needed
+  for a demo.
 - Pick a pod CIDR that doesn't overlap the VPC external block.
-- Make the deploy idempotent; a demo that re-runs in 3 minutes is one you
+- Make the deploy idempotent. A demo that re-runs in 3 minutes is one you
   can afford to break on stage.
 
 ## Broadcom documentation

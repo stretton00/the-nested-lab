@@ -18,8 +18,8 @@ cover:
 summary: "Students request their own labs; trainers build a lab for any student. We kept two copies of each student blueprint to do it, and sharing one catalog item across projects did not reach the students on VCF Automation 9.1. Now one blueprint per phase decides on the server, from a trainers list in a property group, where each lab lands. The expression, the proof, and three test requests on f06."
 ---
 
-Phase 1 of our lab catalog existed twice, and so did Phase 2. The catalog API
-on f06 listed them like this:
+Phase 1 of our lab catalog existed twice, and so did Phase 2. That's one more
+of each than anybody needs. The catalog API on f06 listed them like this:
 
 ```text
 lab-phase-1-dc-build         global=False requestable=True  projects=['67df468d']
@@ -31,13 +31,14 @@ lab-phase-2-blank-hosts      global=False requestable=True  projects=['5330317d'
 ```
 
 The first pair lived in the instructors' project (on f06 simply
-`default-project`) with a lab name field, so a trainer could build or rebuild
+`default-project`), with a lab name field, so a trainer could build or rebuild
 any student's lab. The second pair lived in `lab-students`, bound to whoever
-made the request, so a student's lab always went into their own VPC. Same
-labs, same names, two blueprints each: every change meant ten blueprints to
-generate, validate and release for eight kinds of lab. Two copies that must
-stay in step except where they differ on purpose are how drift starts, and a
-review of our release tool found it looking blueprints up by name alone,
+made the request, so a student's lab always went into their own VPC.
+
+Same labs, same names, two blueprints each. Every change meant ten blueprints
+to generate, validate and release for eight kinds of lab. Two copies that must
+stay in step, except where they differ on purpose, are how drift starts. A
+review of our release tool also found it looking blueprints up by name alone,
 which with two copies could pick the other project's. Publishing all six
 phases to the students would have meant six of each.
 
@@ -57,19 +58,21 @@ and so on. The two audiences want different things from the same item:
   their own.
 
 The students' copies did their part with one expression. VCF Automation hands
-every request the user who made it as [`env.requestedBy`](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/maphead-designing-your-deployments/expressions-general/expressions-syntax.html), and the blueprint
-turns that into a DNS label: the part before the `@`, lower case, dots as
-hyphens. The label names everything in the lab: the VPC it attaches to, the
-namespace (`ns-student01-` and a random suffix), the VMs (`esx01-student01`)
-and the jump host.
+every request the user who made it, as [`env.requestedBy`](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/maphead-designing-your-deployments/expressions-general/expressions-syntax.html).
+The blueprint turns that into a DNS label: the part before the `@`, lower case,
+dots as hyphens. The label names everything in the lab: the VPC it attaches
+to, the namespace (`ns-student01-` and a random suffix), the VMs
+(`esx01-student01`) and the jump host.
 
 ## Sharing the item did not reach the students
 
 The obvious fix was one item in the instructors' project, shared with every
 project in the organization (Catalog Item Sharing, "allow all projects"). I
-tried it with a throw-away blueprint. The organization's API service account
-could not request in the students' project even as a member ("Bad project
-ID ... Check project settings for your service roles"), so the test that
+tried it with a throw-away blueprint.
+
+The organization's API service account couldn't request in the students'
+project, even as a member. It got "Bad project ID ... Check project settings
+for your service roles", which is a lot of words for "no". So the test that
 counted ran as `student01`:
 
 ```text
@@ -85,32 +88,35 @@ request from lab-students: 404 {"message":"No value present","statusCode":404,"e
 
 The item was marked global, and the student could neither see it nor open it
 by its ID. The 9.1 documentation says the all-projects setting makes a
-catalog item [available to all other projects](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/setting-up-the-content-hub-in-vcf-automation-for-all-apps-organizations/publishing-content-to-the-vcf-automation-catalog/edit-blueprint-settings-in-vcf-automation.html); that is not what a
-student in another project saw here.
-Nor does the organization offer a policy type for sharing content:
-its types are lease, day-2 action, approval and supervisor IaaS. On VCF
-Automation 9.1, for us, an item reaches the members of its own project, so it
-has to live where the students are.
+catalog item [available to all other projects](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/setting-up-the-content-hub-in-vcf-automation-for-all-apps-organizations/publishing-content-to-the-vcf-automation-catalog/edit-blueprint-settings-in-vcf-automation.html).
+That is not what a student in another project saw here.
+
+Nor does the organization offer a policy type for sharing content. Its types
+are lease, day-2 action, approval and supervisor IaaS. On VCF Automation 9.1,
+for us, an item reaches the members of its own project, so it has to live
+where the students are.
 
 ## Let the blueprint decide
 
 So the design turned around. Each phase that students may request lives once,
-in `lab-students`, and trainers become members of that project too. The item
-decides on the server, from the user who made the request, where the lab
-goes. The trainers are a list, `trainers`, in the property group
-`nestedLabSite`, which already holds [every site value](/posts/lab-catalog-property-groups/).
+in `lab-students`, and trainers become members of that project too. On the
+server, the item decides where the lab goes, from the user who made the
+request.
+The trainers are a list, `trainers`, in the property group `nestedLabSite`,
+which already holds [every site value](/posts/lab-catalog-property-groups/).
 This is the VPC line of the released Phase 1:
 
 ```yaml
 vpcName: ${'vpc-' + ((contains(propgroup.nestedLabSite.trainers, replace(to_lower(split(env.requestedBy, '@')[0]), '.', '-')) && input.labName != 'mine') ? input.labName :replace(to_lower(split(env.requestedBy, '@')[0]), '.', '-'))}
 ```
 
-Read it from the inside: take the requester's label; if it is on the trainers
-list and the Lab field says anything but "My own lab", the lab is the one
-picked, otherwise it is the requester's own. The same expression names the
-namespace, the VMs, the jump host and the lab ID in the jump host's config,
-so the whole lab follows one identity. A student can pick `student04` on the
-form; the blueprint ignores it.
+It isn't pretty, so read it from the inside. Take the requester's label. If
+it's on the trainers list, and the Lab field says anything but "My own lab",
+the lab is the one picked. Otherwise it's the requester's own.
+
+The same expression names the namespace, the VMs, the jump host and the lab
+ID in the jump host's config, so the whole lab follows one identity. A student
+can pick `student04` on the form, and the blueprint ignores it.
 
 The form carries both audiences' fields, and says who each one counts for:
 
@@ -134,9 +140,9 @@ The form carries both audiences' fields, and says who each one counts for:
 
 Four fields end with `(trainers only)`: the software release, the jump host
 size and the two disk sizes. For anyone off the list, the blueprint reads the
-class defaults from the property groups instead, with the same test, for
+class defaults from the property groups instead. It uses the same test, for
 example `(contains(...) ? input.release :propgroup.nestedLabMedia.defaultRelease)`.
-The request form puts those fields on a Trainer options tab, which is the
+The request form puts those fields on a Trainer options tab, but that's the
 next post's story.
 
 ![The Phase 1 request form's Trainer options tab: a note that the settings do nothing for students, Lab set to My own lab, then the release, the jump host size and the two disk sizes, each marked trainers only](/images/ui/phase1-form-trainer-options.png)
@@ -147,9 +153,10 @@ starts a mapping.
 
 ## Prove the rule first
 
-Blueprint validation does not evaluate expressions, so before the generator
-changed I deployed a namespace-only test blueprint whose outputs showed the
-rule's parts. The first draft request tripped over exactly that colon:
+Blueprint validation doesn't evaluate expressions. So before the generator
+changed, I deployed a namespace-only test blueprint whose outputs showed the
+rule's parts. Naturally, the first draft request tripped over exactly that
+colon:
 
 ```text
 draft request: 400 {"message":"Failed to parse blueprint: mapping values are not allowed here\n in 'reader', line 31, column 176:\n     ... 0]), '.', '-')) ? input.labName : replace(to_lower(split(env.req ...
@@ -157,8 +164,8 @@ draft request: 400 {"message":"Failed to parse blueprint: mapping values are not
 
 With the values quoted, and a few unrelated fixes to the test blueprint
 itself, the draft deployed. `isTrainer` tested a literal list that held the
-requester, `notTrainer` one that did not, and `lab` and `labOther` applied the
-rule with each list to a Lab field set to `student05`. It ran as the API
+requester, and `notTrainer` one that did not. Then `lab` and `labOther` applied
+the rule with each list to a Lab field set to `student05`. It ran as the API
 service account, whose name I have masked:
 
 ```text
@@ -166,8 +173,8 @@ deployment: CREATE_SUCCESSFUL
 outputs: {'lab': 'student05', 'whoami': '<api service account>', 'labOther': '<api service account>', 'isTrainer': True, 'notTrainer': False}
 ```
 
-`contains()` works on a list, the requester is known on the server, and the
-choice follows the list. Only then did the generator get its shared mode; the
+So `contains()` works on a list, the requester is known on the server, and the
+choice follows the list. Only then did the generator get its shared mode. The
 list in the property group got its proof from real requests.
 
 ## The trainers list is data
@@ -185,9 +192,10 @@ nestedLabMedia: up to date
 
 That was the whole change. Blueprints read the property groups when a lab is
 requested, so adding or removing a trainer needs no new blueprint version.
+
 The list is also the one thing to guard. A user on it can build in any
-student's VPC, and a trainer missing from it counts as a student: their
-request would look for a VPC named after them, which does not exist.
+student's VPC. A trainer missing from it counts as a student: their request
+would look for a VPC named after them, which doesn't exist.
 
 ## Three requests on f06
 
@@ -199,9 +207,9 @@ request as student01: 200 inputs={'labName': 'student04'} [{"deploymentId": "7ce
 15:47:49 VMs: dc01-student01=PoweredOn esx01-student01=PoweredOn esx02-student01=PoweredOn esx03-student01=PoweredOn esx04-student01=PoweredOn jump-student01=PoweredOff
 ```
 
-The form said `student04`, and the lab took the student's own name. The delete
-tool, which reads the lab's VPC from the deployment, later confirmed it:
-`clean - vpc-student01 has no subnets left, a new lab can use it`.
+The form said `student04`, and the lab took the student's own name anyway. The
+delete tool, which reads the lab's VPC from the deployment, later confirmed
+it: `clean - vpc-student01 has no subnets left, a new lab can use it`.
 
 Then `student06`, on the list, made the same request, and our follower tool
 timed out:
@@ -211,17 +219,18 @@ request as student06: 200 inputs={'labName': 'student04'} [{"deploymentId": "3d0
 16:05:52 time limit reached (15 min) - the deployment is not done yet
 ```
 
-The deployment was fine. When a deployment does not report its namespace, the
-follower guesses it from the deployment's name, and this one sent it looking
-for `ns-student06-`. Asked directly, VCF Automation had it all:
+The deployment was fine; our tool was the one that got lost. When a
+deployment doesn't report its namespace, the follower guesses it from the
+deployment's name. This one sent it looking for `ns-student06-`. Asked
+directly, VCF Automation had it all:
 
 ```text
 status: CREATE_SUCCESSFUL | owner: student06 | project: 5330317d-0ae5-48da-82de-e2378da48a2f
 supervisor namespace: ns-student04-nfnny vpc: vpc-student04
 ```
 
-In this design trainers are organization administrators, not organization
-users. So the third request repeated the second with `student06` promoted for
+In this design, trainers are organization administrators, not organization
+users. So the third request repeated the second, with `student06` promoted for
 the test, and with the deployment named after the lab it builds:
 
 ```text
@@ -230,37 +239,38 @@ request as student06: 200 inputs={'labName': 'student04'} [{"deploymentId": "1a5
 16:13:01 deployment done, all VMs powered on
 ```
 
-Afterwards `student06` went back to Organization User and the list to empty
+Afterwards, `student06` went back to Organization User, and the list to empty
 (`trainers: ['student06'] -> []`). The lesson for our tools: name a deployment
 `<lab>-p<phase>`, after the lab it builds.
 
-Note `owner: student06`. A lab a trainer builds is the trainer's deployment:
-the student does not see it under Instances and cannot open its host
-consoles, so a lab a student will work in is best requested by the student.
+Note `owner: student06`. A lab a trainer builds is the trainer's deployment.
+The student doesn't see it under Instances and can't open its host consoles.
+So a lab a student will work in is best requested by the student.
 
 One limit is worth saying out loud. Every student VPC sits on the students'
-project's Associated VPCs list, so it is the catalog, not the platform, that
+project's Associated VPCs list. So it's the catalog, not the platform, that
 keeps a student in their own VPC, as long as every item students can request
 decides on the server like this one. A project per student would move that
 boundary into the platform, with one more project per student to keep in step
 with every release.
 
-f06 now holds each phase once: after this change and a clean-up of old test
-blueprints, nine blueprints for nine catalog items.
+After this change, and a clean-up of old test blueprints, f06 now holds each
+phase once: nine blueprints for nine catalog items.
 
 ## Why this matters outside the lab
 
 Self-service works when people can help themselves without being able to get
-in each other's way. A student gets a lab with two decisions and no way to
+in each other's way. A student gets a lab with two decisions, and no way to
 land it in someone else's network. A trainer uses the very same catalog item
 to build, rebuild or rescue any student's lab. What tells them apart is
 checked by the platform when the request runs, not by what the form happens
 to show.
 
 It also halves the upkeep. One blueprint per phase means one change, one
-validation and one release, and the two audiences cannot drift apart because
-there is nothing left to drift. Who counts as a trainer is data in a property
-group: onboarding a trainer is a one-line change with no new catalog version.
+validation and one release. The two audiences can't drift apart, because
+there's nothing left to drift. Who counts as a trainer is data in a property
+group, so onboarding a trainer is a one-line change with no new catalog
+version.
 
 The pattern fits any catalog with requesters and operators, such as
 developers who each get a sandbox while the platform team can build one for
