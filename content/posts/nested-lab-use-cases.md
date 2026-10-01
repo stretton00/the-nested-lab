@@ -109,7 +109,10 @@ anyone wants to see on the morning of a demo.
 
 One thing that first demo lab still needed by hand was the VCF Operations
 first-login wizard and the start of its collection. Builds since do both, as
-the rehearsal below shows.
+the rehearsal below shows. Getting there
+took two days, not helped by a message reading "no any VCF license", which sent
+me hunting for a licence problem that wasn't there. The cure was to start
+collection the way the UI's own Save button does.
 
 ## A new release, side by side
 

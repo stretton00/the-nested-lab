@@ -173,6 +173,18 @@ Three habits keep it reliable:
 - Every step checks for its own result first, so starting the task again
   carries on where it stopped.
 
+A fourth habit arrived on 1 October. A lab sat perfectly still for 70
+minutes, partway through importing its vCenter's disks. DRS had live-migrated
+two of its nested hosts mid-import, and the SSH session watching the import
+never noticed that its connection had died. It just kept waiting. The build's
+two-hour watchdog couldn't step in either, because it runs in the same loop
+and was waiting too.
+
+The fix was two SSH options for keep-alives, so a dead session now ends within
+a minute and the next check opens a fresh one. It went onto the binaries
+server that evening, so the next lab picks it up without a new blueprint
+version.
+
 Each stage ends in a marker file, or in a `-FAILED.txt` on the desktop with
 the reason and the command to run it again. Here's the end of the vCenter
 stage in a Phase 6 rehearsal lab, and the jump host's desktop at that moment:
