@@ -45,7 +45,7 @@ assigned and quota set — all in the vSphere Client, by hand.
 
 ## Path B: the same manifest, as a catalog request
 
-In All Apps the cluster is a `CCI.Supervisor.Resource` inside a blueprint,
+In All Apps the cluster is a `CCI.Supervisor.Resource` inside a [blueprint](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html),
 sitting next to a `CCI.Supervisor.Namespace`:
 
 ```yaml
@@ -102,9 +102,11 @@ thing that exists, not a thing that was *provided*.
 
 Both paths share the same four traps on VKS 1.35 / VCF 9.1:
 
-1. **A VCFA-created namespace has no content library.** Zero
+1. **Our VCFA-created namespace had no content library.** Zero
    `VirtualMachineImage`s → no cluster possible. `contentSources` in the
-   blueprint, or attach by hand.
+   blueprint, or attach by hand. The 9.1 docs say a namespace class
+   [gets a content library automatically](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-projects-in-vcfa/create-a-namespace-class.html); our `large` class had none
+   assigned.
 2. **`ClusterClass` lives in `vmware-system-vks-public`.** It 404s from
    the workload namespace unless the spec sets
    `topology.classNamespace`.
@@ -150,10 +152,19 @@ it, not on it.
   doesn't change it.
 - What All Apps adds: catalog RBAC, class-based quota, library attach,
   VPC pinning, deployment history, and a place in the Ops object model.
-- Four traps on 1.35: no default library, `classNamespace`, tiny default
-  quota, PodSecurity `restricted`.
+- Four traps on 1.35: no library on our namespace class, `classNamespace`,
+  tiny default quota, PodSecurity `restricted`.
 - Set `serviceDomain` and a non-shadowing pod CIDR at create; both are
   immutable.
+
+## Broadcom documentation
+
+- [Workflow for Provisioning VKS Clusters Using kubectl](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/provisioning-tkg-service-clusters/workflow-for-provisioning-tkg-clusters-using-kubectl.html): path A, from Supervisor login to an applied cluster YAML
+- [Using the Versioned ClusterClass](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/provisioning-tkg-service-clusters/using-the-cluster-v1beta1-api/using-the-versioned-clusterclass.html): the built-in ClusterClass in `vmware-system-vks-public` and `spec.topology.classNamespace`
+- [Sample Blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html): a `Cluster` as a `CCI.Supervisor.Resource` beside a `CCI.Supervisor.Namespace`
+- [Create a Namespace Class in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-projects-in-vcfa/create-a-namespace-class.html): CPU and memory limits, VM classes, storage and content libraries per class, and the default small, medium and large
+- [Configure PSA for VKr 1.25 and Later](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/managing-security-for-tkg-service-clusters/configure-psa-for-tkr-1-25-and-later.html): `restricted` enforced by default from VKr 1.26, and the namespace label that relaxes it
+- [Monitoring VKS Clusters Using VCF Operations](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/operating-tkg-service-clusters/monitoring-vks-clusters-using-vcf-operations.html): VKS clusters in VCF Operations, monitored by default on VCF 9.1
 
 *Next in All Apps in Practice: [the demo apps that live on this
 cluster](/series/all-apps-in-practice/).*

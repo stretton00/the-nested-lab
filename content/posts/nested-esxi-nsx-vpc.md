@@ -52,9 +52,11 @@ it, ever.
 
 ![Standard VPC subnet port: SpoofGuard pins one IP+MAC; vmk0's synthesised MAC loses, silently](/images/post1-blackhole.svg)
 
-(There's a second trap stacked on top: VPC subnets run with DHCP deactivated,
+(There's a second trap stacked on top: our VPC subnets run with DHCP deactivated,
 so the appliance also sits at "waiting for DHCP" unless you inject static
-addressing via OVF `guestinfo.*` properties. More on that below.)
+addressing via OVF `guestinfo.*` properties. NSX can give a VPC subnet a
+DHCP server or relay ([Add a Subnet to a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-subnet-for-the-vpc.html));
+ours had neither. More on that below.)
 
 ## The design that works: a trunk subnet + binding maps
 
@@ -107,7 +109,7 @@ vSAN                vSwitch0                     1     1612
 ![Host Client: port groups on VLANs 1610 / 1611 / 1612](/images/ui/u12a-hostclient-portgroups-vlans.jpg)
 *The same three VLANs as the nested host sees them.*
 
-And because there's no DHCP in a VPC subnet, the nested-ESXi appliance gets
+And because there's no DHCP in our VPC subnets, the nested-ESXi appliance gets
 its identity through OVF properties in the VM Service spec:
 
 ```yaml
@@ -177,7 +179,7 @@ factory.
   vmk0's synthesised MAC loses to SpoofGuard, silently.
 - Attach nested-host vNICs **only to a trunk subnet**; one binding map per
   VLAN; the map lives under the VLAN subnet and points at the trunk.
-- **No DHCP in VPC subnets** — bootstrap addressing via `guestinfo.*`
+- **No DHCP in our VPC subnets** — bootstrap addressing via `guestinfo.*`
   (appliances) or cloud-init (Linux). Static IP plans are a feature in a
   lab anyway.
 - ESXi's default TCP/IP stack has **one** gateway — set per-vmk override
@@ -186,6 +188,15 @@ factory.
 - Recreating a VM **reallocates** its NSX addresses. Pin what you depend on.
 - MTU: everything here ran at 1500. Raise the trunk and the nested vDS
   before you do vSAN at any real scale.
+
+## Broadcom documentation
+
+- [Create a SubnetConnectionBindingMap CR on the Supervisor](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-0/managing-vsphere-kuberenetes-service-clusters-and-workloads/managing-networking-for-tkg-service-clusters/enable-antrea-egress-separate-subnet-on-a-tkg-cluster-with-nsx-vpc/create-a-subnetconnectionbindingmap-cr-on-the-supervisor.html): the binding map CR and its `vlanTrafficTag`, shown for VKS egress subnets.
+- [Creating a Child Segment](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/segments/creating-a-child-segment.html): the NSX mechanism underneath: a binding map on the child segment, pointing at its parent with a VLAN ID.
+- [Understanding SpoofGuard Segment Profile](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/segments/segment-profiles/understanding-spoofguard-segment-profile.html): port address bindings, and traffic dropped when its MAC or IP does not match them.
+- [Add a VPC Service Profile](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-vpc-service-profile.html): the DHCP settings and segment profiles, SpoofGuard included, that a VPC's subnets inherit.
+- [Deploy VMs with Configurable OVF Properties in vSphere Supervisor](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/vm-service/deploy-vms-with-configurable-ovf-properties-vsphere-iaas-control-plane.html): OVF properties set through the VM Service's vAppConfig transport.
+- [Configure the VMkernel Adapter Gateway by Using esxcli Commands](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/9-0/vsphere-networking/setting-up-vmkernel-networking/configure-the-vmkernel-adapter-gateway-by-using-esxcli.html): a gateway per VMkernel adapter, set with esxcli.
 
 Next in this series: what happens when you want *ten* of these labs — with
 byte-identical IP plans, firewalled from each other by construction. That's

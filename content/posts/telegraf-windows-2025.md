@@ -106,9 +106,12 @@ anything else does.
 - **WMIC on new builds.** Any image or pipeline that produces Server 2025
   needs the capability added, or the next install will fail the way the
   first one did.
-- **Service account and WinRM hardening.** W2025 tightens defaults; if the
-  install bootstrap fails and WMIC is present, it's almost always WinRM/TLS,
-  not the agent.
+- **Service account and UAC.** WMIC was the only install blocker we hit.
+  The documented Windows catch is
+  [UAC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/workload-monitoring-and-observability/os-and-application-monitoring/steps-to-monitor-your-applications/install-and-uninstall-an-agent/install-an-agent-from-the-ui.html):
+  with UAC on and a non-administrator account in Administrators, the agent
+  stays at "Not Started", the last operation reads "Download Success", and
+  the bootstrap has to be run by hand.
 - **Don't file cases on it.** Reproduce on a supported OS first. That's
   the deal you made.
 
@@ -134,6 +137,15 @@ combination.
   Alert on metric **absence**, not just thresholds.
 - Configure checks from the agent row in Ops; leave `telegraf.conf` alone
   so upgrades from Ops stay clean.
+
+## Broadcom documentation
+
+- [Supported Platforms](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/workload-monitoring-and-observability/os-and-application-monitoring/supported-platforms.html): the operating systems the product-managed agent supports; Windows stops at Server 2022
+- [Windows Server 2025 support for Telegraf Agent in VCF and Aria Operations](https://knowledge.broadcom.com/external/article/397548/telegraf-agent-support-for-windows-serve.html): Server 2025 not yet supported, and the install that stays "in progress"
+- [Install an Agent from the UI](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/workload-monitoring-and-observability/os-and-application-monitoring/steps-to-monitor-your-applications/install-and-uninstall-an-agent/install-an-agent-from-the-ui.html): the Manage Telegraf Agents install, and what UAC changes about it
+- [Communication with Cloud Proxy and vCenter](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/workload-monitoring-and-observability/os-and-application-monitoring/prerequisites/communication-with-cloud-proxy-and-vcenter-server.html): the vCenter guest-operation privileges the UI install needs
+- [Activate Remote Checks](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/workload-monitoring-and-observability/os-and-application-monitoring/steps-to-monitor-your-applications/additional-operations-from-the-manage-agents-tab/monitor-remote-checks.html): ICMP, UDP, TCP and HTTP checks under Custom Monitoring
+- [Custom Script](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/workload-monitoring-and-observability/os-and-application-monitoring/steps-to-monitor-your-applications/additional-operations-from-the-manage-agents-tab/custom-script.html): scripts the agent runs on the box, each returning a single integer
 
 *Previously: [fluent-bit two ways](/posts/fluent-bit-two-ways/). Next in
 the [Observability on VCF](/series/observability-on-vcf/) series: the

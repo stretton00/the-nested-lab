@@ -102,7 +102,7 @@ step, and that evidently refreshes the view.
 
 ## The fix: set it the way vCenter reads it
 
-The check before the join now sets the vSAN network through the vSAN API
+The check before the join now sets the vSAN network through the [vSAN API](https://techdocs.broadcom.com/us/en/vmware-cis/vsan/vsan-sdk/8-0/setting-up-a-vsan-cluster/configuring-vmkernel-netowkring-for-vsan.html)
 instead of trusting the tags. `UpdateVsan` writes the host's configuration and
 its view in one call:
 
@@ -195,6 +195,14 @@ on the management network, where it competes with everything else.
   one service that would fix them is the one that just lost its storage.
 - When a fix "does nothing", check whether it tested the thing the platform
   actually reads.
+
+## Broadcom documentation
+
+- [Set Up a VMkernel Network for vSAN](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/vsan-deployment-administration-and-monitoring/vsan-planning-and-deployment/creating-a-virtual-san-cluster/enabling-virtual-san/set-up-networking-for-virtual-san.html): a VMkernel adapter with the vSAN service on each host
+- [Using Unicast in vSAN Network](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/vsan-deployment-administration-and-monitoring/vsan-network-design/understanding-vsan-networking/vsan-network-characteristics/using-unicast-in-vsan-network.html): vCenter as the source of the membership list every host receives
+- [Configuring VMkernel Networking for vSAN](https://techdocs.broadcom.com/us/en/vmware-cis/vsan/vsan-sdk/8-0/setting-up-a-vsan-cluster/configuring-vmkernel-netowkring-for-vsan.html): setting the vSAN vmknic with `UpdateVsan_Task` (vSAN SDK 8.0 guide)
+- [vSAN cluster partition due to invalid unicast agent list](https://knowledge.broadcom.com/external/article/317830/vsan-cluster-partition-due-to-invalid-un.html): partitions when vCenter does not update the unicast agent lists after a vSAN vmknic change
+- [Non-Disruptively Change the VLAN/IP for vSAN VMk in a Production Environment](https://knowledge.broadcom.com/external/article/326852/nondisruptively-change-the-vlanip-for-vs.html): moving vSAN to a new vmknic on a running cluster, one host at a time
 
 ---
 *Lab environment; opinions my own. Everything above was captured from a live

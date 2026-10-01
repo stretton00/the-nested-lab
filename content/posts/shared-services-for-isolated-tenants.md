@@ -67,9 +67,11 @@ default-vpc  -> http://172.31.0.2/   200  shared-svc repo01
 Three pods with **identical source addresses** (`172.30.0.40`) all hit
 one service and all get answers. How does the reply find its way back to
 the right pod when three of them claim `.40`? Because pod traffic crosses
-the transit gateway **SNAT'd to a per-VPC transit address**. The service
-never sees `172.30.0.40`; it sees three distinct transit IPs. Ambiguity
-never arises.
+the transit gateway **SNAT'd to a per-VPC address** from the external IP
+block, by the
+[default outbound NAT](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-vpc-connectivity-profile.html)
+in each VPC's connectivity profile. The service never sees `172.30.0.40`;
+it sees three distinct SNAT addresses. Ambiguity never arises.
 
 Now the other direction — from `svc-repo01` back toward a pod:
 
@@ -126,12 +128,20 @@ tenants consume but shouldn't be able to be reached *by*.
   per VPC), service → pod has no route. Test both directions and write
   down both results.
 - Identical pod addressing and shared services coexist *because* of the
-  SNAT — the hub sees per-VPC transit addresses, never the overlapping
+  SNAT — the hub sees per-VPC SNAT addresses, never the overlapping
   private ones.
 - Same ordering rules apply to the hub VPC (VPC → attachment → LB →
   namespace → subnets → wait for image sync → workloads).
 - Add a gateway firewall policy on the hub. Reachability is not
   authorisation.
+
+## Broadcom documentation
+
+- [Add a Subnet to a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-subnet-for-the-vpc.html): the Private Transit Gateway mode: addresses from the private transit gateway blocks, reachable from the project's VPCs.
+- [Add a VPC Connectivity Profile](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-vpc-connectivity-profile.html): private transit gateway IP blocks, and the SNAT rule default outbound NAT gives each VPC.
+- [Transit Gateways](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/transit-gateways.html): traffic between a tenant's VPCs, and out to the external network.
+- [Virtual Private Clouds Overview](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview.html): Private, Private - Transit Gateway and Public subnets side by side.
+- [Add GFW Rules for VPCs](https://techdocs.broadcom.com/us/en/vmware-security-load-balancing/vdefend/vdefend-firewall/9-0/secure-vpc-projects/firewall-policies-in-an-nsx-project/add-gfw-rules-for-vpc-projects.html): north-south gateway firewall rules for a VPC's ingress and egress traffic.
 
 *Previously: [three datacenters, one IP plan](/posts/three-datacenters-one-ip-plan/).
 Next: the whole pod as a single catalog item.*

@@ -36,7 +36,7 @@ version. The goal for this round: blueprints that contain no site at all.
 | The lab's shape | host count, names, VM layout, scripts | generator + site file |
 
 The site file is still the one place an operator edits. The generator now
-writes the two property groups from it as well as the blueprints, and a small
+writes the two [property groups](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/property-groups.html) from it as well as the blueprints, and a small
 sync tool pushes the groups to VCF Automation:
 
 ```text
@@ -248,6 +248,14 @@ disconnected site.
 - Make the groups organization-wide, so every project's copy of an item can
   read them.
 - Put a lint in the generator. Portability that is not checked erodes.
+
+## Broadcom documentation
+
+- [Reusing a Group of Properties in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/property-groups.html): input and constant property groups, shared with the organization or kept to one project
+- [Constant Property Groups in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/property-groups/constant-property-groups-in-vcf-automation-for-all-apps.html): constant values that blueprints read through the `propgroup` binding
+- [Expression syntax in VCF Automation for VM Apps](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/maphead-designing-your-deployments/expressions-general/expressions-syntax.html): arithmetic, the `[ ]` operator, conditionals and functions, documented in the VM Apps guide
+- [Versioning Blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/blueprint-versioning.html): blueprint versions and releasing one to the catalog
+- [Sample Blueprints in VCF Automation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html): `CCI.Supervisor.Namespace` with `className`, `regionName` and `vpcName`
 
 ---
 *Lab environment; opinions my own. Everything above was captured from a live

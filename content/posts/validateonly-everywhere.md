@@ -107,6 +107,12 @@ was going to happen, produced by the same tooling that then did it.
   is a smoke test. Same checkbox.
 - The refactor it forces — compute, *then* act — is the one you wanted.
 
+## Broadcom documentation
+
+- [Use a JSON Specification File to Deploy VMware Cloud Foundation or vSphere Foundation](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/deployment/deploying-a-new-vmware-cloud-foundation-or-vmware-vsphere-foundation-private-cloud-/use-a-json-specification-to-deploy-vmware-cloud-foundation-or-vmware-vsphere-foundation.html): the installer's own validation of a spec, with errors and warnings, before deployment
+- [First VCF Instance FQDNs and IP addresses](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/planning-and-preparation/vcf-components-fqdns-and-ip-addresses/first-vcf-instance-fqdns-and-ip-addresses.html): the names and forward and reverse DNS records every VCF component needs
+- [Add VCF Operations Orchestrator Client workflows to the VCF Automation catalog](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/service-broker-adding-content-to-the-catalog/service-broker-add-vrealize-orchestrator-workflows-to-the-catalog.html): vRO workflows as catalog items, through an Orchestrator content source
+
 *Part of [The Lab Factory](/series/the-lab-factory/).*
 
 ---

@@ -130,6 +130,14 @@ in three minutes.
 - Make the deploy idempotent; a demo that re-runs in 3 minutes is one you
   can afford to break on stage.
 
+## Broadcom documentation
+
+- [Creating and Managing Namespaces](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/administration-sdks-cli-and-tools/about-the-vcf-automation-api/tenant-portal/creating-and-managing-namespaces.html): a `SupervisorNamespace` with a class, region and VPC, through the All Apps API
+- [Create a Service Account in Your VCF Automation Organization](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/administering-users-and-groups-in-vcf-automation-for-all-apps/create-a-service-account-in-your-vcf-automation-organization.html): organization service accounts and their device-bound API tokens
+- [Pod Deployment with Load Balancer Service](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/deploying-workloads-on-tkg-service-clusters/pod-deployment-with-load-balancer-service.html): a `Service` of type `LoadBalancer` on a VKS cluster and its external IP
+- [Storage for VKS Clusters](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/deploying-workloads-on-tkg-service-clusters/storage-concepts-for-tkg-service-clusters.html): persistent volumes from the storage classes assigned to the namespace
+- [Configure PSA for VKr 1.25 and Later](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/managing-security-for-tkg-service-clusters/configure-psa-for-tkr-1-25-and-later.html): `restricted` enforced by default from VKr 1.26, and the namespace label that relaxes it
+
 *Previously: [one VKS cluster, two ways](/posts/vks-kubectl-vs-vcfa-all-apps/).
 The Pac-Man instance here is the one from [What's a VPC?](/posts/whats-a-vpc-with-pacman/).*
 

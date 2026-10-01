@@ -47,7 +47,14 @@ upgrade.
 imgpkg copy -b <bundle> --to-tar vks.tar --cosign-signatures
 imgpkg copy --tar vks.tar --to-repo harbor02/vks/vsphere-kubernetes-service --cosign-signatures
 kubectl rollout restart deployment -n vmware-system-appplatform-operator-system
+# then force a fresh attempt, now the signatures are in
+kubectl -n svc-tkg-domain-<cluster> get deploy -o name | xargs -I{} kubectl -n svc-tkg-domain-<cluster> rollout restart {}
 ```
+
+The operator-namespace restart cycles that namespace's Deployments;
+[KB 431379](https://knowledge.broadcom.com/external/article/431379/vsphere-kubernetes-service-upgrade-faile.html)
+restarts the operator's StatefulSet instead:
+`kubectl rollout restart sts -n vmware-system-appplatform-operator-system vmware-system-appplatform-operator-mgr`.
 
 The bundle digest is unchanged by adding signatures, so no re-registration.
 And if the content is already in the registry, the signatures alone are
@@ -139,6 +146,10 @@ Three findings from the node roll:
   (nsenter from the driver image, `sed` the pause ref back to the
   node-local registry, never touch `sandboxer`) runs permanently until a
   fresh node's guard log shows no repair.
+  [KB 429604](https://knowledge.broadcom.com/external/article/429604/nvidia-gpuoperator-pods-not-starting-in.html)
+  fixes the same problem at install time instead, with a Helm setting we
+  haven't tried: `RUNTIME_CONFIG_SOURCE=file=/etc/containerd/config.toml`
+  in `toolkit.env`.
 - **`.local` is mDNS.** A site domain ending `.local` means the node
   resolver multicasts for the registry, the licence server and the vSAN
   file-service endpoints. A per-release hosts-injector DaemonSet (pinned
@@ -189,6 +200,15 @@ the real work.
 - Roll GPU nodes at the pace the *workloads* recover. Add PDBs first.
 - A lab that can't hit the prod gate proves nothing about the gate. Know
   which gates your rehearsal *cannot* exercise and say so in the runbook.
+
+## Broadcom documentation
+
+- [Upgrade VKS from a Private Registry](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-0/managing-vsphere-kubernetes-service/installing-and-upgrading-the-tkg-service/upgrade-tkg-service-from-a-private-registry.html): `imgpkg copy` with `--cosign-signatures` on both copies, then register the new version
+- [Supervisor upgrade stuck after upgrading to 9.0.2 error "vmware-system-vks-public user=system:serviceaccount:svc-tkg-domain-:runtime-extension- pkg-sa: prohibited operation on system namespace"](https://knowledge.broadcom.com/external/article/429547/supervisor-upgrade-stuck-after-upgrading.html): on VCF 9.0.1 and 9.0.2, VKS above 3.4.0 needs signed packages in the private registry
+- [vSphere kubernetes service upgrade failed with "kapp: error waiting on reconcile packageinstall"](https://knowledge.broadcom.com/external/article/431379/vsphere-kubernetes-service-upgrade-faile.html): the untrusted-namespace webhook denial, and re-copying with signatures
+- [VMware vSphere Kubernetes Service 3.7 Release Notes](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-1/release-notes/vks-release-notes/vmware-tanzu-kubernetes-grid-service-37-release-notes.html): VKS 3.7 needs Supervisor Kubernetes 1.32 or later
+- [Provide an Ubuntu Package Repository Mirror and vGPU Drivers for Deep Learning VMs and VKS Clusters with GPU in a Disconnected Environment](https://techdocs.broadcom.com/us/en/vmware-cis/private-ai/foundation-with-nvidia/9-0/private-ai-foundation-9-x/deploying-private-ai-foundation-with-nvidia/finalizing-the-setup-for-deep-learning-vms-and-vks-cluster-with-gpu/provide-an-ubuntu-package-repository--mirror-and-vgpu-drivers-for---deep-learning-vms-and-vks-clusters-with-gpu-in-a-disconnected-environment.html): the local Ubuntu repository the driver build compiles against
+- [NVIDIA gpu-operator pods not starting in air-gapped environment with VKr 1.33 (or higher) showing error "failed to get sandbox image "registry.k8s.io/pause:3.10": failed to pull image "registry.k8s.io/pause:3.10": "](https://knowledge.broadcom.com/external/article/429604/nvidia-gpuoperator-pods-not-starting-in.html): the GPU Operator's containerd drop-in losing the air-gapped sandbox image, and a toolkit setting that avoids it
 
 ---
 *Techniques from a real air-gapped engagement, generalised; identifiers

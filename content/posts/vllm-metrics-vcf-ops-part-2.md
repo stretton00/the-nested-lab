@@ -196,6 +196,13 @@ Operations adapter of its own.
   Everything else is a threshold on an existing gauge.
 - Log rotation is part of the script, not an ops afterthought.
 
+## Broadcom documentation
+
+- [Custom Script](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/workload-monitoring-and-observability/os-and-application-monitoring/steps-to-monitor-your-applications/additional-operations-from-the-manage-agents-tab/custom-script.html): the Telegraf agent's own exec-based script check, which also expects a single integer
+- [Acquire an Authentication Token](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/administration-sdks-cli-and-tools/understanding-the-vr-ops-api/getting-started-with-the-api/acquire-an-authentication-token.html): `POST /suite-api/api/auth/token/acquire`, the `authSource` field, and a token reusable for six hours
+- [Alert Definitions in VCF Operations](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/configuring-alerts-and-actions/alert-definitions.html): alerts built from symptoms and recommendations
+- [Symptom Definitions in VCF Operations](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/configuring-alerts-and-actions/symptom-definitions.html): metric symptoms at Warning and Critical levels, for the thresholds
+
 *Previously: [don't ship the histogram](/posts/vllm-metrics-vcf-ops-part-1/).
 Related: [Telegraf on Windows Server 2025](/series/observability-on-vcf/) —
 where this script actually runs.*

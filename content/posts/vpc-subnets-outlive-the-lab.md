@@ -219,6 +219,13 @@ wait, make the failure say what to do.
 - Smoke-test each free VPC with a throwaway namespace before a class, never
   beside a live lab.
 
+## Broadcom documentation
+
+- [Add a Subnet to a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-subnet-for-the-vpc.html): subnet CIDRs auto-allocated from the VPC's IP blocks, by size.
+- [Create a VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/create-a-vpc.html): the private CIDRs a VPC's subnets come from.
+- [Provision a VM Using Self-Service](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/vm-service/provision-a-vm-using-the-iaas-services-console-in-vcf-automation.html): a subnet's static IP allocation, and entering an address to override it.
+- [Remove a vSphere Namespace from Supervisor](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/vsphere-supervisor-installation-and-configuration/configuring-and-managing-vsphere-namespaces/services-and-workloads-remove-a-vsphere-namespace.html): removing a namespace, which can take a while to complete.
+
 ---
 *Lab environment; opinions my own. Everything above was captured from a live
 VCF 9.1 environment - output trimmed for length, never edited for outcome.*

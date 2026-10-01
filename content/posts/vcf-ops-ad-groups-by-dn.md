@@ -163,7 +163,8 @@ alice is in that list because an earlier test had added her to the group in
 AD. The automatic sync had not picked her up in six minutes of watching; it
 runs roughly every 45 minutes. A sync by hand makes an AD change count at
 once: `PUT /auth/sources/{id}/usergroups/synchronize`, or in the UI
-**Administration** > **Access Control** > **Authentication Sources**.
+**Operate** > **Administration Control Panel** > the **Authentication Sources**
+tile, select the source, then **Synchronize User Groups**.
 Another test found the last gap: the lab's `student` account, added to the
 group, never appeared. It had no user principal name, and the source
 identifies users by `userPrincipalName`, so VCF Operations' own user search
@@ -239,6 +240,14 @@ platform's background jobs have had their turn.
   Authorized" page.
 - Check after the background jobs: one real sign-in per group, minutes after
   the import, not seconds.
+
+## Broadcom documentation
+
+- [Authentication Sources](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/-configuring-administration-settings/managing-user-access-control/authentication-sources-overview.html): AD and LDAP sources, Auto Synchronization, and the Synchronize User Groups action
+- [Authentication Sources: Add Authentication Source for User and Group Import](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/-configuring-administration-settings/managing-user-access-control/authentication-sources-overview/authentication-sources-add-authentication-source-for-user-and-group-import.html): the AD source settings, with `userPrincipalName` as the default user name attribute
+- [Import User Groups From Source](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/infrastructure-operations/-configuring-administration-settings/managing-user-access-control/access-control-overview/access-control-user-groups-tab/import-user-groups-from-source.html): the UI import, which picks groups from a directory search
+- [Using the API with VCF Operations](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/administration-sdks-cli-and-tools/understanding-the-vr-ops-api/using-the-api-with-vrealize-operations-manager.html): the REST API and the Swagger reference each appliance serves
+- [AD group members and nested groups members are not properly synchronizing](https://knowledge.broadcom.com/external/article/406237/ad-group-members-and-nested-groups-membe.html): a group sync that misses members: `memberOf` read access, and a sync by hand
 
 ---
 *Lab environment; opinions my own. Everything above was captured from a live

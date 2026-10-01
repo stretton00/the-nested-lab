@@ -186,6 +186,13 @@ long?" has an answer instead of a guess.
 - Scrub, delete yourself, reboot. The customer gets a server, not a
   build environment.
 
+## Broadcom documentation
+
+- [Windows Automation Assembler image for vSphere](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/initialize-general/initialize-windows-general/initialize-windows-image-vsphere.html): how Cloudbase-Init gets onto the template, the install the cleanup removes
+- [Event topics provided with Automation Assembler](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/maphead-extensibility-in-cloud-assembly/learn-more-about-extensibilty-subscriptions/event-topics-provided-with-cloud-assembly.html): Compute post provision, issued once per machine after it is provisioned
+- [How do I track workflow runs](https://techdocs.broadcom.com/us/en/vmware-cis/aria/aria-automation/8-18/assembler-on-prem-using-and-managing-master-map-8-18/maphead-designing-your-deployments/maphead-extensibility-in-cloud-assembly/extensibility-workflow-subscriptions/learn-more-about-workflow-subscriptions/how-do-i-track-workflow-runs.html): Extensibility > Activity > Workflow Runs, to see when the metadata workflow ran
+- [Query Information using GuestInfo Variable](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/tools/12-5-0/vmware-tools-administration-12-5-0/configuring-vmware-tools-components/using-vmware-tools-configuration-utility/view-virtual-machine-status-information/query-information-using-guestinfo-variable.html): `info-get` on a `guestinfo` variable from inside the guest
+
 *Part 3: [validation as a product, and the details that hurt](/posts/windows-2025-aria-part-3/).*
 
 ---

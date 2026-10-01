@@ -8,7 +8,7 @@ cover:
   image: "/images/product-03-failover.jpg"
   alt: "Fail a NIC. Nothing blinks."
   hidden: false
-summary: "VCF wants two pNICs per host. In a nested lab the second vNIC adds no physical redundancy — so why add it? Because bringup validation and uplink teaming expect it, and because the failover test tells you something real about the trunk. vmnic0 down, 0% loss, and the SSH session watching it never dropped."
+summary: "VCF wants two pNICs per host. In a nested lab the second vNIC adds no physical redundancy — so why add it? Because we expected bringup validation and uplink teaming to want it, and because the failover test tells you something real about the trunk. vmnic0 down, 0% loss, and the SSH session watching it never dropped."
 ---
 
 "Naturally, a VCF host has at least two NICs. Are we testing that, or have
@@ -17,11 +17,15 @@ you virtualised it away?"
 Fair question, and the honest answer has two halves. In a nested lab the
 *physical* redundancy is provided by the outer host — its vDS, its NSX
 uplinks — and a second vNIC on the nested VM adds precisely none. But VCF
-doesn't know it's nested. Bringup's host validation and the vDS uplink
-teaming it configures **expect two vmnics**, and a host with one gets
-flagged. So the nested hosts get two vNICs, both on the trunk subnet, and
-the question becomes: does failover between them actually work inside a
-VPC?
+doesn't know it's nested, and we expected bringup's host validation and the
+vDS uplink teaming it configures to **want two vmnics**. We never tried a
+host with one. Broadcom's docs
+[allow single-pNIC hosts](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/building-your-private-cloud-infrastructure/host-management/commission-hosts.html),
+and the VCF Installer's
+[9.1 known issue](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/release-notes/vmware-cloud-foundation-9-1-0-0-release-notes/known-issues/vcf-installer-91-known-issues.html)
+is about single-pNIC hosts with an NFS datastore. So the nested hosts get
+two vNICs, both on the trunk subnet, and the question becomes: does
+failover between them actually work inside a VPC?
 
 ## The setup
 
@@ -87,11 +91,19 @@ foreign MAC between two of its ports, which is the property nested vSphere
 
 So the second vNIC buys three things, none of them physical redundancy:
 
-1. **Bringup and vLCM stop complaining** about a single-uplink host.
+1. **Bringup and vDS teaming get the two uplinks** we expected them to want.
 2. **The teaming policy you'll configure in production gets exercised** —
    uplink failover, active/standby for vSAN, whatever you're rehearsing.
 3. **A live proof that the trunk carries MAC mobility**, which is the
    real assurance that the design isn't relying on a quiet network.
+
+One caution for a host headed into a VCF Installer bringup: the 9.x
+installer's validation expects exactly one physical NIC on vSwitch0 and
+stops with "has 2 Physical NICs connected to vSphere Standard Switch
+vSwitch0 (Expecting 1)" ([KB 415469](https://knowledge.broadcom.com/external/article/415469)).
+Give such a host its second vNIC but leave vmnic1 unclaimed until bringup
+takes it; the failover test above teams both on vSwitch0 because it tests
+the trunk, not a bringup.
 
 ## What it does *not* buy, and how to say so
 
@@ -118,8 +130,9 @@ able to make that call confidently is worth more than the test itself.
 
 ## Rules learned
 
-- Give nested VCF hosts **two vNICs on the same trunk subnet**. Bringup,
-  vLCM and vDS teaming expect ≥ 2 vmnics; humouring them costs nothing.
+- Give nested VCF hosts **two vNICs on the same trunk subnet**. We expected
+  bringup and vDS teaming to want ≥ 2 vmnics; humouring them costs nothing.
+  Before a VCF Installer bringup, leave vmnic1 off vSwitch0 (KB 415469).
 - Test failover **from a session that depends on it** (SSH via the VIP).
   Pings passing while your terminal dies is not success.
 - The trunk subnet tolerates a **vmk MAC moving between ports mid-flow**
@@ -128,6 +141,15 @@ able to make that call confidently is worth more than the test itself.
   *physical* redundancy. Physical link faults can't be reproduced here.
 - Rebuilds re-run the vmk config: the appliance creates vmk0 only;
   vmk1/vmk2, their VLANs and override gateways are applied post-boot.
+
+## Broadcom documentation
+
+- [Configure NIC Teaming, Failover, and Load Balancing on a vSphere Standard Switch or Standard Port Group](https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/9-0/vsphere-networking/networking-policies/teaming-and-failover-policy/configure-nic-teaming-and-load-balancing-on-a-standard-switch-or-port-group.html): the default originating-port policy, failover order, and port groups inheriting the switch's policy.
+- [Understanding SpoofGuard Segment Profile](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/segments/segment-profiles/understanding-spoofguard-segment-profile.html): the address bindings a standard port enforces.
+- [Understanding MAC Discovery Segment Profile](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/segments/segment-profiles/understanding-mac-discovery-segment-profile.html): MAC learning for nested hypervisors, with many MACs behind one vNIC.
+- [VCF Installer](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/release-notes/vmware-cloud-foundation-9-1-0-0-release-notes/known-issues/vcf-installer-91-known-issues.html): the VCF 9.1 known issue where single-pNIC hosts fail NFS datastore validation, and the fix of two or more pNICs.
+- [Support for running ESXi as a nested virtualization solution](https://knowledge.broadcom.com/external/article/313547/support-for-running-esxi-as-a-nested-vir.html): nested ESXi is not supported in production, and is encouraged for learning, training and testing.
+- [VCF 9.0 Installer validation fails at ESX Host Configuration (KB 415469)](https://knowledge.broadcom.com/external/article/415469): one physical NIC on vSwitch0 before deployment, the other left unclaimed.
 
 *Companion to [nested ESXi inside an NSX VPC](/posts/nested-esxi-nsx-vpc/).*
 
