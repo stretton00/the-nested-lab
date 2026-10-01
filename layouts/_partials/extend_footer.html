@@ -1,0 +1,60 @@
+{{- /* Click to enlarge for images in a post's body (styles: assets/css/extended/lightbox.css). An image that is
+       already a link keeps the link. Escape, a click or Enter closes the overlay; focus returns to the image. */ -}}
+<script>
+(function () {
+  var images = document.querySelectorAll('.post-content img');
+  if (!images.length) return;
+  var overlay = null, opener = null;
+
+  function close() {
+    if (!overlay) return;
+    overlay.remove();
+    overlay = null;
+    document.documentElement.classList.remove('lb-open');
+    if (opener) opener.focus();
+  }
+
+  function open(img) {
+    opener = img;
+    overlay = document.createElement('div');
+    overlay.className = 'lb-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', img.alt || 'Image');
+    overlay.tabIndex = -1;
+    var big = document.createElement('img');
+    big.src = img.currentSrc || img.src;
+    big.alt = img.alt || '';
+    overlay.appendChild(big);
+    if (img.alt) {
+      var caption = document.createElement('p');
+      caption.className = 'lb-caption';
+      caption.textContent = img.alt;
+      overlay.appendChild(caption);
+    }
+    overlay.addEventListener('click', close);
+    overlay.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); close(); }
+    });
+    document.body.appendChild(overlay);
+    document.documentElement.classList.add('lb-open');
+    overlay.focus();
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') close();
+  });
+
+  images.forEach(function (img) {
+    if (img.closest('a')) return;
+    img.classList.add('lb-zoomable');
+    img.tabIndex = 0;
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-label', 'Enlarge image: ' + (img.alt || ''));
+    img.addEventListener('click', function () { open(img); });
+    img.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(img); }
+    });
+  });
+})();
+</script>

@@ -22,9 +22,3 @@ Or email: {{< email user="adam.stretton" domain="comms-care.com" >}}.
   those are observed behaviour on specific releases, and releases move.
 - **Follow-up questions** that are really "have you tried X?" — often the
   answer is no and it becomes a post.
-
-## What I can't do
-
-- Support your production environment. Everything here is lab work;
-  Broadcom Support is the right door for anything you're paying for.
-- Share customer material. Techniques are generalised deliberately.
