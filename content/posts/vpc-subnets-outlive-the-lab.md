@@ -18,7 +18,8 @@ cover:
 summary: "I deleted a test lab, got 'clean', and requested the next one into the same VPC eleven seconds later. It never booted: NSX still held the old lab's subnets. Why fixed addresses need a clean slate, and tooling that waits for NSX instead of a timer."
 ---
 
-Our delete tool said the old lab was gone:
+Our delete tool said the old lab was gone, and it sounded very sure of
+itself:
 
 ```text
 23:26:06 deployment=DELETE_INPROGRESS namespaces=0 volumes=0
@@ -27,8 +28,8 @@ clean
 ```
 
 Eleven seconds later I requested the next Phase 6 lab into the same VPC.
-Forty minutes after that, the four nested ESXi hosts were running, and the
-two Windows VMs, the domain controller `dc01` and the jump host, had never
+Forty minutes after that, the four nested ESXi hosts were running. The two
+Windows VMs, the domain controller `dc01` and the jump host, had never
 powered on:
 
 ```text
@@ -52,10 +53,10 @@ The jump host had the same error for 172.30.0.35.
 
 ## The plan every lab shares
 
-Every lab in a student's VPC uses the same addresses, the pattern from
+Every lab in a student's VPC uses the same addresses: the pattern from
 [three datacenters, one IP plan](/posts/three-datacenters-one-ip-plan/). The
-blueprint creates four subnets in a fixed order, and in a fresh VPC NSX
-hands out /27 blocks from `172.30.0.0/16` in that order:
+blueprint creates four subnets in a fixed order. In a fresh VPC, NSX hands
+out /27 blocks from `172.30.0.0/16` in that order:
 
 | Subnet | Block | What lives there |
 |---|---|---|
@@ -65,9 +66,9 @@ hands out /27 blocks from `172.30.0.0/16` in that order:
 | sn-vsan | 172.30.0.96/27 | vmk2 .100-.103 (VLAN 1612) |
 
 `dc01` and the jump host ask VM Operator for their fixed addresses
-(`addresses` and `gateway4` in the VM spec), and NSX creates each port with
-that address bound to it. That is why the domain controller is .34 in every
-lab, and why one set of class notes fits them all.
+(`addresses` and `gateway4` in the VM spec). NSX creates each port with that
+address bound to it. That is why the domain controller is .34 in every lab,
+and why one set of class notes fits them all.
 
 ## What NSX actually did
 
@@ -82,10 +83,13 @@ sn-vsan_pzsh3 sn-vsan_pzsh3 ['172.30.0.128/27'] 1790720933557 False
 ```
 
 Every subnet had moved up one block, so the first block was still taken, by
-the lab I had just deleted. VCF Automation had removed the deployment, the
-Supervisor had no namespace and no volumes left, and NSX still held at least
-one of its subnets. The new sn-mgmt came out as .64/27, where .34 and .35 do
-not exist, so NSX refused both Windows VMs' ports and they waited for ever.
+the lab I had just deleted. VCF Automation had removed the deployment, and
+the Supervisor had no namespace and no volumes left. NSX still held at least
+one of its subnets.
+
+The new sn-mgmt came out as .64/27, where .34 and .35 do not exist. So NSX
+refused both Windows VMs' ports, and they waited for ever.
+
 The hosts powered on because their trunk ports take whatever address NSX
 hands out; their own addresses are set inside the guest. They were running
 on a plan that no longer matched their subnets, so the lab was dead either
@@ -95,9 +99,11 @@ way.
 
 Two live labs in one VPC break each other the same way, because the second
 lab's subnets take the next free blocks. The first time I met this, a failed
-attempt's namespace was still in the VPC and the retry's subnets came out
-three blocks up. The rule has been one lab per VPC at a time ever since. The
-new lesson was that a deleted lab still counts for a while.
+attempt's namespace was still in the VPC, and the retry's subnets came out
+three blocks up. The rule has been one lab per VPC at a time ever since.
+
+The new lesson was that a deleted lab still counts for a while. "Deleted",
+it turns out, is a process rather than an event.
 
 ## Wait for the layer that holds the resource
 
@@ -127,8 +133,9 @@ Its first job was deleting the stuck lab:
 clean - vpc-student03 has no subnets left, a new lab can use it
 ```
 
-The retry, requested after that line, was ready three and a half hours later,
-and went on to star in [the VCF Operations post](/posts/vcf-ops-ad-groups-by-dn/).
+The retry, requested after that line, was ready three and a half hours
+later. It went on to star in [the VCF Operations post](/posts/vcf-ops-ad-groups-by-dn/).
+
 A later delete caught the lag in the act, one second after the namespace and
 volumes had gone:
 
@@ -148,8 +155,8 @@ The main endings, one line each, and what each means:
 | `NSX still holds vpc-student01's subnets after 10 minutes (...): ...` | Do not request until NSX shows none |
 | `the delete FAILED - see the deployment in VCF Automation` | Read the reason there and delete again |
 
-The five minutes are a margin, not a measurement, and apply only when NSX
-cannot be asked. That happened once, a timeout (`NSX not asked about
+The five minutes are a margin, not a measurement, and they apply only when
+NSX cannot be asked. That happened once, a timeout (`NSX not asked about
 vpc-student03's subnets (TimeoutError)`), so the tool now asks three times
 before it falls back.
 
@@ -157,9 +164,12 @@ before it falls back.
 
 The error that explained all this was not in VCF Automation, and not in VM
 Operator's log. It was in each VM's `VirtualMachineNetworkReady` condition,
-a long way into the message. So the lab watcher, `phase_watch.py`, now reads
-the failing conditions of every VM that is not on yet, cuts the message down
-to the part that matters, and adds a line saying what to do:
+a long way into the message, which is where error messages keep their best
+material.
+
+So the lab watcher, `phase_watch.py`, now reads the failing conditions of
+every VM that is not on yet. It cuts the message down to the part that
+matters, and adds a line saying what to do:
 
 ```python
 HINTS = [(re.compile(r"IP Address [\d.]+ does not belong to any of the existing ranges"),
@@ -173,12 +183,14 @@ then the hint on a line of its own after `>>>`.
 ## Before a class: a throwaway namespace per VPC
 
 Would namespaces waiting in the VPCs save time? No: creating the namespace
-took about 5 seconds of a 2 min 25 s lab request. What pre-creating would
-really buy is failing early, and a throwaway namespace buys that too.
+took about 5 seconds of a 2 min 25 s lab request. That's not a saving. It's
+a rounding error. What pre-creating would really buy is failing early, and a
+throwaway namespace buys that too.
+
 `vpc_check.py` makes a namespace-only draft deployment in each free VPC
-through VCF Automation, with no VMs and no subnets, checks it and deletes
-it. A VPC that holds a lab is skipped, because a namespace beside a live lab
-is exactly what the labs must avoid:
+through VCF Automation, with no VMs and no subnets, then checks it and
+deletes it. A VPC that holds a lab is skipped, because a namespace beside a
+live lab is exactly what the labs must avoid:
 
 ```text
 vpc-student01      ok - a namespace was created in it
@@ -196,8 +208,8 @@ vpc-student03      skipped - a lab's namespace is in it now
 Fixed addresses are what make identical environments possible: one runbook,
 true screenshots, firewall rules written once. But the platform promises
 deterministic addressing only to a clean slate. A tear-down that finishes in
-the background turns a harmless delay into an environment that never boots,
-and the failure surfaces somewhere else, forty minutes later, in a message
+the background turns a harmless delay into an environment that never boots.
+The failure then surfaces somewhere else, forty minutes later, in a message
 nobody reads.
 
 The same race exists wherever an environment is torn down and recreated with

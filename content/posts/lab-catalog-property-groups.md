@@ -18,19 +18,25 @@ cover:
 summary: "Our nested-lab blueprints worked, and had one platform written all over them: 59 values from the region to every lab address. How they now read all of it from two VCF Automation property groups, what I proved before trusting it, and the lint that keeps literals out."
 ---
 
-Our nested-lab catalog worked: six phase items and two dev items, each building
-an isolated training lab with nested ESXi hosts, a domain controller, a jump
-host and, in the later phases, a vCenter and VCF Operations. It also had one
-platform written all over it. When I finally counted, 59 values in those
-blueprints belonged to the pod they were generated for: the region and zone,
-the namespace class, storage policies, VM class names, content-library image
-IDs, every address in the lab network plan, the DNS forwarders and the binaries
-server URL.
+Our nested-lab catalog worked. It had six phase items and two dev items, each
+building an isolated training lab: nested ESXi hosts, a domain controller, a
+jump host and, in the later phases, a vCenter and VCF Operations.
 
-A generator and a per-site YAML file kept that manageable, but the blueprints
-themselves were not portable. Moving to another pod meant regenerating and
-re-releasing all eight, and nobody could change a value without a new blueprint
-version. The goal for this round: blueprints that contain no site at all.
+It also had one platform written all over it. When I finally counted, 59
+values in those blueprints belonged to the pod they were generated for:
+
+- the region and zone;
+- the namespace class, storage policies and VM class names;
+- content-library image IDs;
+- every address in the lab network plan;
+- the DNS forwarders and the binaries server URL.
+
+A generator and a per-site YAML file kept that manageable. The blueprints
+themselves, though, were not portable, or only in the way a piano is. Moving
+to another pod meant regenerating and re-releasing all eight, and nobody could
+change a value without a new blueprint version.
+
+The goal for this round: blueprints that contain no site at all.
 
 ## Where each setting lives now
 
@@ -43,7 +49,7 @@ version. The goal for this round: blueprints that contain no site at all.
 | The lab's shape | host count, names, VM layout, scripts | generator + site file |
 
 The site file is still the one place an operator edits. The generator now
-writes the two [property groups](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/property-groups.html) from it as well as the blueprints, and a small
+writes the two [property groups](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/property-groups.html) from it, as well as the blueprints. A small
 sync tool pushes the groups to VCF Automation:
 
 ```text
@@ -55,14 +61,15 @@ nestedLabSite: up to date
 nestedLabMedia: up to date
 ```
 
-The second run is the important one: a round trip through the API that
+The second run is the important one. It's a round trip through the API that
 changes nothing, so a later difference means someone edited a group in the
 UI.
 
 ## What a reference looks like
 
 Wherever a blueprint used to say `domain-c9` or `172.30.0.40`, it now says where
-to find it. The namespace:
+to find it. Here's the namespace. Its memory limit is one long sum, and I'm
+pleased to report that it adds up:
 
 ```yaml
 className: ${propgroup.nestedLabSite.namespaceClass}
@@ -72,24 +79,29 @@ zones:
     memoryLimit: "${propgroup.nestedLabSite.hostSizes.large.memMi + 2 * propgroup.nestedLabSite.hostSizes[input.hostSize].memMi + (input.opsSize == 'xsmall' ? propgroup.nestedLabSite.hostSizes[input.hostSize].memMi : propgroup.nestedLabSite.hostSizes.large.memMi) + propgroup.nestedLabSite.jumpSizes[input.jumpSize].memMi + propgroup.nestedLabSite.dc.memMi + 'Mi'}"
 ```
 
-A nested host picks its image from the requested release and its class from
+A nested host picks its image from the requested release, and its class from
 the requested size. esx04 grows when VCF Operations needs it:
 
 ```text
 'imageName':propgroup.nestedLabMedia.releases[input.release].esxAppliance,'className':(input.opsSize == 'xsmall' ? propgroup.nestedLabSite.hostSizes[input.hostSize].vmClass : propgroup.nestedLabSite.hostSizes.large.vmClass)
 ```
 
-And inside the jump host's cloud-config, the lab's DNS script and its config
-file carry references too, resolved before the VM ever sees them.
+Inside the jump host's cloud-config, the lab's DNS script and its config file
+carry references too. They're resolved before the VM ever sees them.
 
 ## Prove the expression language first
 
 Blueprint validation skips expressions entirely; it only checks literals. So
-"valid" said nothing about whether any of this would resolve. Before touching
-the generator, I deployed three throw-away blueprints into a free VPC. They
-covered each construct the refactor needed: references in namespace fields
-and in block scalars, a map indexed by an input, arithmetic on group values,
-and an integer where Kubernetes insists on one.
+"valid" said nothing about whether any of this would resolve. Validation, in
+other words, was being polite.
+
+Before touching the generator, I deployed three throw-away blueprints into a
+free VPC. Between them, they covered each construct the refactor needed:
+
+- references in namespace fields and in block scalars;
+- a map indexed by an input;
+- arithmetic on group values;
+- an integer where Kubernetes insists on one.
 
 The arithmetic test echoed its results into a ConfigMap:
 
@@ -109,18 +121,21 @@ Only then did the generator change.
 
 ## Releases and sizes
 
-A release is a set that belongs together, for example ESXi 9.1.0.0200 with
-vCenter 9.1.0.0200 and VCF Operations 9.1.0.0400. The request offers releases,
-not three independent version pickers, and every image and folder is looked
-up as `releases[input.release].<key>`. Adding a release is data: media on the
-binaries server, images in the content library, an entry in the site file, a
-sync. The one blueprint change is the Release dropdown itself, because input
-lists cannot come from a property group.
+A release is a set of versions that belong together: for example, ESXi
+9.1.0.0200 with vCenter 9.1.0.0200 and VCF Operations 9.1.0.0400. The request
+offers releases, not three independent version pickers. Every image and
+folder is looked up as `releases[input.release].<key>`.
 
-The design got its first real test the same morning, when the binaries server
-moved from a flat folder to a versioned tree (`vcenter/<build>/`,
-`ops/<build>/`, `scripts/`, `tools/`). Hard links kept every old path working
-for labs already running. For the catalog, the move was this:
+Adding a release is data: media on the binaries server, images in the content
+library, an entry in the site file, and a sync. The one blueprint
+change is the Release dropdown itself, because input lists cannot come from a
+property group.
+
+The design got its first real test the same morning. No pressure, then. The
+binaries server moved from a flat folder to a versioned tree
+(`vcenter/<build>/`, `ops/<build>/`, `scripts/`, `tools/`). Hard links kept
+every old path working for labs already running. For the catalog, the move
+was this:
 
 ```text
 nestedLabSite: 2 change(s)
@@ -137,13 +152,13 @@ Six values in two groups. All eight blueprints, regenerated afterwards, came
 out byte-for-byte identical.
 
 Host sizes became Small, Medium and Large. Each entry in the group carries the
-VM class and the vCPU and memory the quota should count, so the namespace
+VM class, plus the vCPU and memory the quota should count, so the namespace
 limits follow the request. The default Phase 5 lab comes out at exactly the
 figures the old literal expressions produced: 126976 Mi and 52000 M.
 
 ## A lint for literals
 
-The failure mode of "portable" templates is quiet: someone adds a feature,
+The failure mode of "portable" templates is quiet. Someone adds a feature,
 types an address or an image ID straight into it, and portability is gone
 until the next site finds out. So the generator now refuses to write a
 blueprint containing any value from either property group. The first run
@@ -161,13 +176,16 @@ someone's head.
 
 The real test of "no site inside" is a second site. I wrote an example site
 file for a made-up platform, with a different region, network plan, VLANs,
-image IDs, binaries server and AD domain, and generated the same eight
-blueprints from it. The Phase 5 blueprint for that site differs from f06's in
-25 lines. Every one is either a password default on the form or a sample
-domain account, both lab content by choice. The comparison also caught one
-real leak the lint had missed: the NetBIOS name written as text into the jump
-host's README. It is a reference now, and the lint checks for that name as a
-whole word.
+image IDs, binaries server and Active Directory domain. Then I generated the
+same eight blueprints from it.
+
+The Phase 5 blueprint for that site differs from f06's in 25 lines. Every one
+is either a password default on the form or a sample domain account, both lab
+content by choice.
+
+The comparison also caught one real leak the lint had missed: the NetBIOS
+name, written as text into the jump host's README. It's a reference now, and
+the lint checks for that name as a whole word.
 
 ## End to end
 
@@ -176,15 +194,15 @@ releasing anything, I requested two of the regenerated blueprints as drafts,
 straight from the generator's output, in a VPC nobody was using.
 
 Phase 1, the first lab in the series, was done 13 minutes after the request.
-Everything I could check against a hand calculation matched. The namespace
-took its class, region and VPC from `nestedLabSite`, and its limits came out
-at 44000 MHz and 77824 MB. The hosts were Small, with the release's image and
+Long enough to wonder whether it had worked, not long enough to worry. Everything I could check against a hand
+calculation matched. The namespace took its class, region and VPC from
+`nestedLabSite`, and its limits came out at 44000 MHz and 77824 MB. The hosts were Small, with the release's image and
 ESXi ISO. The three binding maps carried 1610, 1611 and 1612 as integers.
 
-Phase 4 adds a vCenter, built by a script on the jump host, and that script
-takes the network plan and the release folders from the lab's config file. So
-the file the jump host received is the real test. Trimmed, with the passwords
-masked and the host list cut:
+Phase 4 adds a vCenter, built by a script on the jump host. That script takes
+the network plan and the release folders from the lab's config file, so the
+file the jump host received is the real test. Here it is, trimmed, with the
+passwords masked and the host list cut:
 
 ```text
 "zone": "acme.lab",
@@ -204,7 +222,7 @@ masked and the host list cut:
 "vcsaSparseFolder": "vcenter/9.1.0.0200-25573614/sparse/",
 ```
 
-Every value in it came from one of the two groups or from the request. The
+Every value in it came from one of the two groups, or from the request. The
 check script ends by searching the jump host's files for `${`, which would
 mean a reference the platform never resolved:
 
@@ -225,22 +243,25 @@ The build log shows the script working from that plan:
 09:38:18    created a new single-node vSAN ESA cluster
 ```
 
-The vCenter build needed two fixes before it finished, both in the build
-script rather than the catalog, and both worth a post of their own: a PowerCLI
-connection that hangs, and hosts that joined vSAN on the wrong network. The
-final run ended at 12:26 with the lab's vCenter, four hosts, a 399 GB vSAN ESA
-datastore, the distributed switch and the binaries share mounted over NFS.
-Twenty minutes later the whole set went out as version 2.0.0.
+The vCenter build needed two fixes before it finished. Both were in the build
+script rather than the catalog, and both are worth a post of their own: a
+PowerCLI connection that hangs, and hosts that joined vSAN on the wrong
+network.
+
+The final run ended at 12:26 with the lab's vCenter, four hosts, a 399 GB vSAN
+ESA datastore, the distributed switch and the binaries share mounted over NFS.
+Twenty minutes later, the whole set went out as version 2.0.0.
 
 ## Why this matters outside the lab
 
 A catalog is a product. The first version usually hard-codes the platform it
-was built on, and that is fine until a second platform, a second team or a
-second release arrives. Separating "what the lab is" from "where it runs" and
-"which software it runs" turns a copy-and-edit exercise into two data changes,
-with an audit trail in one YAML file. The same pattern fits any estate that
-runs one service design on several VCF instances: regions, dev and prod, or a
-disconnected site.
+was built on, and that's fine until a second platform, a second team or a
+second release arrives.
+
+Separating "what the lab is" from "where it runs" and "which software it runs"
+turns a copy-and-edit exercise into two data changes, with an audit trail in
+one YAML file. The same pattern fits any estate that runs one service design
+on several VCF instances: regions, dev and prod, or a disconnected site.
 
 ## Rules learned
 

@@ -19,14 +19,18 @@ summary: "Stage 2 of the lab factory: a vRO workflow that turns an environment n
 ---
 
 The [nested hosts exist](/posts/porting-a-powershell-deploy-script/). Now
-they need to become a VCF instance: vCenter, NSX, SDDC Manager, the fleet
-components. The VCF 9.1 Installer appliance does that from a deployment
-spec — a few hundred lines of JSON — through an API. This post is the vRO
-workflow that drives it, and the three design constraints that shaped it:
-nobody edits the spec by hand, the request gets two hours by default, and
-nested hosts fail hardware validation.
+they need to become a VCF instance: vCenter, NSX, SDDC Manager and the fleet
+components. The VCF 9.1 Installer appliance does that through an API, from a
+deployment spec of a few hundred lines of JSON.
 
-Unlike stage 1 this isn't VM provisioning, so it's not a cloud template.
+This post is the vRO workflow that drives it. Three design constraints
+shaped it:
+
+- nobody edits the spec by hand;
+- the request gets two hours by default;
+- nested hosts fail hardware validation.
+
+Unlike stage 1, this isn't VM provisioning, so it's not a cloud template.
 It's a **vRO workflow published directly as a catalog item** through an
 [Orchestrator content source](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/working-with-the-vcf-automation-catalog/service-broker-adding-content-to-the-catalog/service-broker-add-vrealize-orchestrator-workflows-to-the-catalog.html).
 
@@ -34,8 +38,8 @@ It's a **vRO workflow published directly as a catalog item** through an
 
 A vRO action, `buildVcfDeploymentSpec(environment, hostFqdns, labPassword,
 …)`, returns the whole spec as a string. Its structure was reconciled
-against a *validated* export from a real bringup — the installer UI lets
-you export the spec it accepted — and everything variable derives from the
+against a *validated* export from a real bringup (the installer UI lets
+you export the spec it accepted). Everything variable derives from the
 environment number X:
 
 | Element | Pattern | f03 |
@@ -56,18 +60,20 @@ function vlan(o) { return 2000 + (n * 100) + o; }
 function gw(sub) { return net + "." + sub + ".254"; }
 ```
 
-Static across environments: DNS, NTP, subdomain, component sizes, vSAN ESA
-FTT=1, and the component build versions pinned to the installer binaries.
-One lab password feeds every credential field (the UI export scrubs them;
-the action puts them back per the API schema).
+Some things are static across environments: DNS, NTP, subdomain, component
+sizes, vSAN ESA FTT=1, and the component build versions pinned to the
+installer binaries.
+
+One lab password feeds every credential field. The UI export scrubs them,
+and the action puts them back as the API schema expects.
 
 Two spec-level decisions worth stealing:
 
 - `skipEsxThumbprintValidation: true` instead of carrying per-host
   `sslThumbprint`. Supported, and the right trade-off for a lab.
-- Ops and Automation are **checkboxes** that add their blocks to the spec
-  — and the installer only accepts a `licenseServerSpec` when Ops is
-  present, so the action adds them together or not at all.
+- Ops and Automation are **checkboxes** that add their blocks to the spec.
+  The installer only accepts a `licenseServerSpec` when Ops is present, so
+  the action adds them together or not at all.
 
 ## The workflow: authenticate → validate → start → return
 
@@ -81,34 +87,44 @@ Two spec-level decisions worth stealing:
 ```
 
 Step 2 is the [validateOnly](/posts/validateonly-everywhere/) story made
-concrete: the installer will tell you, in seconds, that
-`f03-m01-nsx01.res.lab` doesn't resolve, that an IP is in use, that a host
-isn't reachable. Two hours into a bringup is a bad time to learn that.
-Every one of the ~40 DNS records the pre-flight wants is created ahead of
-time by a one-shot PowerShell script (`New-LabEnvDnsRecords.ps1`) — DNS is
-a prerequisite, not a step.
+concrete. In seconds, the installer will tell you that
+`f03-m01-nsx01.res.lab` doesn't resolve, that an IP is in use, or that a
+host isn't reachable. Two hours into a bringup is a bad time to learn that.
+Seconds in, it's merely embarrassing.
+
+Every one of the roughly 40 DNS records the pre-flight wants is created
+ahead of time by a one-shot PowerShell script (`New-LabEnvDnsRecords.ps1`).
+DNS is a prerequisite, not a step.
 
 ## The two-hour leash, and how to slip it
 
 A request from the catalog carries a token with a roughly **two-hour**
-lifetime, and a bringup takes around **eight**: when it runs out, the
-workflow dies with `Delegating token is not service token`. The project's
-[request timeout](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/getting-started-with-organizations-for-vm-apps-in-vcf-automation/map-head-projects-adding-and-managing-projects/projects-how-do-i-add-a-project-for-my-development-team.html)
-also defaults to two hours and its Provisioning tab can raise it; we never
-tried, because eight hours is too long to hold a request open. So by default the workflow
-is fire-and-forget: `waitForCompletion=false`, return the task id, watch
-progress in the installer UI. A `watchTaskId` input lets you re-attach
-later and poll an already-running bringup from a new request.
+lifetime, and a bringup takes around **eight**. The arithmetic is not
+encouraging. When the token runs out, the workflow dies with
+`Delegating token is not service token`.
 
-The wrapper that chains *everything* — hosts, bringup, then the day-N
-components that need bringup to be finished — has a neater trick. The
-catalog-bound parent deploys the hosts, submits bringup, and then
-**re-executes itself as a plain vRO run** (Orchestrator → Run, no catalog
-token, no two-hour kill) carrying the hidden `bringupWatchTaskId`. That
-continuation polls the installer task to completion — eight hours, fine —
-and then runs certificates, fleet items, edge, supervisor and identity.
-Watch it under *Orchestrator → Activity → Runs*. The catalog request
-itself completes in under an hour — 47 minutes on the run pictured below — having
+The project's
+[request timeout](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/vcfa-overview/getting-started-with-organizations-for-vm-apps-in-vcf-automation/map-head-projects-adding-and-managing-projects/projects-how-do-i-add-a-project-for-my-development-team.html)
+also defaults to two hours, and its Provisioning tab can raise it. We never
+tried, because eight hours is too long to hold a request open.
+
+So by default the workflow is fire-and-forget: `waitForCompletion=false`,
+return the task id, and watch progress in the installer UI. A `watchTaskId`
+input lets you re-attach later, and poll an already-running bringup from a
+new request.
+
+The wrapper that chains *everything* (the hosts, then bringup, then the day-N
+components that need bringup to be finished) has a neater trick.
+
+The catalog-bound parent deploys the hosts, submits bringup, and then
+**re-executes itself as a plain vRO run** (Orchestrator > Run: no catalog
+token, no two-hour kill). It carries the hidden `bringupWatchTaskId` with
+it. That continuation polls the installer task to completion (eight hours,
+fine), and then runs certificates, fleet items, edge, supervisor and
+identity.
+
+Watch it under *Orchestrator > Activity > Runs*. The catalog request itself
+completes in under an hour (47 minutes on the run pictured below), having
 *started the work correctly and handed off*.
 
 ![Orchestrator runs: the catalog-bound parent (13:12→14:00) and the continuation it spawned (14:00 → 01:56 next day)](/images/ui/f5-f00-vro-runs-parent-continuation.jpg)
@@ -121,43 +137,54 @@ itself completes in under an hour — 47 minutes on the run pictured below — h
 
 Three things a physical bringup never meets:
 
-- **HCL validation vs virtual NVMe.** The installer's hardware check
-  blocks the virtual NVMe controller. Fix at the vLCM layer:
+- **HCL validation vs virtual NVMe.** The installer's hardware
+  compatibility list (HCL) check blocks the virtual NVMe controller. Fix it
+  at the vSphere Lifecycle Manager (vLCM) layer:
   `enforce_hcl_validation=false` on the image policy. The vSAN health test
-  `nvmeonhcl` also complains; silenced via the vSAN API, best-effort with
-  manual fallback.
+  `nvmeonhcl` also complains. We silence it through the vSAN API,
+  best-effort, with a manual fallback.
 - **DVS compatibility appears late.** After bringup, NSX takes 1–2 hours
   to settle before the supervisor's zones endpoint stops returning 500.
-  If the supervisor stage fails "No compatible DVS" on a fresh instance,
-  wait and re-run just that item.
-- **TSM-SSH.** Bringup wants SSH on the hosts; the wrapper enables it
-  host-direct via SOAP before submitting.
+  If the supervisor stage fails with "No compatible DVS" on a fresh
+  instance, wait and re-run just that item. Patience, it turns out, is a
+  deployment step.
+- **TSM-SSH.** Bringup wants SSH on the hosts, so the wrapper enables it
+  host-direct through SOAP before submitting.
 
 ## Stale schema: the failure that looks like a bug and isn't
 
-Add an input to the vRO workflow after the catalog item exists and the
-form will show the new field, the request will record its value, and the
-workflow will receive **null** — Service Broker keeps the old request
-schema until the content source re-imports. The workflow null-guards every
-boolean and aborts with "inputs not mapped" rather than running with
-silently-wrong options. Fix: re-import the content source, confirm the
-schema, submit a *new* request (resubmitting an old one reuses the old
-payload).
+Add an input to the vRO workflow after the catalog item exists, and three
+things happen. The form shows the new field. The request records its value.
+And the workflow receives **null**, because Service Broker keeps the old
+request schema until the content source re-imports. Two out of three, which
+here counts as a fail.
 
-There are actually three async layers between "publish" and "mappable
-request" — vRO processing the import, the catalog schema after re-import,
-and the form service still enforcing the previous custom form for a minute
-or two. Same symptom for all three. Check timing before assuming a bug.
+The workflow null-guards every boolean, and aborts with "inputs not mapped"
+rather than running with silently wrong options. The fix: re-import the
+content source, confirm the schema, and submit a *new* request.
+Resubmitting an old one reuses the old payload.
+
+There are actually three asynchronous layers between "publish" and
+"mappable request":
+
+- vRO processing the import;
+- the catalog schema after re-import;
+- the form service still enforcing the previous custom form for a minute
+  or two.
+
+Same symptom for all three. Check timing before assuming a bug.
 
 ## Why this matters outside the lab
 
 Repeatable, generated VCF deployments matter well beyond a lab: a second
 site, a disaster-recovery instance, a new business unit, an environment per
-supported release. Generating the specification from a validated reference
-removes the class of errors that comes from editing hundreds of lines of
-JSON by hand, and running the installer's own validation first turns
-"find out in hour two" into "find out in minute one". It's the difference
-between a VCF deployment being a project and being a procedure.
+supported release.
+
+Generating the specification from a validated reference removes a whole
+class of errors: the ones that come from editing hundreds of lines of JSON
+by hand. Running the installer's own validation first turns "find out in
+hour two" into "find out in minute one". It's the difference between a VCF
+deployment being a project and being a procedure.
 
 ## Rules learned
 
@@ -168,7 +195,7 @@ between a VCF deployment being a project and being a procedure.
 - Pre-create DNS. Enable SSH. Disable HCL enforcement on virtual NVMe.
 - Respect the request lifetime: **start, return a task id, re-attach**.
   For a long chain, have the workflow re-run itself outside the catalog.
-- Null-guard every input and fail loud; stale schemas are a fact of life
+- Null-guard every input and fail loudly. Stale schemas are a fact of life
   after adding inputs.
 - On a fresh instance, give NSX an hour before you expect DVS
   compatibility.

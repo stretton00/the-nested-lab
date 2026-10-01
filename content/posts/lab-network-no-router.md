@@ -30,24 +30,25 @@ Tracing route to 172.31.0.34 over a maximum of 8 hops
 Trace complete.
 ```
 
-Three NSX hops and the server: the gateway of the lab's management subnet,
-the transit gateway and the gateway of the shared-services VPC. The lab has
-no router VM, and no physical switch carries a VLAN for it. Its management,
+Three NSX hops, then the server. The hops are the gateway of the lab's
+management subnet, the transit gateway, and the gateway of the shared-services
+VPC. The most interesting hop is the one that isn't there. The lab has no
+router VM, and no physical switch carries a VLAN for it. Its management,
 vMotion and vSAN networks are ordinary subnets of the lab's own VPC, and the
 VPC routes them.
 
-This is the network half of [the design](/posts/nested-labs-as-code/), and
-how it compares with the other two ways to network a nested lab.
+This post covers the network half of [the design](/posts/nested-labs-as-code/),
+and how it compares with the other two ways to network a nested lab.
 
 ## One VPC per lab, one plan in every VPC
 
-Every student has a VPC of their own, `vpc-student01` and so on, created once
-with a load balancer and the same private range, `172.30.0.0/16`. A lab
-request creates a Supervisor namespace pinned to that VPC and four subnets in
-a fixed order, and a fresh VPC hands out /27 blocks in creation order, so
-every lab gets the same plan
+Every student has a VPC of their own, `vpc-student01` and so on. Each one was
+created once, with a load balancer and the same private range,
+`172.30.0.0/16`. A lab request creates a Supervisor namespace pinned to that
+VPC, then four subnets in a fixed order. A fresh VPC hands out /27 blocks in
+creation order
 ([three datacenters, one IP plan](/posts/three-datacenters-one-ip-plan/) has
-the mechanism):
+the mechanism). So every lab gets the same plan:
 
 | Subnet | Block | Gateway | VLAN on the trunk | What uses it |
 |---|---|---|---|---|
@@ -56,23 +57,25 @@ the mechanism):
 | sn-vmotion | 172.30.0.64/27 | .65 | 1611 | vmk1 .70-.73 |
 | sn-vsan | 172.30.0.96/27 | .97 | 1612 | vmk2 .100-.103 |
 
-Class notes that say esx01 is 172.30.0.40 are right for every student; the
+So class notes that say esx01 is 172.30.0.40 are right for every student. The
 RDP address is the only one a student sees change from lab to lab.
 
 ## Three ordinary subnets on one trunk
 
 A nested host's vNICs attach only to `sn-trunk`. The three networks a vSphere
-host needs are ordinary `Private` VPC subnets, and a
+host needs are ordinary `Private` VPC subnets. A
 [`SubnetConnectionBindingMap`](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-0/managing-vsphere-kuberenetes-service-clusters-and-workloads/managing-networking-for-tkg-service-clusters/enable-antrea-egress-separate-subnet-on-a-tkg-cluster-with-nsx-vpc/create-a-subnetconnectionbindingmap-cr-on-the-supervisor.html)
 binds each of them to the trunk with a VLAN tag. The nested hosts tag their
 vmkernel traffic 1610, 1611 or 1612, as they would on a physical trunk, and
-each binding map delivers its tag into its subnet.
+each binding map delivers its tag into its subnet. As far as the hosts know,
+it is a physical trunk, and nobody has the heart to tell them.
+
 [Nested ESXi inside an NSX VPC](/posts/nested-esxi-nsx-vpc/) explains why the
-hosts need a trunk subnet rather than a plain one, and
-[dual-NIC nested hosts](/posts/dual-nic-nested-hosts/) fails a vNIC over on it.
+hosts need a trunk subnet rather than a plain one.
+[Dual-NIC nested hosts](/posts/dual-nic-nested-hosts/) fails a vNIC over on it.
 
 The generated blueprint creates all of this as plain Supervisor resources.
-The management subnet, its binding map and the jump host's interface:
+Here are the management subnet, its binding map and the jump host's interface:
 
 ```yaml
   snMgmt:
@@ -106,18 +109,19 @@ The management subnet, its binding map and the jump host's interface:
 `dependsOn` fixes the creation order, and with it every address. The VLAN
 tags and the addresses come from the site's property group, so the blueprint
 carries no address or VLAN of its own. The jump host and `dc01` are ordinary
-VMs on `sn-mgmt`: VM Operator asks NSX for their fixed addresses, .35 and
+VMs on `sn-mgmt`. VM Operator asks NSX for their fixed addresses, .35 and
 .34, and hands them the gateway, because
 [our VPC subnets have no DHCP](/posts/vpc-subnets-have-no-dhcp/).
 
 ## The gateway is the VPC's own router
 
 Nothing in the blueprint creates a router. Each subnet's gateway is an
-interface of the VPC gateway, which NSX runs as a distributed router in every
-host's kernel plus a service router on an edge node for the NAT and the load
-balancer (`DR-vpc-student02` and `SR-vpc-student02` on the edge). The service
-router's interfaces hold the lab's four gateway addresses beside its uplink
-to the transit gateway:
+interface of the VPC gateway. NSX runs that as a distributed router in every
+host's kernel. For the NAT and the load balancer, it adds a service router on
+an edge node. On the edge, the two routers show up as `DR-vpc-student02` and
+`SR-vpc-student02`. The
+service router's interfaces hold the lab's four gateway addresses, beside its
+uplink to the transit gateway:
 
 ```text
 ...
@@ -131,19 +135,19 @@ to the transit gateway:
 
 Traffic inside one network stays at layer 2 on its subnet. Traffic between
 the lab's networks is routed by the distributed router on the host where it
-starts, and traffic in and out passes the service router. No VM sits in the
-path, and there is nothing in the lab to size, patch or recover from a
-console.
+starts. Traffic in and out passes the service router. No VM sits in the path,
+so there's nothing in the lab to size, patch or recover from a console. That's
+my favourite amount of maintenance.
 
 ## What NSX does for the lab
 
-What NSX does for each lab, with nothing to configure per request:
+Here's what NSX does for each lab, with nothing to configure per request.
 
 **The way out.** Each student VPC is attached to the
 [connectivity profile](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-vpc-connectivity-profile.html)
-`default--f06`, which turns default SNAT on: every lab VPC gets an outbound
-NAT rule that nobody wrote. NSX's view of a lab VPC and the shared-services
-VPC:
+`default--f06`, which turns default SNAT on. So every lab VPC gets an outbound
+NAT rule that nobody wrote, and therefore nobody can mistype. Here's NSX's
+view of a lab VPC and the shared-services VPC:
 
 ```text
 == shared-svc  private_ips=['172.30.0.0/16']  ...
@@ -157,15 +161,15 @@ VPC:
    NAT DEFAULT  SNAT   src=172.30.0.0/16      dst=None               -> 192.168.144.8 default-vpc-student02-172_30_0
 ```
 
-**The shared binaries server.** The build scripts, PowerCLI and the vCenter
-and VCF Operations files sit on one server in `shared-svc`, on a `PrivateTGW`
-subnet (`Private_TGW` above) that the transit gateway advertises to every lab
-VPC: the route in the opening trace.
+**The shared binaries server.** The build scripts, PowerCLI, and the vCenter
+and VCF Operations files sit on one server in `shared-svc`. It's on a
+`PrivateTGW` subnet (`Private_TGW` above) that the transit gateway advertises
+to every lab VPC: the route in the opening trace.
 [Shared services for isolated tenants](/posts/shared-services-for-isolated-tenants/)
-shows why the server cannot reach back into a lab.
+shows why the server can't reach back into a lab.
 
-**The way in.** The jump host is the lab's only door, published by the VPC's
-load balancer through a `VirtualMachineService` of type `LoadBalancer`; a
+**The way in.** The jump host is the lab's only door. The VPC's load balancer
+publishes it through a `VirtualMachineService` of type `LoadBalancer`, and a
 deployment output gives the student the address as
 `RDP to <address> as student`:
 
@@ -179,7 +183,7 @@ deployment output gives the student the address as
             - {name: rdp, port: 3389, targetPort: 3389, protocol: TCP}
 ```
 
-What the Supervisor made of it in one lab:
+Here's what the Supervisor made of it in one lab:
 
 ```text
 NAME                  TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)    AGE   SELECTOR
@@ -189,13 +193,14 @@ NAME                                                      TYPE           AGE
 virtualmachineservice.vmoperator.vmware.com/jump-access   LoadBalancer   40m
 ```
 
-The VPC's load balancer must predate the lab's namespace, which is why every
-student VPC is created with one
+The VPC's load balancer must exist before the lab's namespace does. That's
+why every student VPC is created with one
 ([the load balancer that must exist first](/posts/the-lb-that-must-exist-first/)).
 
-**Addresses.** NSX's IPAM hands out and records every VM port's address: the
-fixed ones `dc01` and the jump host ask for, and one on `sn-trunk` for each of
-the sixteen host vNICs. The fixed two, as the Supervisor lists their ports:
+**Addresses.** NSX's IPAM (its IP address management) hands out and records
+every VM port's address. That means the fixed ones `dc01` and the jump host
+ask for, and one on `sn-trunk` for each of the sixteen host vNICs. Here are
+the fixed two, as the Supervisor lists their ports:
 
 ```text
 NAME                          VIFID                                  IPADDRESS        MACADDRESS
@@ -203,41 +208,46 @@ dc01-student01-sn-mgmt-eth0   66313239-3765-4232-ad37-6134652d3433   172.30.0.34
 jump-student01-sn-mgmt-eth0   34303932-3833-4561-ad31-6239332d3431   172.30.0.35/27   04:50:56:00:3c:00
 ```
 
-**MAC learning.** A nested host sends from MAC addresses that are not its
-vNIC's: its vmkernel ports and, later, the VMs it runs. The lab VPCs' own
+**MAC learning.** A nested host sends from MAC addresses that aren't its
+vNIC's: its vmkernel ports and, later, the VMs it runs. The lab VPCs have
+their own
 [service profile](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/advanced-network-management/virtual-private-cloud-in-nsx/virtual-private-clouds-overview/add-a-vpc-service-profile.html),
-`lab-nested`, turns MAC learning on, so NSX learns those addresses behind each
-trunk port instead of flooding their frames.
+`lab-nested`, which turns MAC learning on. So NSX learns those addresses
+behind each trunk port, instead of flooding their frames.
 
 ## Three ways to give nested hosts their VLANs
 
 The two other ways each buy something real.
 
-**VLANs from the provider.** The classic answer: VLANs for each lab, trunked
-to the hosts as VLAN-backed port groups or connected into the VPC by the
-provider. The lab gets real layer-2 networks that reach physical equipment.
-Each new lab costs provider-side objects and switch changes, and identical
-addresses need a routing domain per lab.
+**VLANs from the provider.** This is the classic answer. Each lab gets its own
+VLANs, trunked to the hosts as VLAN-backed port groups, or connected into the
+VPC by the provider. The lab gets real layer-2 networks that reach physical
+equipment. But each new lab costs provider-side objects and switch changes,
+and identical addresses need a routing domain per lab.
 
 **A router VM in the lab.** Tom Fojta's
 [Building Nested Labs in VCF Automation 9.1](https://fojta.wordpress.com/2026/05/12/building-nested-labs-in-vcf-automation-9-1/)
-uses the same trunk subnet and binding maps and makes the other choice about
-the gateway. His trunk and VLAN subnets are disconnected from it, and a VyOS
-router in the lab, uplink on a private VPC subnet and downlink on the trunk,
-routes between the VLANs and masquerades traffic out; a DNAT rule on the VPC
-gateway reaches the router, which forwards SSH and RDP inward. The router is
-the lab's to shape: custom routes, a simulated WAN link, a firewall between
-the lab's networks. And because he captures the whole namespace as a
-blueprint, everything set up by hand, router included, comes along. The
-price is a router image to build (VyOS lacks VMware Tools, so his post
-compiles an ISO with open-vm-tools), its configuration, a DNAT rule and a port
-forward for each service, binding maps that the 9.1.0 capture leaves out and
-that go back in by hand, and a VM in the path of every packet that leaves a
-network.
+uses the same trunk subnet and binding maps, and makes the other choice about
+the gateway. His trunk and VLAN subnets are disconnected from it. Instead, a
+VyOS router in the lab routes between the VLANs and masquerades traffic out.
+Its uplink sits on a private VPC subnet, and its downlink on the trunk. A DNAT
+rule on the VPC gateway reaches the router, which forwards SSH and RDP inward.
 
-Our subnets stay on the gateway. In the Subnet object that is one field,
-`advancedConfig.connectivityState`, which his post sets to `Disconnected`.
-Ours are left at the default:
+The router is the lab's to shape: custom routes, a simulated WAN link, a
+firewall between the lab's networks. And because he captures the whole
+namespace as a blueprint, everything set up by hand comes along, router
+included. The price is:
+
+- a router image to build (VyOS lacks VMware Tools, so his post compiles an
+  ISO with open-vm-tools);
+- its configuration;
+- a DNAT rule and a port forward for each service;
+- binding maps that the 9.1.0 capture leaves out, and that go back in by hand;
+- a VM in the path of every packet that leaves a network.
+
+Our subnets stay on the gateway. In the Subnet object that's one field,
+`advancedConfig.connectivityState`, which his post sets to `Disconnected`. We
+left ours at the default, a rare case of doing nothing and calling it design:
 
 ```text
 sn-mgmt spec: {"accessMode": "Private", "advancedConfig": {"connectivityState": "Connected", "staticIPAllocation": {"enabled": true}}, "ipv4SubnetSize": 32, ... status: {... "gatewayAddresses": ["172.30.0.33/27"], "networkAddresses": ["172.30.0.32/27"], ...}
@@ -256,23 +266,25 @@ sn-mgmt spec: {"accessMode": "Private", "advancedConfig": {"connectivityState": 
 What ours gives up is the other side of that row. The VPC routes every
 network in the lab, vMotion and vSAN included, where a physical design might
 keep those two unrouted. A lab has no routing of its own, no WAN link to
-simulate and no firewall appliance between its networks, and nothing set up
-by hand survives a rebuild, which is a new request. For a class that installs
-ESXi, vCenter and VCF Operations, none of that is the lesson; for a class
-about routing, the router VM is the better tool.
+simulate, and no firewall appliance between its networks. And nothing set up
+by hand survives a rebuild, because a rebuild is a new request.
+
+For a class that installs ESXi, vCenter and VCF Operations, none of that is
+the lesson. For a class about routing, the router VM is the better tool.
 
 ## Why this matters outside the lab
 
-Self-service scales when the network comes with the platform. Every lab gets
-routing, NAT, a published door, addresses and a path to shared services from
-NSX, the same way every time, with nothing for a network team to change per
-request and no appliance to patch, size or rescue. That fits any repeatable environment: training labs, team sandboxes,
-upgrade rehearsals, proofs of concept.
+Self-service scales when the network comes with the platform. NSX gives every
+lab its routing, NAT, a published door, addresses and a path to shared
+services, the same way every time. There's nothing for a network team to
+change per request, and no appliance to patch, size or rescue. That fits any
+repeatable environment: training labs, team sandboxes, upgrade rehearsals,
+proofs of concept.
 
-Support stays simple too: one lab's network is checked with the platform's
-own tools, not by reading one router's configuration among dozens. When an
-environment exists to exercise routing, a router VM earns its place; when it
-does not, the platform's routing takes a moving part out of every copy.
+Support stays simple too. You check one lab's network with the platform's own
+tools, not by reading one router's configuration among dozens. When an
+environment exists to exercise routing, a router VM earns its place. When it
+doesn't, the platform's routing takes a moving part out of every copy.
 
 ## Rules learned
 

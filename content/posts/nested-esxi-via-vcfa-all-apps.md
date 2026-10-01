@@ -20,26 +20,28 @@ summary: "The whole isolated pod — namespace, trunk subnets, binding maps, two
 ---
 
 Everything in this series so far was built with `kubectl` and API calls.
-That proves the platform. It doesn't make a *product*. This post turns the
-pod into a **catalog item**: fill in a name, pick a VPC, click Request, and
-a few minutes later there's a datacenter-in-miniature with two SSH prompts
-waiting.
+That proves the platform. It doesn't make a *product*.
+
+This post turns the pod into a **catalog item**. Fill in a name, pick a VPC,
+click Request, and a few minutes later there's a datacenter in miniature with
+two SSH prompts waiting. Barely time to put the kettle on.
 
 ![VCFA catalog: the nested-esxi-pod tile](/images/ui/u1-catalog-tile.jpg)
 
 ## All Apps in one paragraph
 
 VCF Automation 9.1 has two provisioning models side by side. **VM Apps** is
-the classic Aria Automation path — cloud templates through an IaaS engine
-that drives vCenter. **All Apps** is the supervisor-native path: the
-blueprint composes Kubernetes objects (a Supervisor Namespace, VM Service
-VMs, NSX subnets, VKS clusters) and the vSphere Supervisor's controllers
-reconcile them. A blueprint is `formatVersion: 2`; its resources are
-`CCI.Supervisor.Namespace` and `CCI.Supervisor.Resource` — the latter is
-literally "here's a manifest, apply it in that namespace."
+the classic Aria Automation path: cloud templates run through an IaaS
+(infrastructure as a service) engine that drives vCenter. **All Apps** is the
+supervisor-native path. Its blueprint composes Kubernetes objects (a
+Supervisor Namespace, VM Service VMs, NSX subnets, vSphere Kubernetes Service
+clusters), and the vSphere Supervisor's controllers reconcile them.
 
-That makes the blueprint a *composition* of the manifests from the earlier
-posts, with two additions: inputs, and `dependsOn`.
+A blueprint is `formatVersion: 2`, and its resources are
+`CCI.Supervisor.Namespace` and `CCI.Supervisor.Resource`. The second is
+literally "here's a manifest, apply it in that namespace." So the blueprint
+is a *composition* of the manifests from the earlier posts, with two
+additions: inputs, and `dependsOn`.
 
 ## The blueprint, section by section
 
@@ -74,10 +76,12 @@ namespace:
 ```
 
 `contentSources` is the line that closes the gap a lot of first attempts
-hit: our libraries were plain vCenter libraries, and a VCFA-created
-namespace got **none of them**, so there were no `VirtualMachineImage`s and
-nothing could be deployed. Declaring the libraries here attaches them at
-creation. (The 9.1 docs say a
+hit. Our libraries were plain vCenter libraries, and a namespace created by
+VCF Automation got **none of them**. No libraries meant no
+`VirtualMachineImage`s, so nothing could be deployed. An empty namespace is
+very tidy, and of no use to anyone.
+
+Declaring the libraries here attaches them at creation. (The 9.1 docs say a
 [namespace class](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-projects-in-vcfa/create-a-namespace-class.html)
 is assigned a content library automatically, and provider libraries are
 shared with every namespace.)
@@ -93,8 +97,8 @@ bmVmotion: {... manifest: <SubnetConnectionBindingMap sn-vmotion -> sn-trunk, vl
 ```
 
 The `dependsOn` chain is the whole reason [every pod has identical
-CIDRs](/posts/three-datacenters-one-ip-plan/): fresh VPCs realize subnets
-in creation order, and the blueprint fixes that order.
+CIDRs](/posts/three-datacenters-one-ip-plan/). A fresh VPC realizes its
+subnets in the order they were created, and the blueprint fixes that order.
 
 ![Blueprint canvas and YAML side by side](/images/ui/u3-blueprint-canvas-yaml.jpg)
 
@@ -118,98 +122,104 @@ esx01:
     fields: [{path: status.powerState, value: PoweredOn}]
 ```
 
-(Abridged — the full resource carries the image references, VM class,
+(Abridged: the full resource carries the image references, VM class,
 guest ID and the complete `guestinfo` set.)
 
-Two vNICs, both on the trunk — [the nested equivalent of a VCF host's two
+Two vNICs, both on the trunk: [the nested equivalent of a VCF host's two
 pNICs](/series/the-vpc-pod-papers/). The ISO rides along as a declarative
-CD-ROM. And the `wait` block makes the deployment's *completion* mean
-something: the request doesn't finish until the host is powered on.
+CD-ROM.
+
+The `wait` block makes the deployment's *completion* mean something: the
+request doesn't finish until the host is powered on. Finishing any earlier
+would be optimism, not automation.
 
 ### The doors — one VIP per host
 
-A `VirtualMachineService` of type `LoadBalancer` per host, selecting it by
-label and publishing 22 and 443, and a blueprint **output** that reads the
-VIP back out of the service's status:
+Each host gets a `VirtualMachineService` of type `LoadBalancer`, which
+selects it by label and publishes 22 and 443. A blueprint **output** then
+reads the VIP back out of the service's status:
 
 ```yaml
 outputs:
   esx01Ssh: {value: "ssh root@${resource.esx01Access.object.status.loadBalancer.ingress[0].ip}"}
 ```
 
-The outputs surface in the deployment view — the requester gets the SSH
-command, not a scavenger hunt.
+The outputs show up in the deployment view, so the requester gets the SSH
+command rather than a scavenger hunt.
 
 ![Deployment topology after a successful request](/images/ui/u4-deployment-topology.jpg)
 
 {{< video src="/images/u7-catalog-request-flow.mp4" poster="/images/u7-catalog-request-flow-poster.jpg" ratio="1344 / 788" caption="The request flow, end to end: request → deployment in progress → complete." >}}
 
-
 ## What the blueprint cannot express (yet)
 
-Three cluster-scoped objects must exist *before* the request — [in this order](/posts/the-lb-that-must-exist-first/):
+Three cluster-scoped objects must exist *before* the request, [in this order](/posts/the-lb-that-must-exist-first/):
 
-1. `VPC` — `privateIPs: 172.30.0.0/16`, same in every pod
-2. `VPCAttachment` — connectivity profile with the service gateway; the LB
-   creation fails loudly without it
-3. `LoadBalancer` — silently, permanently required before the namespace
+1. `VPC`: `privateIPs: 172.30.0.0/16`, the same in every pod.
+2. `VPCAttachment`: the connectivity profile with the service gateway.
+   Without it, creating the load balancer fails loudly.
+3. `LoadBalancer`: silently, permanently required before the namespace.
 
 VCF Automation 9.1 does have blueprint types for the first two: `CCI.VPC`,
-and `CCI.VPC.Configuration` with `kind: VPCAttachment` (one of its
+and `CCI.VPC.Configuration` with `kind: VPCAttachment`. One of its
 [sample blueprints](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/sample-blueprints-in-vcf-automation-for-all-apps.html)
-uses both). There is none for the third. A later test confirmed it:
-`CCI.VPC.Configuration` rejects a `LoadBalancer` kind, and a VPC created
-that way comes up with load balancing off, so its namespace's VIPs would
-pend.
+uses both. There is none for the third.
+
+A later test confirmed it. `CCI.VPC.Configuration` rejects a `LoadBalancer`
+kind, and a VPC created that way comes up with load balancing off. Its
+namespace's VIPs would sit pending, waiting for a load balancer that isn't
+coming.
 
 Today that's a short script or a runbook step per pod. The honest framing:
-the blueprint is the *pod*; the VPC is the *tenancy*, and tenancy is
-still created one layer up. I'd expect the load balancer to become
-blueprintable too; until then, keep the three calls next to the blueprint
-in version control.
+the blueprint is the *pod*, the VPC is the *tenancy*, and tenancy is still
+created one layer up. I'd expect the load balancer to become blueprintable
+too. Until then, keep the three calls next to the blueprint in version
+control.
 
 ## Publishing: one version at a time
 
-Blueprint → `BlueprintVersion` → release. Validation happens at *version*
-time, not create time, and the result lives in `status.validationMessages`
-rather than the HTTP code — a 200 with `ContentValid: False` is a thing.
-And only **one** version can be published: unrelease 1.0.0 before releasing
+The order is blueprint, then `BlueprintVersion`, then release. Validation
+happens at *version* time, not at create time. The result lives in
+`status.validationMessages` rather than the HTTP code, so a 200 with
+`ContentValid: False` is a thing: the HTTP equivalent of "yes, but no".
+
+And only **one** version can be published. Unrelease 1.0.0 before releasing
 1.1.0, or you get a 409. (The full list of sharp edges is
 [its own post](/series/the-vpc-pod-papers/).)
 
 ## Why this matters outside the lab
 
-This is where platform engineering turns into a service. The difference
-between "we can build you an environment" and "request one from the
-catalog" is the difference between days and minutes — and between a
-bespoke build and one that is consistent, quota-controlled and recorded
-every time. For an organisation that means:
+This is where platform engineering turns into a service. The gap between "we
+can build you an environment" and "request one from the catalog" is the gap
+between days and minutes. It's also the gap between a bespoke build and one
+that is consistent, quota-controlled and recorded every time. For an
+organisation that means:
 
 - **Time-to-environment** measured in minutes, requested by the people who
   need it, without a queue.
-- **Consistency by construction** — every environment comes from the same
+- **Consistency by construction.** Every environment comes from the same
   definition, so support, training material and runbooks all match.
-- **Governance built in** — quotas, ownership, history and clean teardown
-  are properties of the deployment record, not a spreadsheet.
+- **Governance built in.** Quotas, ownership, history and clean teardown are
+  properties of the deployment record, not a spreadsheet.
 
 The nested-ESXi pod is one catalog item. The same approach delivers any
-environment shape: application stacks for developers, sandboxes for a
-proof of concept, demo kits for a sales team, isolated builds for a
-partner.
+shape of environment: application stacks for developers, sandboxes for a
+proof of concept, demo kits for a sales team, isolated builds for a partner.
 
 ## Rules learned
 
 - All Apps blueprints are **compositions of manifests**: `CCI.Supervisor.Namespace`
   plus `CCI.Supervisor.Resource` per object. If it works with `kubectl`, it
   works in a blueprint.
-- `generateName`, not `name`, for the namespace; `contentSources` to attach
-  libraries at creation; `zones`/`storageClasses` flat, not wrapped.
-- `dependsOn` is how you get **deterministic CIDRs** — order the subnets.
+- Use `generateName`, not `name`, for the namespace, and `contentSources` to
+  attach libraries at creation. Keep `zones`/`storageClasses` flat, not
+  wrapped.
+- `dependsOn` is how you get **deterministic CIDRs**: order the subnets.
 - `wait.fields` turns "request complete" into "host is powered on".
-- VPC / VPCAttachment / LoadBalancer are **prerequisites outside the
+- VPC, VPCAttachment and LoadBalancer are **prerequisites outside the
   blueprint**, in that order, before every request.
-- One published version per blueprint; validation in `status`, not the
-  HTTP response.
+- One published version per blueprint. Validation results live in `status`,
+  not in the HTTP response.
 
 ## Broadcom documentation
 
@@ -221,7 +231,7 @@ partner.
 - [Deploy VMs with Configurable OVF Properties in vSphere Supervisor](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/vm-service/deploy-vms-with-configurable-ovf-properties-vsphere-iaas-control-plane.html): OVF properties set through the VM Service's vAppConfig transport.
 
 *Previously: [shared services for isolated tenants](/posts/shared-services-for-isolated-tenants/).
-This closes the Pod Papers' core arc — the companion posts on
+This closes the Pod Papers' core arc. The companion posts on
 [dual-NIC](/series/the-vpc-pod-papers/), [no-DHCP bootstrap](/series/the-vpc-pod-papers/)
 and [blueprint gotchas](/series/the-vpc-pod-papers/) fill in the details.*
 

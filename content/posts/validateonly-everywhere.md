@@ -20,75 +20,91 @@ summary: "Terraform has plan. Kubernetes has --dry-run. Your vRO workflows have 
 
 Terraform has `plan`. Kubernetes has `--dry-run=server`. Ansible has
 `--check`. Every mature infrastructure tool grew a way to say "tell me what
-you'd do, then don't" — because the alternative is finding out at 2am, two
-hours into a bringup, that a hostname doesn't resolve.
+you'd do, then don't".
 
-vRO workflows don't come with one. This is the case for adding it to every
-single one you write, and cascading it through every wrapper.
+The alternative is finding out at 2am, two hours into a bringup, that a
+hostname doesn't resolve. Two hours is a long time to wait for bad news from
+DNS.
+
+vRO workflows don't come with a dry run. This is the case for adding one to
+every workflow you write, and cascading it through every wrapper.
 
 ## The shape
 
 Every catalog item in [the lab factory](/posts/one-catalog-item-one-vcf-instance/)
-has a boolean input, `validateOnly`, default false. When true the workflow
-does *everything it can without changing anything*:
+has a boolean input, `validateOnly`, which defaults to false. When it's true,
+the workflow does *everything it can without changing anything*:
 
 - authenticate to every endpoint it would touch
 - resolve every name it would use, and fail on the ones that don't
 - generate every spec it would submit, and run the target's own validation
   API on it where one exists (the VCF Installer has one; use it)
-- check for collisions — names, IPs, existing objects
+- check for collisions: names, IPs, existing objects
 - report what it *would* have created, then return `CREATE_SUCCESSFUL`
 
-The wrapper — the one form that chains hosts, bringup, supervisor, fleet
-components, identity — has the same checkbox, and **cascades** it to every
-component. Tick everything, tick validateOnly, request. Thirty seconds to
-a few minutes later you have a full-stack plan against the *live*
-environment, and nothing has moved.
+The wrapper is the one form that chains hosts, bringup, supervisor, fleet
+components and identity. It has the same checkbox, and it **cascades** it to
+every component. Tick everything, tick validateOnly, request.
+
+Thirty seconds to a few minutes later, you have a full-stack plan against the
+*live* environment, and nothing has moved. It's the most productive way I
+know of doing nothing.
 
 ## What it caught
 
-Not hypothetically. On a built environment, the cascaded dry run of the
-whole stack reported:
+This isn't hypothetical. On an already-built environment, the cascaded dry
+run of the whole stack reported:
 
-- edge cluster: **already exists** — correctly recorded, wrapper carried on
-- Ops for Logs: **IP_IN_USE** on the planned address — right, it's deployed
+- edge cluster: **already exists**; correctly recorded, and the wrapper
+  carried on
+- Ops for Logs: **IP_IN_USE** on the planned address. Quite right: it's
+  deployed
 - Ops for Networks: same
 - supervisor: the existing one would be reused; the per-service plan
   listed which services were already active
 - identity: bind succeeded, group resolved, no changes needed
 
-That's a plan output. On a *fresh* environment the same run has caught, at
-various times: a DNS record missing for one of ~40 required names (the
-installer's own pre-flight found it, in seconds, instead of bringup
-finding it in hour two); a stale content-library image ID; a form field
-arriving `null` because a custom form hadn't finished re-importing — which
-is a *publishing* bug the dry run surfaced before anyone requested
-anything real.
+That's a plan output, and a reassuringly dull one.
+
+On a *fresh* environment, the same run has caught, at various times:
+
+- a DNS record missing for one of about 40 required names. The installer's
+  own pre-flight found it in seconds, instead of bringup finding it in hour
+  two.
+- a stale content-library image ID.
+- a form field arriving `null` because a custom form hadn't finished
+  re-importing. That's a *publishing* bug, and the dry run surfaced it
+  before anyone requested anything real.
 
 ## The argument against, answered
 
-"It doubles the code." It doesn't — it moves the `if (!validateOnly)` guard
+"It doubles the code." It doesn't. It puts the `if (!validateOnly)` guard
 around the mutating call, and the validation logic is code you should have
-had anyway. What it *does* force is separating "compute what to do" from
-"do it", which is how the workflows should have been structured in the
-first place.
+had anyway.
+
+What it *does* force is separating "compute what to do" from "do it". That's
+how the workflows should have been structured in the first place.
 
 "Some things can't be validated without doing them." True. Say so in the
-result summary — "would deploy X; no pre-validation available" — rather
-than skipping the item. Partial plans are still plans.
+result summary ("would deploy X; no pre-validation available") rather than
+skipping the item. Partial plans are still plans.
 
 "We have a test environment." You have *a* test environment. A dry run
 against the *target* is what catches the collision with the thing that's
-already there.
+already there, which the test environment has never had the pleasure of
+meeting.
 
 ## Make it the smoke test
 
 The best consequence: a validateOnly request against a known environment
-is a **regression test for the automation itself**, runnable on every
-change. The factory's smoke runner does exactly this — request every item
-with `validateOnly: true`, assert `CREATE_SUCCESSFUL`, diff the plan
-summary against the last run. It takes minutes and it has caught more
-bugs in the workflows than any amount of code review.
+is a **regression test for the automation itself**, and you can run it on
+every change.
+
+The factory's smoke runner does exactly that. It requests every item with
+`validateOnly: true`, asserts `CREATE_SUCCESSFUL`, and diffs the plan summary
+against the last run. It takes minutes. It has caught more bugs in the
+workflows than any amount of code review, which says something about the
+bugs, or possibly about my code reviews.
 
 ![Deploy VCF Stack request form: one checkbox per component, and validateOnly](/images/ui/f2-f00-stack-form-validateonly.jpg)
 *The same form, real or dry-run. One checkbox decides.*
@@ -98,9 +114,11 @@ bugs in the workflows than any amount of code review.
 For anyone who has sat through a failed change window, the value is
 obvious: a full dry run against the *real* estate before anything moves.
 Fewer failed changes, shorter windows, and a plan output that answers the
-change board's questions before they're asked. It also gives auditors
-something they rarely get from infrastructure automation — evidence of what
-was going to happen, produced by the same tooling that then did it.
+change board's questions before they're asked.
+
+It also gives auditors something they rarely get from infrastructure
+automation: evidence of what was going to happen, produced by the same
+tooling that then did it.
 
 ## Rules learned
 
@@ -112,7 +130,7 @@ was going to happen, produced by the same tooling that then did it.
   Never skip it silently.
 - A dry run against the real target is a plan. A dry run on every change
   is a smoke test. Same checkbox.
-- The refactor it forces — compute, *then* act — is the one you wanted.
+- The refactor it forces (compute, *then* act) is the one you wanted.
 
 ## Broadcom documentation
 

@@ -18,18 +18,21 @@ summary: "VCF Automation 9.1 ships two provisioning architectures, as two types 
 ---
 
 VCF Automation 9.1 has two ways to build things, side by side, as two types
-of organisation. If you've come from Aria Automation you'll recognise one of
-them immediately. The other looks like Kubernetes because it *is*
-Kubernetes. Choosing between them isn't a matter of taste — they have
-genuinely different shapes, and some use cases are natural in one and
-awkward in the other.
+of organisation. If you've come from Aria Automation, you'll recognise one
+of them immediately. The other looks like Kubernetes because it *is*
+Kubernetes.
+
+Choosing between them isn't a matter of taste. They have genuinely
+different shapes, and some use cases are natural in one and awkward in the
+other.
 
 I've now pushed the same list of requirements through both on a live VCF
-9.1 lab. This is the comparison I wish I'd had at the start.
+9.1 lab. This is the comparison I wish I'd had at the start. Hindsight, as
+usual, turned up late.
 
 ## The two shapes
 
-**VM Apps** — the classic Aria Automation model:
+**VM Apps**, the classic Aria Automation model:
 
 ```
 Org ─ Project ─ Cloud Zone(s)
@@ -43,10 +46,10 @@ Org ─ Project ─ Cloud Zone(s)
 ```
 
 Provisioning is *imperative through a broker*. The IaaS engine holds the
-vCenter session; the tenant references abstractions (flavors, image
+vCenter session. The tenant references abstractions (flavors, image
 mappings) that resolve at request time. State lives in the IaaS database.
 
-**All Apps** — supervisor-native, via the Cloud Consumption Interface:
+**All Apps**, supervisor-native, through the Cloud Consumption Interface:
 
 ```
 Org ─ CCI Project ─ Region
@@ -61,13 +64,14 @@ Org ─ CCI Project ─ Region
    Blueprint (formatVersion 2, CCI.Supervisor.*) → BlueprintVersion → Catalog
 ```
 
-Provisioning is *declarative*. The blueprint states desired objects; the
-supervisor's controllers converge reality onto them and keep it there.
-State lives in etcd. Networking is NSX VPC-native.
+Provisioning is *declarative*. The blueprint states the desired objects,
+and the supervisor's controllers make reality match them and keep it that
+way. State lives in etcd. Networking is NSX VPC-native.
 
 ## Scorecard by use case
 
-Every row below was actually built, not read about.
+Every row below was actually built, not read about. It's a slow way to fill
+in a table, but an honest one.
 
 | Use case | VM Apps | All Apps |
 |---|---|---|
@@ -86,7 +90,7 @@ Every row below was actually built, not read about.
 
 The two bold rows are the ones that decided it for me. Both are
 [documented](/posts/three-datacenters-one-ip-plan/) [in this
-series](/posts/nested-esxi-nsx-vpc/); both are genuinely hard in VM Apps
+series](/posts/nested-esxi-nsx-vpc/). Both are genuinely hard in VM Apps,
 and simply the default in All Apps.
 
 ## Where VM Apps still wins
@@ -96,8 +100,8 @@ Be fair to the incumbent:
 - **Years of content.** vRO workflows, ABX actions, template libraries and
   a mature day-2 action framework carry over unchanged. If you have an
   estate of them, that's real value you'd be throwing away.
-- **Deep vSphere reach.** Anything vCenter can do to a VM — RDMs, per-device
-  tuning, exotic customization — the IaaS engine can do, because it drives
+- **Deep vSphere reach.** Anything vCenter can do to a VM (RDMs, per-device
+  tuning, exotic customization), the IaaS engine can do, because it drives
   vCenter directly.
 - **Familiar network model.** Segments, portgroups, on-demand routed/NAT
   networks from a network profile. No new mental model.
@@ -105,65 +109,74 @@ Be fair to the incumbent:
   endpoints.
 
 The [Windows Server 2025 pipeline](/series/the-windows-build-pipeline/)
-elsewhere on this blog is a VM Apps build, and it's a good one: Event Broker
-hooks for hostname allocation and placement metadata, cloudbase-init
-staging, a reboot-safe state machine in the guest. Nothing about it needs
-rewriting.
+elsewhere on this blog is a VM Apps build, and it's a good one. It has Event
+Broker hooks for hostname allocation and placement metadata, cloudbase-init
+staging, and a reboot-safe state machine in the guest. Nothing about it
+needs rewriting, which, for a pipeline, is high praise.
 
 ## Where All Apps wins, and why it's structural
 
-- **Declarative and self-healing.** Desired state in etcd, controllers
-  reconcile. There's no second database to drift from vCenter.
+- **Declarative and self-healing.** Desired state lives in etcd, and
+  controllers reconcile to it. There's no second database to drift from
+  vCenter.
 - **Structural multi-tenancy.** A VPC per tenant is a hard NSX boundary,
   not an administrative one. Overlapping CIDRs are *allowed*, so
   cookie-cutter environments deploy side by side.
 - **VMs and Kubernetes are one model.** The same blueprint composes a VKS
-  cluster, VMs, secrets and networking. GitOps-able with ordinary tools.
+  cluster, VMs, secrets and networking. It's GitOps-able with ordinary
+  tools.
 - **VPC networking is first-class.** Trunk subnets, binding maps,
-  `PrivateTGW`, per-VPC gateway firewall — none of it has a VM Apps
+  `PrivateTGW`, a per-VPC gateway firewall: none of it has a VM Apps
   equivalent.
 - **Modern bootstrap.** cloud-init and sysprep as typed API fields.
 
 ## Where All Apps hurts today (all observed live)
 
-- **Ordering matters and the errors are opaque.** [The LB must exist
-  before the namespace](/posts/the-lb-that-must-exist-first/); new
-  namespaces reject VMs until images sync; blueprint validation has
-  [seven sharp edges](/posts/cci-blueprint-gotchas/).
+- **Ordering matters, and the errors are opaque.** [The LB must exist
+  before the namespace](/posts/the-lb-that-must-exist-first/). New
+  namespaces reject VMs until images sync. Blueprint validation has
+  [seven sharp edges](/posts/cci-blueprint-gotchas/), and I found every
+  one of them by walking into it.
 - **The tenancy layer is only partly blueprintable.** VPC and VPCAttachment
-  have blueprint types (`CCI.VPC`, `CCI.VPC.Configuration`), but there is no
-  LoadBalancer kind and a blueprint-made VPC comes up with load balancing
-  off, so all three go through the VPC API — scripted, not catalogued.
-- **Two endpoints.** The CCI proxy serves tenancy objects; workload
+  have blueprint types (`CCI.VPC`, `CCI.VPC.Configuration`). But there's no
+  LoadBalancer kind, and a blueprint-made VPC comes up with load balancing
+  off. So all three go through the VPC API: scripted, not catalogued.
+- **Two endpoints.** The CCI proxy serves tenancy objects, and workload
   manifests go to the supervisor. You'll hold two kubeconfigs.
-- **Day-2 is thinner.** No event broker; extensibility means controllers
-  and GitOps, which is fine if that's your team and a gap if it isn't.
+- **Day-2 is thinner.** There's no event broker. Extensibility means
+  controllers and GitOps, which is fine if that's your team and a gap if it
+  isn't.
 
 ## Recommendation
 
-Default to **All Apps** for new build-outs. Every use case on the list —
-including the two that are genuinely hard in VM Apps — is natural in the
-VPC model, and the whole estate is version-controlled YAML. Keep **VM
-Apps** as the compatibility surface for existing vRA content and for the
-rare thing that needs direct vCenter device manipulation. They coexist as
-organisations of different types on one platform, so migration is
-incremental and nobody has to rewrite a working pipeline on a deadline.
+Default to **All Apps** for new build-outs. Every use case on the list is
+natural in the VPC model, including the two that are genuinely hard in VM
+Apps. And the whole estate is version-controlled YAML.
 
-And whichever you pick: **codify the ordering rules** into the scripts
-that provision tenancy, so the sharp edges stay encapsulated and the people
-requesting catalog items never meet them.
+Keep **VM Apps** as the compatibility surface for existing vRA content, and
+for the rare thing that needs direct vCenter device manipulation. They
+coexist as organisations of different types on one platform. So migration
+is incremental, and nobody has to rewrite a working pipeline on a deadline.
+
+And whichever you pick, **codify the ordering rules** into the scripts
+that provision tenancy. The sharp edges stay wrapped up in there, and the
+people requesting catalog items never meet them.
 
 ## Why this matters outside the lab
 
-Most customers arriving at VCF 9 have an estate of Aria Automation content
+Most customers arriving at VCF 9 have an estate of Aria Automation content,
 and a question: rewrite, coexist, or migrate? The answer above is the one
-we take into design workshops. In practice it plays out as an assessment —
-which existing templates and workflows still earn their keep, which use
-cases are genuinely better served by the VPC model, and where the
-boundaries sit — followed by a coexistence plan that moves workloads across
-opportunistically instead of on a deadline. The two architectures sharing
-one platform, as organisations of different types, is what makes that
-low-risk.
+we take into design workshops.
+
+In practice it starts with an assessment:
+
+- which existing templates and workflows still earn their keep;
+- which use cases are genuinely better served by the VPC model;
+- where the boundaries sit.
+
+Then comes a coexistence plan that moves workloads across
+opportunistically, not on a deadline. What makes that low-risk is the two
+architectures sharing one platform, as organisations of different types.
 
 ## Rules learned
 
@@ -173,9 +186,9 @@ low-risk.
   addressing** and **nested/VLAN networks without fabric changes**.
 - VM Apps is still the home for **existing vRO/ABX content** and
   **deep vCenter device work**.
-- All Apps' pain is *ordering*: VPC → attachment → LB → namespace →
-  subnets → image sync → workloads. Script it once.
-- They coexist; migrate opportunistically.
+- All Apps' pain is *ordering*, in this order: VPC, attachment, LB,
+  namespace, subnets, image sync, then workloads. Script it once.
+- They coexist, so migrate opportunistically.
 
 ## Broadcom documentation
 

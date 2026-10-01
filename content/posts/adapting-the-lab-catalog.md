@@ -19,8 +19,8 @@ summary: "Everything that ties our nested-lab catalog to one platform sits in a 
 ---
 
 On 28 September we rebuilt the binaries server, the machine the labs fetch
-their build scripts and appliance files from, and it came back at a new
-address. For the catalog, the move was four values in one
+their build scripts and appliance files from. It came back at a new address.
+For the catalog, the move was four values in one
 [property group](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/organization-management/managing-blueprints-in-vcf-automation/property-groups/constant-property-groups-in-vcf-automation-for-all-apps.html):
 
 ```text
@@ -33,9 +33,11 @@ nestedLabSite: 4 change(s)
 nestedLabMedia: up to date
 ```
 
-No blueprint changed and no version was released; the next labs simply read
-the new address. [Post 5](/posts/inside-the-lab-blueprint/) opened the
-blueprints. Making them yours is mostly knowing where each change belongs:
+No blueprint changed and no version was released. The next labs simply read
+the new address. As house moves go, that one was painless.
+
+[Post 5](/posts/inside-the-lab-blueprint/) opened up the blueprints. Making
+them yours is mostly a matter of knowing where each change belongs:
 
 | Change | Where | New blueprint version? |
 |---|---|---|
@@ -48,17 +50,24 @@ blueprints. Making them yours is mostly knowing where each change belongs:
 ## One file per platform
 
 Each platform has one site file. Ours, `site-f06.yaml`, is 332 lines: 158 of
-settings and 153 of comments that say why. A new platform starts from
-`site-example-acme.yaml`, a template with every key the tools read and
-made-up values for a platform called Acme. `SITE_FILE` tells the generator and
-every tool which file to read.
+settings and 153 of comments that say why. That's nearly a line of comment for
+every line of setting, because future me forgets things.
 
-`tools\site_check.py` reads that file without touching the platform. It lists
-the values still to be filled in, each with its line and the install step that
-supplies it; compares the keys with the template; checks the values against
-each other; and runs the generator for all eight blueprints and both property
-groups, so the generator's own rules apply too. Then it prints the site at a
-glance. Ours, run while writing this:
+A new platform starts from `site-example-acme.yaml`, a template with every key
+the tools read and made-up values for a platform called Acme. `SITE_FILE`
+tells the generator and every tool which file to read.
+
+`tools\site_check.py` reads that file without touching the platform. It does
+four things with it:
+
+- lists the values still to be filled in, each with its line and the install
+  step that supplies it;
+- compares the keys with the template;
+- checks the values against each other;
+- runs the generator for all eight blueprints and both property groups, so the
+  generator's own rules apply too.
+
+Then it prints the site at a glance. Here's ours, run while writing this:
 
 ```text
 Site file   site-f06.yaml
@@ -85,20 +94,23 @@ The note is expected: f06 has no trainers at the moment.
 ## Data, not versions
 
 Both property groups are generated from the site file and pushed with
-`sync_propgroups.py`, which compares before it writes, so a value someone
-changed in the UI shows up before it is overwritten. `nestedLabSite` holds 74
-values on f06, from the platform and the sizes to every lab address, the
-trainers and the students' defaults; `nestedLabMedia` holds 13, the releases.
-Labs read them when they are requested, so a change needs a sync and nothing
-more. Adding a trainer is one name in the site file's `trainers` list
-(`trainers: [trainer01]` in the template) and a sync;
-[post 4](/posts/six-phases-one-catalog/) shows what that list changes for a
+`sync_propgroups.py`. It compares before it writes, so a value someone
+changed in the UI shows up before it's overwritten.
+
+On f06, `nestedLabSite` holds 74 values: the platform, the sizes, every lab
+address, the trainers and the students' defaults. `nestedLabMedia` holds 13,
+the releases. Labs read them when they're requested, so a change needs a sync
+and nothing more.
+
+Adding a trainer is one name in the site file's `trainers` list
+(`trainers: [trainer01]` in the template), then a sync.
+[Post 4](/posts/six-phases-one-catalog/) shows what that list changes for a
 student and a trainer. Moving the students to another release is
 `defaultRelease` and a sync.
 
 A new blueprint version is needed only for what the blueprints carry
-themselves: the lab's shape, the domain's accounts, the form's starting values
-and the Release list, because an input's list of choices cannot hold an
+themselves. That's the lab's shape, the domain's accounts, the form's starting
+values and the Release list, because an input's list of choices can't hold an
 expression.
 
 ## A new software release
@@ -135,23 +147,27 @@ blueprints read:
     },
 ```
 
-A second release takes four moves: its nested ESXi appliance and the ESXi
-and VCSA ISOs into the
-[content library](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-1/provision-and-manage-virtual-machines/deploying-and-managing-virtual-machines-in-vsphere-iaas-control-plane/creating-and-managing-content-libraries-for-stand-alone-vms-in-iaas-platform.html);
-its vCenter and VCF Operations appliances onto the binaries server, where
-`rebuild-binaries.py add-vcenter` and `add-ops` file each build in a folder of
-its own; an entry beside
-`vcf-9.1.0` in the site file and a sync; then a release, the forms applied
-again and one more release, so the Release list offers it. Nothing is
-overwritten: running labs keep their release, and students move only when
-`defaultRelease` does. Build one Phase 4 lab on a new release before a class
-relies on it.
+A second release takes four moves:
+
+1. Put its nested ESXi appliance and the ESXi and vCenter Server Appliance
+   (VCSA) ISOs into the
+   [content library](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-1/provision-and-manage-virtual-machines/deploying-and-managing-virtual-machines-in-vsphere-iaas-control-plane/creating-and-managing-content-libraries-for-stand-alone-vms-in-iaas-platform.html).
+2. Put its vCenter and VCF Operations appliances on the binaries server, where
+   `rebuild-binaries.py add-vcenter` and `add-ops` file each build in a folder
+   of its own.
+3. Add an entry beside `vcf-9.1.0` in the site file, and sync.
+4. Release, apply the forms again and release once more, so the Release list
+   offers it.
+
+Nothing is overwritten. Running labs keep their release, and students move
+only when `defaultRelease` does. Build one Phase 4 lab on a new release before
+a class relies on it.
 
 ## Sizes
 
-The nested hosts come in Small, Medium and Large, each a
+The nested hosts come in Small, Medium and Large. Each is a
 [VM class](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-service-administration-and-development/9-1/provision-and-manage-virtual-machines/deploying-and-managing-virtual-machines-in-vsphere-iaas-control-plane/working-with-vm-classes-in-vsphere-with-tanzu.html)
-with nested hardware virtualization plus the vCPUs and memory the namespace
+with nested hardware virtualisation, plus the vCPUs and memory the namespace
 limits count. From the template:
 
 ```yaml
@@ -162,19 +178,22 @@ hostSizes:
   large:  {vmClass: nested-esx-large,  cpu: 32, memMi: 131072}
 ```
 
-Resizing one is two changes: the class in vCenter, with
-`vmclass_api.py update <class> <vCPUs> <MiB>`, then the same numbers in
-`hostSizes` and a sync. A changed class applies to new VMs only, so running
-labs keep their size. When we resized all three on 28 September, the sync
-carried nine values, and the next release updated the size titles on the form,
-which are text. The vCenter appliance comes in Small or Medium, since Tiny
-starved inside a nested host, and VCF Operations in Extra small, Small or
-Medium; the site file sets where each form starts.
+Resizing one takes two changes. First the class in vCenter, with
+`vmclass_api.py update <class> <vCPUs> <MiB>`. Then the same numbers in
+`hostSizes`, and a sync. A changed class applies to new VMs only, so running
+labs keep their size.
+
+When we resized all three on 28 September, the sync carried nine values. The
+next release updated the size titles on the form, which are text.
+
+The vCenter appliance comes in Small or Medium: Tiny lived down to its name
+and starved inside a nested host. VCF Operations comes in Extra small, Small
+or Medium. The site file sets where each form starts.
 
 ## The IP plan
 
-Every lab uses the same addresses inside its own VPC. The plan is
-`lab.network`; the template's, for its made-up platform:
+Every lab uses the same addresses inside its own VPC. The plan lives in
+`lab.network`. Here's the template's, for its made-up platform:
 
 ```yaml
   network:                    # the same inside every lab; one lab per VPC
@@ -193,33 +212,43 @@ Every lab uses the same addresses inside its own VPC. The plan is
 ```
 
 The generator derives the rest, down to each host's three addresses and the
-reverse zone. The check keeps it consistent: every subnet inside the VPC range,
-each gateway inside its subnet, the fixed addresses inside the management
-subnet and clear of the hosts, three different VLANs. Ours is the same shape on
-172.30.0.x, and [post 3](/posts/lab-network-no-router/) explains why it needs no
-router. Any plan the check accepts will do, as long as no server the labs must
-reach, a DNS forwarder or the binaries server, sits inside it.
+reverse zone. The check keeps it consistent:
+
+- every subnet inside the VPC range;
+- each gateway inside its subnet;
+- the fixed addresses inside the management subnet, and clear of the hosts;
+- three different VLANs.
+
+Ours is the same shape on 172.30.0.x, and
+[post 3](/posts/lab-network-no-router/) explains why it needs no router. Any
+plan the check accepts will do, as long as no server the labs must reach (a
+DNS forwarder, say, or the binaries server) sits inside it.
 
 ## Another platform
 
 [Post 1](/posts/nested-labs-as-code/) argued that code pays off when labs move
 to another platform. The route is short: copy the template, check it,
-generate, install, following our implementation guide's eleven steps with
-`SITE_FILE` pointing at the new file. Where Python cannot run on the day,
-`tools\export_catalog.py` writes the by-hand route's files from the same site
-file: both property groups as the JSON bodies the API takes, one blueprint per
-item in a folder named after its project, and a README saying which goes
-where.
+generate, install. It follows our implementation guide's eleven steps, with
+`SITE_FILE` pointing at the new file.
+
+Where Python can't run on the day, `tools\export_catalog.py` writes the
+by-hand route's files from the same site file:
+
+- both property groups, as the JSON bodies the API takes;
+- one blueprint per item, in a folder named after its project;
+- a README saying which goes where.
 
 ## Dark sites
 
-A platform without internet takes everything as files; the
+A platform without internet takes everything as files. The
 [GPU Operator post](/posts/vks-gpu-operator-dark-site/) shows what that means
-for VKS. For the catalog, the rule that matters comes after the kit ships:
-once someone is copying it, it is frozen, and changes travel in an update
-folder beside it that holds only new and changed files, under the same paths.
-Its manifest carries each file's SHA-256 and, for a file that replaces one in
-the kit, the SHA-256 of the version it replaces:
+for vSphere Kubernetes Service (VKS). For the catalog, the rule that matters
+comes after the kit ships. Once someone is copying it, it's frozen. Changes
+travel in an update folder beside it, which holds only new and changed files,
+under the same paths.
+
+Its manifest carries each file's SHA-256. For a file that replaces one in the
+kit, it also carries the SHA-256 of the version it replaces:
 
 ```json
   {
@@ -237,13 +266,14 @@ the kit, the SHA-256 of the version it replaces:
   },
 ```
 
-The receiving side can prove that a file arrived intact and that it lands on
+The receiving side can prove that a file arrived intact, and that it lands on
 the version it was built against. The builder also refuses a changed file
-without a one-line reason, which goes into the update's README.
+without a one-line reason, which goes into the update's README. It's stricter
+with me than I would be.
 
 ## Extending the lab
 
-The generator has no plug-in interface: a new phase is a code change, in
+The generator has no plug-in interface. A new phase is a code change, in
 places the existing phases already show. The modes are named in one list, and
 what a mode does comes from the sets it belongs to:
 
@@ -255,13 +285,17 @@ OPS_MODES = ("ops", "full")
 BLANK_MODES = ("build", "builddc")      # the hosts arrive blank and the class installs ESXi
 ```
 
-A new VM or appliance can join a lab in two ways. One the blueprint creates,
-like `dc01`, gets a resource template in the generator, a size in
-`nestedLabSite` and a term in the namespace limits. One the lab deploys into
-its nested cluster, like VCF Operations, gets a block in the jump host's
-`lab-config.json`, a script on the binaries server, and a step in the vCenter
-build that runs the script when the block is there. The VCF Operations step is
-the whole pattern:
+A new VM or appliance can join a lab in two ways. If the blueprint creates it,
+like `dc01`, it gets a resource template in the generator, a size in
+`nestedLabSite` and a term in the namespace limits.
+
+If the lab deploys it into its nested cluster, like VCF Operations, it gets:
+
+- a block in the jump host's `lab-config.json`;
+- a script on the binaries server;
+- a step in the vCenter build that runs the script when the block is there.
+
+The VCF Operations step is the whole pattern:
 
 ```powershell
 if ($labCfg.ops) {
@@ -274,31 +308,32 @@ if ($labCfg.ops) {
 }
 ```
 
-Then the marker goes on the lab page and into the status tool, the mode gets a
-title and a catalog name, and the phase number goes into the tools that know
-phases by number: release, forms, export, check and status. The lint makes the
-new pieces read the property groups like everything else.
+Then the marker goes on the lab page and into the status tool, and the mode
+gets a title and a catalog name. The phase number goes into the tools that
+know phases by number: release, forms, export, check and status. The lint
+makes the new pieces read the property groups like everything else.
 
 ## Two tools for the first install
 
 Two tools make the first install easier still.
 
 The site-file wizard is a single HTML page that works offline: no server, no
-network, nothing to install. It is generated from the template, so it knows
-every key the tools read, with the template's comments as help text. It
-builds a site file from scratch or completes a half-filled one, shows each
-value still to come with the install step that fills it, and downloads the
-finished file. Here it has a copy of the template open, with three endpoints
-still to come:
+network, nothing to install. It's generated from the template, so it knows
+every key the tools read, with the template's comments as help text.
+
+It builds a site file from scratch or completes a half-filled one. It shows
+each value still to come with the install step that fills it, and downloads
+the finished file. Here it has a copy of the template open, with three
+endpoints still to come:
 
 ![The site-file wizard with a half-filled site file: the Endpoints section filtered to its three values still to come, each with the install step that fills it](/images/ui/wizard-values-to-come.png)
 
-Its Survey tab prints the same answers by section, with what is still to
-come at the top: the page to go through with whoever supplies the values.
+Its Survey tab prints the same answers by section, with what's still to come
+at the top. It's the page to go through with whoever supplies the values.
 
 ![The wizard's survey view: the three values still to come with their line, key and step, then every setting by section with its status](/images/ui/wizard-survey.png)
 
-`site_check.py` stays the gate. On the file the wizard wrote:
+`site_check.py` stays the gate. Here it is on the file the wizard wrote:
 
 ```text
 Platform    VCF Automation https://TBC-vcfa.fqdn, organization acme-training; vCenter TBC-vcenter.fqdn; NSX TBC-nsx.fqdn (project acme-training); region acme-dc1, zone domain-c9
@@ -312,15 +347,17 @@ Still TBC (3) - fill in at the step named:
 site file OK - 3 value(s) still TBC
 ```
 
-The page and the check agree on what is left, line for line; the wizard's own
+The page and the check agree on what's left, line for line. The wizard's own
 tests hold it to that on every build.
 
 The install runner, `tools\install_runner.py`, runs the implementation guide's
-scripted steps in order from the admin workstation and records each one, so a
-second run carries on where the first stopped. A step on another machine or
-in a browser it hands to the operator, with the section of the guide to
-follow. Its first run on f06, started at step 2.1, stopped at the first step
-it handed over:
+scripted steps in order from the admin workstation. It records each one, so a
+second run carries on where the first stopped. When a step runs on another
+machine or in a browser, the runner hands it to the operator, with the section
+of the guide to follow.
+
+Its first run on f06 started at step 2.1, and stopped at the first step it
+handed over:
 
 ```text
 Site file   X:\VCFA Workflows\Export\guides\site-f06.yaml   (sha256 460cba78a1b84a88)
@@ -347,8 +384,9 @@ site file OK
 stopped - the step stays pending
 ```
 
-With step 1 recorded as done by hand (`--mark`), a plain second run went
-straight back to 2.2, and `--plan` shows where the install stands:
+Anticlimactic, which is exactly what you want from an installer. With step 1
+recorded as done by hand (`--mark`), a plain second run went straight back to
+2.2. And `--plan` shows where the install stands:
 
 ```text
   id        title                                                        where kind    status           when
@@ -360,27 +398,28 @@ straight back to 2.2, and `--plan` shows where the install stands:
   2.C       Check: the whole file, the platform addresses, the values... W     check   pending
 ```
 
-We tested the runner with dry runs over the whole install and real runs of
-the steps that only read; the implementation guide stays the reference.
+We tested the runner with dry runs over the whole install, and real runs of
+the steps that only read. The implementation guide stays the reference.
 
 ## Why this matters outside the lab
 
-Any catalog that must exist in more than one place, a second region, a
-disconnected site, a partner's platform, meets the same question: which part is
-the design and which is the place? Keeping the place in one checked file and
-the design in generated code makes a new site a data exercise with a known list
-of steps, and makes a new release, a resized class or a moved server an
-afternoon's routine.
+Any catalog that must exist in more than one place meets the same question.
+The other place might be a second region, a disconnected site or a partner's platform.
+Which part is the design, and which is the place?
+
+Keep the place in one checked file and the design in generated code. Then a
+new site is a data exercise with a known list of steps. And a new release, a
+resized class or a moved server becomes an afternoon's routine.
 
 ## Rules learned
 
-- One site file per platform, and a template that names every key.
+- One site file per platform, plus a template that names every key.
 - Check the site file offline first, and name the line and the step in every
   message.
-- Keep what changes often in property groups; leave in the blueprint only what
+- Keep what changes often in property groups. Leave in the blueprint only what
   has to be there.
-- Name releases as sets, and look every image and folder up through the set.
-- Ship updates to a frozen kit as a delta with each file's hash and the hash
+- Name releases as sets, and look up every image and folder through the set.
+- Ship updates to a frozen kit as a delta, with each file's hash and the hash
   it replaces.
 - Extend along the patterns the code already has, and let the lint check the
   new pieces.

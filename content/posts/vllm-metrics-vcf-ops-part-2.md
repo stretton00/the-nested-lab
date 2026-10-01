@@ -19,32 +19,35 @@ summary: "The design from part 1 is only useful if it runs every minute, forever
 ---
 
 [Part 1](/posts/vllm-metrics-vcf-ops-part-1/) was about *what* to push.
-This is about making it boring: scheduled, self-monitoring, alertable, and
-testable without a live model.
+This one is about making it boring: scheduled, self-monitoring, alertable,
+and testable without a live model. In monitoring, boring is the highest
+compliment going.
 
 ## Execution pipeline
 
 Each run does seven things:
 
-1. **Authenticate once** to VCF Operations (PowerCLI's Ops module for the
-   token; native `Invoke-RestMethod` for everything after — far faster).
+1. **Authenticate once** to VCF Operations. PowerCLI's Ops module gets the
+   token; native `Invoke-RestMethod` does the rest, far faster.
 2. **Iterate targets** from the config file.
-3. **Resolve the resource** — look up the Ops object by name. The target
+3. **Resolve the resource:** look up the Ops object by name. The target
    must already exist in Ops (a VM, a container object, a custom
-   application). Exact match first, partial match with a warning second.
+   application). Exact match first, then a partial match with a warning.
 4. **Scrape** the Prometheus text from `:8000/metrics`.
-5. **Parse and transform** — gauges, counters, histograms; percentiles,
+5. **Parse and transform:** gauges, counters, histograms; percentiles,
    deltas, derived scores; drop-list applied.
 6. **Push in batches of 1000** stats per request. Ops rejects oversized
-   payloads; a busy model produces ~150 stats per run, but a config with
-   ten targets doesn't.
-7. **Persist state** — counters and timestamps per target. Targets removed
-   from the config are pruned from the state file automatically.
+   payloads. A busy model produces ~150 stats per run, which fits easily;
+   a config with ten targets doesn't.
+7. **Persist state:** counters and timestamps for each target. Targets
+   removed from the config are pruned from the state file automatically.
 
 ## The stdout contract
 
-The single most useful design choice: when run non-interactively, **the
-script prints exactly one integer** — the total number of stats pushed.
+The single most useful design choice is this. When run non-interactively,
+**the script prints exactly one integer**: the total number of stats
+pushed. It's not a chatty script, but it is honest. Mostly; more on that
+below.
 
 That makes it a Telegraf `inputs.exec` plugin with zero glue:
 
@@ -58,13 +61,14 @@ That makes it a Telegraf `inputs.exec` plugin with zero glue:
   name_override = "llm_metrics_pushed"
 ```
 
-Telegraf now has a series called `llm_metrics_pushed` that should read ~150
-every minute. If it reads 0, the scrape failed. If it's *missing*, the
-script didn't run. The integration monitors itself by construction, and the
-thing watching it is the same Telegraf you already run.
+Telegraf now has a series called `llm_metrics_pushed` that should read
+~150 every minute. If it reads 0, the scrape failed. If it's *missing*, the
+script didn't run. The integration monitors itself by construction, and
+the thing watching it is the same Telegraf you already run.
 
-(Task Scheduler or cron work too — `powershell.exe -File Push-LLMMetrics.ps1`
-every 60 s — you just lose the free self-monitoring.)
+(Task Scheduler or cron work too, running
+`powershell.exe -File Push-LLMMetrics.ps1` every 60 s. You just lose the
+free self-monitoring.)
 
 ## Configuration
 
@@ -86,14 +90,15 @@ Credentials and targets live in a JSON file beside the script, never in it:
 ```
 
 `subject` must match the Ops resource name exactly. `-ConfigPath` overrides
-the location for scheduled tasks. `auth_source` is `local` or your AD
-domain.
+the location for scheduled tasks. `auth_source` is `local` or your Active
+Directory domain.
 
 ## Logging that doesn't fill the disk
 
-Interactive runs get colour-coded console output. Silent runs mirror
-everything to `llm-metrics.log`, which rotates itself to `.old` at 5 MB.
-The three warnings you'll actually see:
+Interactive runs get colour-coded console output. Silent runs copy
+everything to `llm-metrics.log`, which rotates itself to `.old` at 5 MB. A
+log that fills the disk would turn the monitoring into the incident. The
+three warnings you'll actually see:
 
 | Log line | Meaning | Action |
 |---|---|---|
@@ -101,8 +106,8 @@ The three warnings you'll actually see:
 | `Rates are exactly 0` | no traffic since last run | normal when idle |
 | `Time gap too large (>300s). Resetting baseline` | scheduler paused / host rebooted | normal; rates resume next run |
 
-And one error: `API Error on batch: 401 Unauthorized` — the service
-account expired or locked. It's the only failure that needs a human.
+And one error: `API Error on batch: 401 Unauthorized`. The service account
+has expired or been locked. It's the only failure that needs a human.
 
 ## The offline test mode
 
@@ -112,10 +117,10 @@ You do not need a GPU to build this. `metrics_url` accepts `file://`:
 { "subject": "LLM01", "metrics_url": "file://C:/temp/llm_metrics.txt" }
 ```
 
-Save one real `/metrics` scrape to a text file, point the config at it,
-and iterate on parsing and Ops resource mapping at your desk. To test the
-rate maths, bump the counter values in the file between runs — the script
-can't tell the difference, and neither can Ops.
+Save one real `/metrics` scrape to a text file and point the config at it.
+Then iterate on parsing and Ops resource mapping at your desk.
+To test the rate maths, bump the counter values in the file between runs.
+The script can't tell the difference, and neither can Ops.
 
 ## The four alerts to configure on day one
 
@@ -131,67 +136,72 @@ each:
 
 Suggested thresholds for the rest, from the field:
 
-- `live_avg_ttft_ms` — warn 1000, critical 3000 (TTFT drives abandonment)
-- `queue|pressure_ratio` — warn 0.5, critical 1.0 (more waiting than running → scale out)
-- `memory|kv_cache_pct` — warn 85, critical 95
-- `queue|preemptions_per_sec` — warn > 0
-- `http|requests_per_sec` ≫ `throughput|requests_per_sec` — users are getting 429/503 at the front door
+- `live_avg_ttft_ms`: warn 1000, critical 3000 (a slow first token drives users to give up)
+- `queue|pressure_ratio`: warn 0.5, critical 1.0 (more waiting than running means scale out)
+- `memory|kv_cache_pct`: warn 85, critical 95
+- `queue|preemptions_per_sec`: warn above 0
+- `http|requests_per_sec` well above `throughput|requests_per_sec`: users are getting 429/503 at the front door
 
 
 ## What running it against a fresh Ops taught me
 
 I re-ran the collector in `file://` mode against a lab VCF Operations 9.1
 that had never seen it, pointing at an existing VM object. Three findings
-in the first ten minutes, all worth knowing before you deploy:
+in the first ten minutes, which is either very efficient or slightly
+worrying. All three are worth knowing before you deploy:
 
 1. **The stdout integer lied once.** The first two runs logged
-   `[ERR] The SSL connection could not be established` on the push — and
+   `[ERR] The SSL connection could not be established` on the push, and
    still printed `Total stats pushed: 76`. The counter tallies stats
    *prepared*, not batches *accepted*. Telegraf would have seen a healthy
-   76 while nothing landed. Fix for v6.4: increment only on a 2xx from the
-   batch push, and print 0 on any batch error. Until then, alert on the
-   log's `[ERR]` lines too.
+   76 while nothing landed. The fix for v6.4: increment only on a 2xx from
+   the batch push, and print 0 on any batch error. Until then, alert on
+   the log's `[ERR]` lines too.
 2. **The push path needs its own certificate handling.** The PowerCLI
    connect honours `Set-PowerCLIConfiguration -InvalidCertificateAction
-   Ignore`; the native `Invoke-RestMethod` pushes don't. On PowerShell 7,
+   Ignore`; the native `Invoke-RestMethod` pushes don't. On PowerShell 7, set
    `$PSDefaultParameterValues['Invoke-RestMethod:SkipCertificateCheck']=$true`
-   before the run (or trust the Ops CA properly) — otherwise auth succeeds
+   before the run, or trust the Ops CA properly. Otherwise auth succeeds
    and every push fails.
 3. **Metric names drift between vLLM versions.** Newer vLLM exposes
-   `vllm:time_per_output_token_seconds`; the key builder was written for
-   `vllm:request_time_per_output_token_seconds`, so the newer name fell
+   `vllm:time_per_output_token_seconds`, but the key builder was written
+   for `vllm:request_time_per_output_token_seconds`. So the newer name fell
    through the hierarchy and landed as a raw top-level metric in Ops
    (`vllm_time_per_output_token_seconds`) instead of `vllm|perf|tpot|*`.
-   Everything else — `vllm|perf|ttft|p95_ms`, `vllm|throughput|total_tokens_per_sec`,
-   `vllm|perf|system_saturation_score`, the `http|request_duration` percentiles —
-   arrived exactly where the design says. Add the new name to the mapping
-   and treat "unexpected top-level metric" as a check in the smoke test.
+   Everything else arrived exactly where the design says:
+   `vllm|perf|ttft|p95_ms`, `vllm|throughput|total_tokens_per_sec`,
+   `vllm|perf|system_saturation_score` and the `http|request_duration`
+   percentiles. Add the new name to the mapping, and treat "unexpected
+   top-level metric" as a check in the smoke test.
 
-Everything else worked first time: resource resolved by name, 89 stats per
-run, batches accepted, rates flowing from the second run onwards.
+Everything else worked first time: the resource resolved by name, 89 stats
+per run, batches accepted, and rates flowing from the second run onwards.
 
 ![VCF Operations: the vllm metric tree on the target object — requests, system|is_up, throughput, tokens — with prompt_total and live_avg_generation_tokens_per_req charted over the last hour](/images/ui/o5-ops-vllm-metric-tree.jpg)
-*The tree as an operator sees it, browsable without a manual. Captured from the `file://` test run above — the pipeline and the Ops side are real; the model behind the numbers was a saved scrape with advancing counters.*
+*The tree as an operator sees it, browsable without a manual. Captured from the `file://` test run above. The pipeline and the Ops side are real; the model behind the numbers was a saved scrape with advancing counters.*
 
 ## What I'd change
 
 Two things, honestly:
 
 - It's PowerShell because the monitoring host was Windows and PowerCLI was
-  already there. The same design ports to Python in an afternoon; the
-  value is the *transformation*, not the language.
-- Ops resource resolution by *name* is fragile. Resolving by an identifier
-  stored in the config after first lookup would survive a rename.
+  already there. The same design ports to Python in an afternoon. The
+  value is in the *transformation*, not the language.
+- Resolving the Ops resource by *name* is fragile. Resolving it by an
+  identifier, stored in the config after the first lookup, would survive a
+  rename.
 
 ## Why this matters outside the lab
 
 The operational payoff is an AI service that can be *run*, not just
-hosted: four alerts that fire before users complain, a saturation dial that
-tells capacity planners when to add a GPU, and an integration that reports
-its own health so silence is never mistaken for calm. For a customer, that
-is the difference between an LLM pilot and an LLM in production — and the
-design ports to any workload that speaks Prometheus but has no VCF
-Operations adapter of its own.
+hosted. You get four alerts that fire before users complain, and a
+saturation dial that tells capacity planners when to add a GPU. You also
+get an integration that reports its own health, so silence is never
+mistaken for calm.
+
+For a customer, that's the difference between an LLM pilot and an LLM in
+production. And the design ports to any workload that speaks Prometheus
+but has no VCF Operations adapter of its own.
 
 ## Rules learned
 

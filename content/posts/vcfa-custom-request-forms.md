@@ -18,9 +18,9 @@ cover:
 summary: "We built a friendlier request form for our lab catalog: two tabs and a text box with the rules. The form service saved it, its renderer served it, and the request page kept showing the generated form. How VCF Automation 9.1 actually picks a request form, why our release tool wiped it on every release, and the upkeep a custom form brings."
 ---
 
-The form was saved. The form service said so, and its renderer, asked for the
-form by the blueprint's ID, answered with our two tabs (asked by the catalog
-item's ID, it still had the generated form's single page, General):
+The form was saved. The form service said so. Its renderer, asked for the form
+by the blueprint's ID, answered with our two tabs. Asked by the catalog item's
+ID, it still had the generated form's single page, General:
 
 ```text
 lab-phase-2-blank-hosts (lab-students): catalog item 1b035714-2499-3377-a8bc-df55802f55e5, blueprint 367e85a3-4bef-417e-b5b1-fdcd4280521e, custom forms now: none
@@ -35,7 +35,8 @@ catalog item formId: None
 
 Signed in as `student01`, the request page for the same item showed VCF
 Automation's generated form: one page, one section per field, no tabs and no
-text.
+text. So our form was saved, stored and even served, just not on the one page
+that mattered.
 
 ![VCF Automation's generated request form on nested-esxi-lab-jump: one page with Project, Deployment Name, Lab, the jump host password, Software release and Jump host size, and no tabs or text](/images/ui/generated-form-lab-jump.png)
 *Every phase has its own form now, so this is the generated form on an item that still has none: a jump-host-only test item, requested as an administrator.*
@@ -43,28 +44,32 @@ text.
 ## Why a custom form
 
 The people who request labs from this catalog are mostly new to VCF
-Automation; that is why they are in a class. The design goal is that nobody
+Automation. That's why they're in a class. The design goal is that nobody
 should need to understand the blueprint to request a lab, and the generated
-form works against it. It lists every input on one page in blueprint order,
-so on the Phase 1 and 2 items that [students and trainers now share](/posts/one-item-students-and-trainers/),
-five of the seven fields do nothing for a student. And a password that breaks
-the rule is refused with the rule itself as the message: a regular
-expression.
+form works against that.
 
-So each phase got a form of its own, on two tabs. "Your lab" opens with a
-text box holding the rules people trip over, then the host size and the
-passwords. "Trainer options" says who its fields count for, then holds the
-Lab list, the release, the jump host size and the disk sizes.
+It lists every input on one page, in blueprint order. So on the Phase 1 and 2
+items that [students and trainers now share](/posts/one-item-students-and-trainers/),
+five of the seven fields do nothing for a student. And a password that breaks
+the rule is refused with the rule itself as the message: a regular expression.
+Friendly, it isn't.
+
+So each phase got a form of its own, on two tabs. The first, "Your lab", opens
+with a text box holding the rules people trip over, then the host size and the
+passwords. The second, "Trainer options", says who its fields count for, then
+holds the Lab list, the release, the jump host size and the disk sizes.
 
 ## Built from the generated form
 
-Our tool, `lab_forms.py`, does not write forms from scratch. It asks the form
+Our tool, `lab_forms.py`, doesn't write forms from scratch. It asks the form
 service for the item's generated form (`designer/request` with the item's
-schema), keeps every field as generated, with its values, defaults and rules,
-and moves the fields onto pages; the only field it rewrites is the jump host
-password's help and error text. A page is a tab. The text box is the
-designer's Text element. I found no form with one to copy, so its format
-started as a guess; the designer and the request page both render it:
+schema). It keeps every field as generated, with its values, defaults and
+rules, and moves the fields onto pages. The only field it rewrites is the jump
+host password's help and error text.
+
+A page is a tab. The text box is the designer's Text element. I found no form
+with one to copy, so its format started as a guess. The guess held, and the
+designer and the request page both render it:
 
 ```python
 def text_field(fid, text):
@@ -76,15 +81,16 @@ def text_field(fid, text):
 A student's first tab starts: "Your lab is built in your own network,
 vpc-<your user name>. You can have one lab at a time: before you request
 another, delete this one (Instances, your lab, Actions > Delete) and wait 5
-minutes after it has disappeared from Instances." It uses the portal's own
-words and names no script, because the people reading it work in the portal.
-The second tab starts: "These settings are for trainers. For students they
-have no effect: a student's lab always goes into their own network and uses
-the class defaults."
+minutes after it has disappeared from Instances."
 
-The password rule needed words too. The generated schema carries the pattern,
-and the jump host's pattern spells each refused word in both cases, because a
-form pattern cannot ignore case:
+It uses the portal's own words and names no script, because the people reading
+it work in the portal. The second tab starts: "These settings are for
+trainers. For students they have no effect: a student's lab always goes into
+their own network and uses the class defaults."
+
+The password rule needed words too. The generated schema carries the pattern.
+The jump host's pattern spells each refused word in both cases, because a form
+pattern can't ignore case:
 
 ```text
  "label": "Jump host password for user 'student' (RDP)",
@@ -97,21 +103,22 @@ form pattern cannot ignore case:
 ```
 
 That pattern was the error text a requester saw. The pattern object takes a
-`message`, and the tool sets it: "This password will not work: use 12 to 64 characters with upper and
+`message`, so the tool now sets one: "This password will not work: use 12 to 64 characters with upper and
 lower case letters, a number and one of ! @ # * _ = + . , ? -, start with a
 letter or a number, and leave out the words listed in the help (i)."
 
 ## Where the request page looks
 
-The form service keys a blueprint's form by a source ID, so I had stored it
+The form service keys a blueprint's form by a source ID. So I had stored it
 under the classic blueprint ID, and then under the catalog item ID as well.
 Its renderer served our tabs for both, and the request page still showed the
-generated form. A new version, 2.1.2, changed nothing, and the blueprint's
-form designer still offered "New Form", as if no form existed.
+generated form. A new version, 2.1.2, changed nothing. The blueprint's form
+designer still offered "New Form", as if no form existed.
 
-So I let the designer show me. I imported our JSON with Actions > Import
-form, clicked Create, and versioned the blueprint in the UI as 2.1.3. The
-designer showed the tabs, and the records showed what had changed:
+So I swallowed my pride and let the designer show me. I imported our JSON
+with Actions > Import form, clicked Create, and versioned the blueprint in the
+UI as 2.1.3. The designer showed the tabs, and the records showed what had
+changed:
 
 ```text
 form {"formId": "4bcd5911-11f4-4267-a1f5-e3cfa6d2ca83", "formName": "lab-phase-2-blank-hosts/2.1.3", "sourceType": "com.vmw.blueprint", "imported": false, ...}
@@ -123,18 +130,20 @@ version {'version': '2.1.3', 'status': 'RELEASED', 'createdAt': '2026-09-30T13:3
 That is the mechanism. The classic blueprint record
 (`/blueprint/api/blueprints/{id}`) has a `formId`, and the designer's Create
 sets it. Creating a version copies that form into a new one named
-`<name>/<version>`, with a `formId` of its own on the version, and the request
-page renders the released version's copy. A form stored by source ID alone is
-never read by the request page, however `ON` its status; the renderer does
-return it, which is what had misled me. The catalog item's own `formId`
-stayed empty throughout, and the admin API that might have set it answered
-403 to our service account. It was never needed.
+`<name>/<version>`, with a `formId` of its own on the version. The request
+page then renders the released version's copy.
+
+A form stored by source ID alone is never read by the request page, however
+`ON` its status. The renderer does return it, which is what had misled me.
+The catalog item's own `formId` stayed empty throughout. The admin API that
+might have set it answered 403 to our service account, but it was never
+needed.
 
 ## The release tool wiped it
 
 `lab_forms.py` now points the blueprint at its form with a PUT of the classic
 record, as the designer does. The first release through our normal release
-tool undid it:
+tool undid it, which was not the plan:
 
 ```text
 release 2.1.4: 200
@@ -142,12 +151,12 @@ release 2.1.4: 200
 blueprint formId after the release's PUT: None
 ```
 
-Our release tool updates the content through the CCI API, where a blueprint
-is a Kubernetes-style `Blueprint` object whose spec holds only the content and
-the description. After that PUT the classic record's `formId` was empty, so
-every release would have gone out with the generated form. The tool now reads
-`formId` before the content update and writes it back before it creates the
-version:
+Our release tool updates the content through the Cloud Consumption Interface
+(CCI) API. There, a blueprint is a Kubernetes-style `Blueprint` object whose
+spec holds only the content and the description. After that PUT, the classic
+record's `formId` was empty, so every release would have gone out with the
+generated form. The tool now reads `formId` before the content update, and
+writes it back before it creates the version:
 
 ```python
 # 30 Sep: a custom request form hangs on the blueprint (formId, set by tools/lab_forms.py or the designer's Create), and
@@ -191,27 +200,30 @@ had deleted the phase's previous form:
 ```
 
 A second run went through. The tool now waits five seconds and retries once,
-and a comment says why, so nobody removes it as noise. The next release gave
-all six phases their own copies, and when I opened the Phase 1 and Phase 6
-request pages, both showed the two tabs. My only notes were about the
-wording.
+and a comment says why, so that nobody (future me included) removes it as
+noise. The next release gave all six phases their own copies. When I opened
+the Phase 1 and Phase 6 request pages, both showed the two tabs. My only notes
+were about the wording.
 
 ![The Phase 1 request page with its custom form: the Your lab and Trainer options tabs, and the rules text above the two fields a student fills in](/images/ui/phase1-form-your-lab.png)
 
 ## A form is a copy
 
-The price is upkeep. The stored form is a full copy of the generated form at
-the moment the tool built it: labels, help texts, defaults, the choices of
-every list, the password patterns. Each field is still tied to its input by
-name, but its choices and starting value are copies, and every version then
-takes a copy of that copy. When a blueprint input changes, say a new entry in
-the Release list, the next version carries the new input in its content and
-the old choices on its form, until the forms are built again from the new
-version and released once more.
+The price is upkeep. Self-service, it turns out, does not maintain itself.
+
+The stored form is a full copy of the generated form at the moment the tool
+built it: labels, help texts, defaults, the choices of every list, the password
+patterns. Each field is still tied to its input by name, but its choices and
+starting value are copies. Every version then takes a copy of that copy.
+
+Say a blueprint input changes, with a new entry in the Release list. The next
+version carries the new input in its content, and the old choices on its form.
+That lasts until the forms are built again from the new version and released
+once more.
 
 So a change to a field is two releases: one for the blueprint, one for the
-rebuilt forms. f06's last catalog refresh went out that way, as 2.1.9 with
-the new blueprints and 2.1.10 with the forms rebuilt from them:
+rebuilt forms. The last catalog refresh on f06 went out that way, as 2.1.9
+with the new blueprints and 2.1.10 with the forms rebuilt from them:
 
 ```text
   stored: form 8334f47a-091d-45d1-b551-2be9c3716dcb, status ON
@@ -225,21 +237,21 @@ the new blueprints and 2.1.10 with the forms rebuilt from them:
    version 2.1.10 request form: VCF Automation's generated form
 ```
 
-The two dev items keep the generated form on purpose; only the six phases
-have custom ones.
+The two dev items keep the generated form on purpose. Only the six phases have
+custom ones.
 
 ## Why this matters outside the lab
 
 A request form is the front door of a self-service catalog, and most people
 who come through it will never read a blueprint. Putting the rules on the
 form, in the portal's own words, answers the questions that would otherwise
-become tickets: where does my lab go, why can I only have one, what do I do
-with blank hosts. Moving the fields that don't concern a requester to another
+become tickets. Where does my lab go? Why can I only have one? What do I do
+with blank hosts? Moving the fields that don't concern a requester to another
 tab keeps the first screen down to the decisions they actually make.
 
 The mechanism matters because the failure is silent. A form that falls back
-to the generated one after a release breaks nothing a monitor would notice;
-the first sign is a confused user. Treat custom forms as release artefacts,
+to the generated one after a release breaks nothing a monitor would notice.
+The first sign is a confused user. Treat custom forms as release artefacts,
 like the blueprint itself: know which object the platform reads, keep it
 intact in the pipeline, and make every release say which form it shipped.
 

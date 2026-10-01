@@ -19,14 +19,15 @@ cover:
 summary: "Part 0 of the Pod Papers: an NSX VPC explained with a running game. Private by default, one deliberate door out — and a self-inflicted outage that taught me five green layers can hide one wrong integer."
 ---
 
-Before this series gets into trunk subnets and binding maps, it's worth
-spending ten minutes on the thing everything else stands on: **what an NSX
-VPC actually is** from the tenant's chair. No slides. A game of Pac-Man.
+Before this series gets into trunk subnets and binding maps, it's worth ten
+minutes on the thing everything else stands on: **what an NSX VPC actually
+is**, seen from the tenant's chair. No slides, just a game of Pac-Man.
+Strictly for educational purposes, you understand.
 
-The lab has Pac-Man running twice on VCF 9.1 — once on a VKS cluster I
-built by hand with `kubectl`, once on a cluster deployed through VCF
-Automation's catalog. Both live inside VPCs. Both were reachable when I
-started:
+The lab has Pac-Man running twice on VCF 9.1. One copy runs on a VKS
+(vSphere Kubernetes Service) cluster I built by hand with `kubectl`. The
+other runs on a cluster deployed through VCF Automation's catalog. Both live
+inside VPCs, and both were reachable when I started:
 
 ```
 http://192.168.144.15/  ->  <title>Pacman in HTML 5 Canvas
@@ -37,19 +38,19 @@ http://192.168.144.23/  ->  <title>Pacman in HTML 5 Canvas
 
 ## A VPC is a private universe with a door policy
 
-Think of an NSX VPC as a tenant's own routed network space: its own
-subnets, its own gateway, its own address plan — carved out by the tenant,
-not filed as a ticket with the network team. Three rules define it:
+Think of an NSX VPC as a tenant's own routed network space. It has its own
+subnets, its own gateway and its own address plan. The tenant carves it out,
+rather than filing a ticket with the network team. Three rules define it:
 
 1. **Private by default.** A `Private` subnet is reachable only from inside
-   the same VPC. Nobody outside can route to it — not other tenants, not
+   the same VPC. Nobody outside can route to it: not other tenants, not
    other VPCs in the same org, not the corporate network.
-2. **Your addresses are your business.** Because private subnets aren't
-   advertised anywhere, two VPCs can use *identical* CIDRs. (This is the
-   superpower the rest of the series is built on.)
-3. **Every door out is deliberate.** Traffic leaves via the transit
-   gateway — SNAT'd — or arrives via a **LoadBalancer VIP** from an
-   external block the provider allocated. Nothing is exposed by accident.
+2. **Your addresses are your business.** Private subnets aren't advertised
+   anywhere, so two VPCs can use *identical* CIDRs. (This is the superpower
+   the rest of the series is built on.)
+3. **Every door out is deliberate.** Traffic leaves through the transit
+   gateway (with source NAT), or arrives through a **LoadBalancer VIP** from
+   an external block the provider allocated. Nothing is exposed by accident.
 
 Pac-Man's pods sit on a private subnet. The only reason `192.168.144.23`
 answers is a Kubernetes `Service` of type `LoadBalancer`, which NSX turns
@@ -67,10 +68,11 @@ $ curl -m 5 http://192.168.144.23/
 curl: timed out / unreachable
 ```
 
-The pods are running. The service exists. The game is fine — *for anything
-inside the VPC*. From my desk it's simply gone. That's the whole VPC model
-in one `curl`: the boundary isn't a firewall rule somebody wrote, it's the
-absence of a route.
+The pods are running. The service exists. The game is fine, *for anything
+inside the VPC*. From my desk, it has simply gone, ghosts and all.
+
+That's the whole VPC model in one `curl`. The boundary isn't a firewall rule
+somebody wrote; it's the absence of a route.
 
 ## After: open it again
 
@@ -81,9 +83,9 @@ NAME     TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)        AGE
 pacman   LoadBalancer   10.106.219.213   192.168.144.23   80:31467/TCP   4d13h
 ```
 
-Same VIP handed straight back. NSX programmed a virtual server and pool on
-the VPC LB; the supervisor stitched it to the cluster's NodePort. Door open.
-
+Same VIP, handed straight back. NSX programmed a virtual server and pool on
+the VPC's load balancer, and the supervisor stitched them to the cluster's
+NodePort. Door open. Lesson over, or so I thought.
 
 And then the game *didn't load*.
 
@@ -91,22 +93,23 @@ And then the game *didn't load*.
 
 Everything was green:
 
-- `kubectl get svc` — LoadBalancer, VIP assigned
-- `kubectl get endpoints` — pod IPs present
-- NSX — virtual server up, pool members healthy
-- `iptables` on the node — NodePort rules identical to a working
+- `kubectl get svc`: LoadBalancer, VIP assigned
+- `kubectl get endpoints`: pod IPs present
+- NSX: virtual server up, pool members healthy
+- `iptables` on the node: NodePort rules identical to a working
   neighbour service
 
 Five layers, all green, and `curl` hung. The control experiment was the
-manually-built cluster's Pac-Man at `.15`, untouched throughout, still
+Pac-Man at `.15` on the hand-built cluster: untouched throughout, and still
 playing.
 
-The cause: my "harmless" `ClusterIP` patch earlier had included a `ports`
-list. `kubectl patch` with a merge patch **replaces arrays**, it doesn't
-merge them — and my array said `targetPort: 80`. Pac-Man listens on
-**8080**. Every layer above was faithfully forwarding traffic to a port
-nothing was listening on, and every layer reported success because *its*
-job was done.
+The culprit, it turns out, was me. My "harmless" `ClusterIP` patch earlier
+had included a `ports` list. A merge patch with `kubectl patch` **replaces
+arrays** rather than merging them, and my array said `targetPort: 80`.
+Pac-Man listens on **8080**.
+
+So every layer above was faithfully forwarding traffic to a port nothing was
+listening on. And every layer reported success, because *its* job was done.
 
 ```
 $ kubectl patch svc pacman -n pacman --type=json \
@@ -116,9 +119,10 @@ $ curl -s http://192.168.144.23/ | grep -o '<title>.*</title>'
 <title>Pacman in HTML 5 Canvas</title>
 ```
 
-Instant recovery. The diagnosis walked the entire paravirtual chain —
-VIP → supervisor `VirtualMachineService` → NSX VS/pool → NodePort
-`iptables` → pod — and it's exactly the walk you'll need one day:
+Instant recovery. The diagnosis walked the whole paravirtual chain: the VIP,
+the supervisor's `VirtualMachineService`, the NSX virtual server and pool,
+the NodePort `iptables` rules, and finally the pod. It's exactly the walk
+you'll need one day:
 
 | Layer | Check | What "green" hides |
 |---|---|---|
@@ -129,41 +133,43 @@ VIP → supervisor `VirtualMachineService` → NSX VS/pool → NodePort
 | Pod | `kubectl exec ... ss -ltn` | the only place the truth lives |
 
 Bonus find on the way: kube-proxy *and* Antrea on that cluster had dropped
-their API watches days earlier (`http2: client connection lost`) and never
-re-established informers until restarted. It didn't cause this outage, but
-it's the kind of thing you only find when you're forced to look.
+their API watches days earlier (`http2: client connection lost`). Neither
+re-established its informers until it was restarted. It didn't cause this
+outage, but it's the kind of thing you only find when you're forced to look.
 
 ## Why this matters outside the lab
 
-If you run a platform for more than one team, this is the feature you've
-been asking the network team for. A VPC gives each team, project or customer
-its own private network space — created by them, in minutes, with nothing
-reachable from outside until they publish it. Security teams like it for the
-same reason developers do: exposure is a deliberate, auditable act, not a
-side effect of plugging something in.
+If you run a platform for more than one team, this is the feature you've been
+asking the network team for. A VPC gives each team, project or customer its
+own private network space. They create it themselves, in minutes, and nothing
+in it is reachable from outside until they publish it.
+
+Security teams like it for the same reason developers do. Exposure is a
+deliberate, auditable act, not a side effect of plugging something in.
 
 What organisations do with it once they have it:
 
 - **Per-team sandboxes** that can't see each other, provisioned without a
   ticket.
-- **Partner or supplier environments** isolated from the corporate estate
+- **Partner or supplier environments**, isolated from the corporate estate
   but hosted on the same platform.
-- **Multi-tenant hosting** — service providers and internal IT alike — with
-  isolation enforced by topology rather than a growing pile of firewall rules.
+- **Multi-tenant hosting**, for service providers and internal IT alike,
+  with isolation enforced by topology rather than a growing pile of firewall
+  rules.
 
 ## Rules learned
 
 - A VPC's boundary is **the absence of a route**, not a rule. `Private`
-  subnets are unreachable from outside by construction — which is also why
+  subnets are unreachable from outside by construction, which is also why
   identical CIDRs across VPCs just work.
-- A `LoadBalancer` service is the *deliberate* door: NSX VIP from the
-  external block, programmed per service. Flip the type and the door
-  closes with nothing else to clean up.
-- `kubectl patch` (merge) **replaces `spec.ports`**, it doesn't merge it.
-  Patch a single field with `--type=json`, or don't include the array.
+- A `LoadBalancer` service is the *deliberate* door: an NSX VIP from the
+  external block, programmed per service. Flip the type and the door closes,
+  with nothing else to clean up.
+- `kubectl patch` (merge) **replaces `spec.ports`**; it doesn't merge it.
+  Patch a single field with `--type=json`, or leave the array out.
 - Five green layers can hide one wrong integer. Keep a *working control*
-  (here: the untouched `.15` instance) and compare layer by layer.
-- Read `kubectl get endpoints` as `IP:targetPort` — the port is the part
+  (here, the untouched `.15` instance) and compare layer by layer.
+- Read `kubectl get endpoints` as `IP:targetPort`. The port is the part
   people skim.
 
 ## Broadcom documentation
@@ -174,7 +180,7 @@ What organisations do with it once they have it:
 - [Deploying Supervisor with VCF Networking with VPC](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/vsphere-supervisor-installation-and-configuration/supervisor-networking-with-virtual-private-clouds.html): the VPC, load balancer and SNAT IP behind a namespace, and the LoadBalancer services NCP provides.
 - [Create vSphere Namespaces on VPCs without SNAT and Load Balancer](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-1/vsphere-supervisor-installation-and-configuration/configuring-and-managing-vsphere-namespaces/managing-vsphere-namespaces-on-a-supervisor-with-nsx-vpc/create-and-configure-a-vsphere-namespace-on-a-supervisor-with-vpc/create-namespaces-with-vpc-nosnat-nolb.html): without the VPC load balancer, LoadBalancer services cannot be deployed at all.
 
-*Next in the Pod Papers: [nested ESXi inside a VPC](/posts/nested-esxi-nsx-vpc/) —
+*Next in the Pod Papers: [nested ESXi inside a VPC](/posts/nested-esxi-nsx-vpc/),
 where "private by default" meets a host that fakes its own MAC address.*
 
 ---
