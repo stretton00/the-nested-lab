@@ -6,6 +6,11 @@ tags: [vllm, llm, observability, vcf-operations, prometheus, powershell, gpu]
 products: ["VCF Operations", "Private AI"]
 series: ["LLM Ops on VCF"]
 seriesPart: 1
+tldr:
+  - "Send vLLM's few hundred Prometheus series per model straight into VCF Operations, and the dashboard tells an operator nothing."
+  - "VCF Operations stores gauges and has no `histogram_quantile`, so the pipeline works out P50, P95 and P99 before pushing."
+  - "Push four gauges per histogram, keep state so counters become rates, and treat the drop-list as design, not housekeeping."
+tested: "VCF 9.1"
 cover:
   image: "/images/post13-hero-vllm.svg"
   alt: "Prometheus histogram buckets in; flat P50/P95/P99 gauges out"

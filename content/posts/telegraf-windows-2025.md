@@ -7,6 +7,10 @@ tags: [observability, telegraf, windows, vcf-operations, metrics, support-matrix
 products: ["VCF Operations"]
 series: ["Observability on VCF"]
 seriesPart: 2
+tldr:
+  - "Windows Server 2025 is missing from the VCF Operations agent's support matrix, but the agent runs and reports on it."
+  - "Server 2025 no longer ships WMIC and the agent's bootstrap still calls it, so add it back with one DISM command."
+  - "\"Unsupported\" is about who fixes it when it breaks, so record versions, add a canary check and upgrade one node first."
 cover:
   image: "/images/post20-hero-telegraf.svg"
   alt: "The support matrix says no; the agent status says Install Success"

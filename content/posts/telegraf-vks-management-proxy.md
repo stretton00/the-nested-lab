@@ -7,6 +7,11 @@ tags: [observability, telegraf, vks, kubernetes, vcf-operations, supervisor-serv
 products: ["VCF Operations", "VKS"]
 series: ["Observability on VCF"]
 seriesPart: 3
+tldr:
+  - "Every Telegraf pod on our VKS cluster sat in `FailedMount`, waiting for two secrets that nothing had created."
+  - "Those secrets only come from the Supervisor Management Proxy, and the cluster also needs `serviceDomain` set when it is created."
+  - "On VCF 9.1, start with the supported route that installs Telegraf for you, and check for it before installing your own."
+tested: "VCF 9.1"
 cover:
   image: "/images/post24-hero-telegraf-vks.svg"
   alt: "Telegraf pods stuck in FailedMount until the Supervisor Management Proxy exists; then a domainless service URL until serviceDomain is set"

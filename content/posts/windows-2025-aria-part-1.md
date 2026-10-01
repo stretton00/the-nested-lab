@@ -7,6 +7,10 @@ tags: [aria-automation, vcf-automation, vm-apps, windows, cloudbase-init, vro, p
 products: ["VCF Automation"]
 series: ["The Windows Build Pipeline"]
 seriesPart: 1
+tldr:
+  - "One catalog request delivers a domain-joined Windows Server 2025 with its agents, a build report and no automation tooling left behind."
+  - "Three layers share the work: Aria and vRO hold the credentials, cloudbase-init handles first boot, a file-share build engine does the rest."
+  - "The domain join changes the rules mid-build, so everything after it runs as a scheduled task under an explicit identity."
 cover:
   image: "/images/post15-hero-winpipe.svg"
   alt: "Three layers: Aria control plane, cloudbase-init first boot, file-share build engine"

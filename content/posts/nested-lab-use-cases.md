@@ -6,6 +6,11 @@ tags: [vcf, vcf-automation, nested-esxi, training-labs, self-service, homelab]
 products: ["VCF Automation"]
 series: ["Nested Labs as Code"]
 seriesPart: 2
+tldr:
+  - "One catalog of nested VCF labs serves a class, a demo, a release trial, an offline rehearsal and tool testing."
+  - "Instead of five precious hand-built environments, the team keeps one design and everyone gets a lab they are allowed to break."
+  - "Build ahead what takes hours, request live what takes minutes, and rehearse each use before it counts."
+tested: "VCF 9.1"
 cover:
   image: "/images/post35-hero-use-cases.svg"
   alt: "One lab catalog, four of its uses: a class with the same lab for every student, a demo on a Phase 6 built ahead, a new release side by side, and an offline rehearsal of an install; each lab is requested, built, used, deleted and requested again"

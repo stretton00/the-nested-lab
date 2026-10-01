@@ -6,6 +6,11 @@ tags: [vcf, vcf-automation, blueprints, api, property-groups, supervisor]
 products: ["VCF Automation"]
 series: ["The Lab Factory"]
 seriesPart: 9
+tldr:
+  - "One VCF Automation API call checks a blueprint's resource types, inputs, property groups and expressions, and leaves nothing behind."
+  - "It answers HTTP 200 to good and bad blueprints alike, so trust `valid`, not the cheerful status code."
+  - "It misses unknown properties in existing groups and unknown manifest fields, so check `propgroup` paths and dry-run manifests on the Supervisor."
+tested: "VCF 9.1"
 cover:
   image: "/images/post41-hero-validate-blueprints.svg"
   alt: "Three checks before a request: the blueprint validation call, a Supervisor dry run of each manifest, and the released version diffed with the generator's output"

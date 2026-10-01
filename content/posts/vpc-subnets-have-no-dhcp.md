@@ -7,6 +7,11 @@ tags: [vcf, nsx, vpc, cloud-init, ovf, esxi, bootstrap]
 products: ["NSX", "vSphere and vSAN"]
 series: ["The VPC Pod Papers"]
 seriesPart: 8
+tldr:
+  - "The nested-ESXi appliance sat at \"waiting for DHCP\", ready to wait politely until the heat death of the universe."
+  - "Our VPC subnets have DHCP deactivated by default: NSX allocates each address at the port, and the guest must be told."
+  - "Use the VM Service's bootstrap providers: `cloudInit` for Linux, `sysprep` for Windows and `vAppConfig` for appliances like nested ESXi."
+tested: "VCF 9.1"
 cover:
   image: "/images/post7-hero-nodhcp.svg"
   alt: "Three bootstrap paths into a VPC subnet: cloud-init, sysprep, vAppConfig"

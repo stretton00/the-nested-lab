@@ -5,6 +5,11 @@ lastmod: 2026-10-01
 draft: false
 tags: [vcf, vcf-automation, all-apps, vm-apps, aria-automation, architecture]
 products: ["VCF Automation"]
+tldr:
+  - "VCF Automation 9.1 has two models: VM Apps is classic Aria Automation, and All Apps looks like Kubernetes because it is."
+  - "All Apps makes identical isolated environments and nested ESXi natural; VM Apps still wins on vRO, ABX and deep vCenter work."
+  - "Default to All Apps for new build-outs, keep VM Apps alongside for existing content, and script the ordering rules once."
+tested: "VCF 9.1"
 cover:
   image: "/images/post9-hero-vmapps-allapps.svg"
   alt: "Two provisioning paths side by side: IaaS engine to vCenter, vs blueprint to supervisor reconciliation"

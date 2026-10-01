@@ -7,6 +7,11 @@ tags: [vcf, nsx, vpc, vks, kubernetes, explainer]
 products: ["NSX", "VKS"]
 series: ["The VPC Pod Papers"]
 seriesPart: 1
+tldr:
+  - "An NSX VPC is a tenant's own network, private by default, and two VPCs can even use identical CIDRs."
+  - "Pac-Man shows it: make its service `ClusterIP` and the game vanishes from outside; make it `LoadBalancer` and the door reopens."
+  - "But the game would not load: my own patch had replaced the ports array, and five green layers hid one wrong integer."
+tested: "VCF 9.1"
 cover:
   image: "/images/post0-hero-pacman.svg"
   alt: "Pac-Man inside a VPC boundary; a LoadBalancer VIP is the one door out"

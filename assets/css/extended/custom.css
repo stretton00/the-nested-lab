@@ -329,3 +329,27 @@ details.toc summary { font-family: "Outfit", sans-serif; font-weight: 600; }
 .nl-path-list li { margin: 0; }
 .nl-path-list a { color: var(--nl-accent); font-weight: 500; }
 .nl-path-sum { display: block; font-size: .92rem; color: var(--secondary); line-height: 1.45; }
+
+/* ---------- the short version under the cover, and folded output (1 Oct 2026) ---------- */
+.nl-short {
+    margin: 18px 0 24px; padding: 14px 18px 12px;
+    border: 1px dashed var(--border); border-radius: var(--radius); background: var(--entry);
+}
+.nl-short-label {
+    margin: 0 0 6px; font-family: "JetBrains Mono", monospace; font-size: .8rem; letter-spacing: .04em;
+    color: var(--nl-accent);
+}
+.nl-short-prompt { margin-right: 2px; font-weight: 700; }
+.nl-short-list { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.nl-short-list li { margin: 0; line-height: 1.55; }
+.nl-short-tested {
+    margin: 10px 0 0; padding-top: 8px; border-top: 1px solid var(--border);
+    font-family: "JetBrains Mono", monospace; font-size: .74rem; color: var(--secondary);
+}
+.nl-fold { margin: 0 0 24px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--entry); }
+.nl-fold > summary {
+    cursor: pointer; padding: 10px 14px; font-family: "JetBrains Mono", monospace; font-size: .82rem; color: var(--nl-accent);
+}
+.nl-fold > summary:focus-visible { outline: 2px solid var(--nl-accent); outline-offset: 2px; }
+.nl-fold[open] > summary { border-bottom: 1px solid var(--border); }
+.nl-fold > :not(summary) { margin: 12px 14px; }

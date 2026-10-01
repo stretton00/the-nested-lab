@@ -6,6 +6,11 @@ tags: [vcf, vcf-automation, blueprints, property-groups, self-service, homelab]
 products: ["VCF Automation"]
 series: ["The Lab Factory"]
 seriesPart: 7
+tldr:
+  - "Trainers and students had separate copies of Phases 1 and 2, and sharing one item across projects did not reach students."
+  - "Now one blueprint per phase checks, on the server, whether the requester is on a trainers list in a property group."
+  - "Trust who asked, not what they typed: a student who picks someone else's lab still gets their own."
+tested: "VCF 9.1"
 cover:
   image: "/images/post28-hero-trainers.svg"
   alt: "A Phase 1 request with Lab: student04 meets one check on the server, whether env.requestedBy is on the trainers list in nestedLabSite: a trainer's lab lands in vpc-student04, everyone else's in their own VPC"

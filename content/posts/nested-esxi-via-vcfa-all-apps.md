@@ -7,6 +7,11 @@ tags: [vcf, vcf-automation, all-apps, cci, blueprint, nested-esxi, vpc]
 products: ["VCF Automation", "NSX"]
 series: ["The VPC Pod Papers"]
 seriesPart: 6
+tldr:
+  - "Fill in a name, pick a VPC, click Request, and a few minutes later two SSH prompts are waiting for you."
+  - "An All Apps blueprint is a composition of manifests, so if it works with `kubectl`, it works in a blueprint."
+  - "Three objects must exist outside the blueprint before each request, in this order: the VPC, its VPCAttachment and its LoadBalancer."
+tested: "VCF 9.1"
 cover:
   image: "/images/post6-hero-blueprint.svg"
   alt: "One blueprint: namespace, trunk topology, two nested hosts, two VIPs — requested as a catalog item"

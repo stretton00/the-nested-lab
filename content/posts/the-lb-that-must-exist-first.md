@@ -7,6 +7,11 @@ tags: [vcf, nsx, vpc, supervisor, ncp, troubleshooting]
 products: ["NSX", "vSphere and vSAN"]
 series: ["The VPC Pod Papers"]
 seriesPart: 3
+tldr:
+  - "In our self-service NSX VPC, the LoadBalancer services sat at `<pending>` for an hour, explained only by a 'Generic error'."
+  - "NCP looks for the VPC's load balancer once, when the namespace is created, and never again, however long you wait."
+  - "Create the VPC, the VPCAttachment and the LoadBalancer before the namespace, or the only tenant fix is recreating the namespace."
+tested: "VCF 9.1"
 cover:
   image: "/images/post2-hero-ordering.svg"
   alt: "The ordering rule: VPC, VPCAttachment, LoadBalancer, then the namespace - swap steps 3 and 4 and VIPs pend forever"

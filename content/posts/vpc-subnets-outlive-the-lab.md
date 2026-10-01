@@ -6,6 +6,11 @@ tags: [vcf, nsx, vpc, vm-service, ipam, training-labs, troubleshooting]
 products: ["NSX", "VCF Automation"]
 series: ["The VPC Pod Papers"]
 seriesPart: 11
+tldr:
+  - "Our delete tool said \"clean\", so I requested the next lab into the same VPC eleven seconds later; it never booted."
+  - "NSX still held the old lab's subnets, so each new subnet moved up a block and the fixed addresses no longer fitted."
+  - "\"Deployment deleted\" is not \"VPC free\": wait for NSX to show no subnets in the VPC, not for a timer."
+tested: "VCF 9.1"
 cover:
   image: "/images/post31-hero-subnets.svg"
   alt: "A deleted lab's subnet still holds the first block of the VPC, so each new subnet moves up one /27 and the domain controller's fixed address 172.30.0.34 no longer fits sn-mgmt"

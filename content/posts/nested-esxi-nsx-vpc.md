@@ -7,6 +7,11 @@ tags: [vcf, nsx, vpc, nested-esxi, homelab, vsphere-supervisor]
 products: ["NSX", "vSphere and vSAN"]
 series: ["The VPC Pod Papers"]
 seriesPart: 2
+tldr:
+  - "The first nested ESXi host on a plain VPC subnet booted green, and every packet it sent, ARP included, died silently."
+  - "SpoofGuard pins a standard VPC port to one IP and MAC, but ESXi's vmk0 makes up a MAC of its own."
+  - "Attach the hosts' vNICs only to a trunk subnet, and give each VLAN subnet a binding map pointing at the trunk."
+tested: "VCF 9.1"
 cover:
   image: "/images/post1-hero-trunk.svg"
   alt: "The trunk-subnet design: one trunk vNIC, binding maps demux VLANs 1610/1611/1612 into VPC subnets"

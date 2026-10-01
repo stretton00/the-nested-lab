@@ -6,6 +6,11 @@ tags: [vcf, vcf-automation, blueprints, property-groups, nested-esxi, automation
 products: ["VCF Automation"]
 series: ["Nested Labs as Code"]
 seriesPart: 6
+tldr:
+  - "Everything that ties our lab catalog to one platform sits in a single site file, checked offline by `site_check.py`."
+  - "When the binaries server moved house, the catalog needed four values in one property group and no new blueprint version."
+  - "Keep what changes often in property groups, and leave in the blueprint only what has to be there."
+tested: "VCF 9.1"
 cover:
   image: "/images/post39-hero-make-it-yours.svg"
   alt: "A site file filled in with the wizard passes site_check.py and is installed step by step by the install runner; afterwards a new release is a library item plus one entry in nestedLabMedia, and a new trainer is one line in nestedLabSite, with no new blueprint version"

@@ -7,6 +7,10 @@ tags: [vcf, vcf-automation, vro, bringup, nested-esxi, automation]
 products: ["VCF Automation", "VCF Installer"]
 series: ["The Lab Factory"]
 seriesPart: 1
+tldr:
+  - "A heroic PowerShell script grew into catalog items that build a whole nested VCF 9.1 instance from one form."
+  - "Requests time out after about two hours, so the wrapper starts long builds, returns a task to watch, and never waits."
+  - "Derive everything from one environment number, and dry-run the whole stack with `validateOnly` before touching anything."
 cover:
   image: "/images/post3-hero-factory.svg"
   alt: "The lab factory: stage 1 nested hosts, stage 2 bringup, day-N items, one wrapper form"

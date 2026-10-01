@@ -7,6 +7,11 @@ tags: [observability, fluent-bit, vks, windows, vcf-operations-for-logs, logging
 products: ["VCF Operations", "VKS"]
 series: ["Observability on VCF"]
 seriesPart: 1
+tldr:
+  - "On VKS, fluent-bit is a package with a short values secret; on Windows Server 2025, one event took four attempts to land."
+  - "Two of the failures are silent: a 200 that drops every event, and a 200 that files events in January 1970."
+  - "On Windows, use the FQDN, the LEGACY resolver, `epoch_ms` and a message field named `text`, then check the explorer."
+tested: "VCF 9.1"
 cover:
   image: "/images/post19-hero-fluentbit.svg"
   alt: "Two fluent-bit shippers — a VKS package and a Windows service — converging on one Ops for Logs endpoint"

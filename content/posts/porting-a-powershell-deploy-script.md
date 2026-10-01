@@ -7,6 +7,10 @@ tags: [vcf-automation, vm-apps, vro, powershell, powercli, ovftool, nested-esxi,
 products: ["VCF Automation"]
 series: ["The Lab Factory"]
 seriesPart: 3
+tldr:
+  - "A 400-line menu-driven PowerShell script became a cloud template, two vRO actions and two subscriptions in VCF Automation."
+  - "Porting is sorting, not rewriting: the formulas stay the same, and each behaviour just finds its new home."
+  - "Filter subscriptions on `nestedEsx: 'yes'`, not `true`, or they may silently never fire, which cost us two hours."
 cover:
   image: "/images/post22-hero-porting.svg"
   alt: "Left: an interactive script's menu prompts. Right: where each one went — inputs, actions, template expressions, subscriptions."

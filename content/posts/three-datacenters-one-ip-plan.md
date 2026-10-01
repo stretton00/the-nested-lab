@@ -7,6 +7,11 @@ tags: [vcf, nsx, vpc, nested-esxi, multi-tenancy, training-labs]
 products: ["NSX"]
 series: ["The VPC Pod Papers"]
 seriesPart: 4
+tldr:
+  - "Three nested-ESXi pods share the same subnets, VLANs, host IPs and even MAC addresses, yet none can reach another."
+  - "Each pod's NSX VPC declares the same private range, and with no route between them, isolation comes from topology, not policy."
+  - "Set the subnet order with `dependsOn`, or two pods can swap management and vMotion, which works perfectly and confuses everyone."
+tested: "VCF 9.1"
 cover:
   image: "/images/post4-hero-pods.svg"
   alt: "Three VPC pods with byte-identical addressing and no route between them"

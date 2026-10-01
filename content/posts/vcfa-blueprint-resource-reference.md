@@ -7,6 +7,11 @@ products: ["VCF Automation", "VKS", "NSX"]
 ShowToc: true
 ShowReadingTime: false
 TocOpen: false
+tldr:
+  - "Behind the designer's sixteen palette items sit only five resource types, documented field by field and checked on a live platform."
+  - "Mistakes show up late: the designer saves, the validator nods, and the request fails ten minutes in."
+  - "Where the designer and the platform disagree, the platform wins, so dry-run every manifest on the Supervisor first."
+tested: "VCF 9.1"
 cover:
   image: "/images/post40-hero-blueprint-reference.svg"
   alt: "The blueprint designer's palette, Supervisor Namespace, VPC and Workload groups, unfolding into five YAML types and the Kubernetes kinds behind each item"

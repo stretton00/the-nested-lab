@@ -7,6 +7,11 @@ tags: [vcf, vks, kubernetes, vcf-automation, all-apps, vcf-operations]
 products: ["VKS", "VCF Automation"]
 series: ["All Apps in Practice"]
 seriesPart: 1
+tldr:
+  - "VKS is VKS whichever door you use: built with `kubectl apply` or an All Apps request, the `Cluster` object is byte-identical."
+  - "The request path adds catalog RBAC, class-based quota, deployment history and a place in the VCF Operations object model."
+  - "Use kubectl to prove or debug something, and All Apps the moment a second person needs a cluster."
+tested: "VCF 9.1"
 cover:
   image: "/images/post10-hero-vks-two-ways.svg"
   alt: "The same Cluster manifest applied by kubectl and requested through the catalog — and what the second path adds for free"

@@ -6,6 +6,11 @@ tags: [vcf, vcf-automation, blueprints, custom-forms, self-service, homelab]
 products: ["VCF Automation"]
 series: ["The Lab Factory"]
 seriesPart: 8
+tldr:
+  - "The form service saved our friendlier request form, its renderer served it, and the request page still showed the generated one."
+  - "The request page shows the released version's copy of the form, and a CCI content update clears the blueprint's `formId`."
+  - "Put `formId` back before each version, rebuild forms when inputs change, and make every release report which form it shipped."
+tested: "VCF 9.1"
 cover:
   image: "/images/post29-hero-forms.svg"
   alt: "The blueprint's formId points at the custom form with its Your lab and Trainer options tabs; each new version copies it as <name>/<version> with a formId of its own, and the request page shows the released version's copy; a CCI content update clears formId, so the release tool puts it back before versioning"

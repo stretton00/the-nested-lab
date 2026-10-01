@@ -6,6 +6,10 @@ tags: [air-gap, harbor, imgpkg, crane, oci, vks, gpu-operator]
 products: ["VKS", "Private AI"]
 series: ["Dark Site Notes"]
 seriesPart: 1
+tldr:
+  - "The VKS bundle loaded into Harbor first time, while the GPU Operator images, same tool and same command, failed."
+  - "imgpkg reads only its own tar layout, so an OCI archive needs `crane push`, skopeo or a re-pull with imgpkg."
+  - "Run `tar -tf` first, and stage both `imgpkg` and `crane`: one of them will be the wrong tool for something."
 cover:
   image: "/images/post12-hero-imgpkg.svg"
   alt: "Two tarballs that look the same: manifest.json vs oci-layout"

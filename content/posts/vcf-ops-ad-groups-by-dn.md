@@ -6,6 +6,11 @@ tags: [vcf, vcf-operations, active-directory, ldap, rbac, troubleshooting, homel
 products: ["VCF Operations"]
 series: ["Observability on VCF"]
 seriesPart: 4
+tldr:
+  - "The lab build's last check signed alice in to VCF Operations; five minutes later, with nothing changed, she was refused."
+  - "Given an AD group's short name, VCF Operations creates a new group linked to nothing, which the sync quite rightly empties."
+  - "Put the distinguished name in `name` and the short name in `displayName`, then test a sign-in minutes later, not seconds."
+tested: "VCF 9.1"
 cover:
   image: "/images/post30-hero-ops-ad.svg"
   alt: "An AD group imported into VCF Operations by its short name becomes a new, unlinked group that the group sync empties; imported by its distinguished name, the sync fills it from AD"

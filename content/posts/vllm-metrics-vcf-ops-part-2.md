@@ -6,6 +6,11 @@ tags: [vllm, llm, observability, vcf-operations, telegraf, powershell, alerting]
 products: ["VCF Operations", "Private AI"]
 series: ["LLM Ops on VCF"]
 seriesPart: 2
+tldr:
+  - "The script prints a single integer, the count of stats pushed, so Telegraf can watch the integration's health with zero glue."
+  - "That integer lied once, showing a healthy 76 while every push failed, because it counted stats prepared, not accepted."
+  - "Configure the four day-one alerts (down, saturated, laggy, swapping), and use `file://` targets to build it without a GPU."
+tested: "VCF 9.1"
 cover:
   image: "/images/post14-hero-vllm-ops.svg"
   alt: "Telegraf runs the script every 60 s; the script's stdout is one integer; the integer is the health of the integration"

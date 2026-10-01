@@ -1,0 +1,7 @@
+{{- /* Long output folded away (1 Oct 2026): the receipts stay, the scrolling goes. The inside is Markdown:
+       {{< fold summary="The full transcript (34 lines)" >}} ... {{< /fold >}}
+       (angle brackets: the site's Markdown renderer drops raw HTML, so the shortcode renders its own inside) */ -}}
+<details class="nl-fold">
+<summary>{{ .Get "summary" | default "Show the full output" }}</summary>
+{{ .Inner | .Page.RenderString (dict "display" "block") }}
+</details>

@@ -6,6 +6,10 @@ tags: [air-gap, vks, gpu-operator, nvidia, harbor, imgpkg, cosign, kernel-header
 products: ["VKS", "Private AI"]
 series: ["Dark Site Notes"]
 seriesPart: 2
+tldr:
+  - "With no internet, upgrading VKS, the Kubernetes release and the GPU Operator is not one project but five supply chains."
+  - "Each one has a trap that passes every reasonable check and saves its failure for activation, like missing cosign signatures."
+  - "List all five before you start, and know which gates your rehearsal lab cannot reach, because it proves nothing about them."
 cover:
   image: "/images/post21-hero-darksite.svg"
   alt: "Everything that has to cross the airlock: images, signatures, node OVAs, kernel headers, licences"
