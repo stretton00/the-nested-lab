@@ -3,6 +3,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
 <meta name="theme-color" content="#1b2a32">
+{{- /* Icons in the 48 px multiples Google's results want (1 Oct 2026: they showed a blank white circle); the theme
+       already links favicon.svg, the 16/32 px PNGs, apple-touch-icon.png and safari-pinned-tab.svg.
+       Regenerate them all with tools/make_icons.py. */ -}}
+<link rel="icon" type="image/png" sizes="48x48" href="{{ "favicon-48.png" | absURL }}">
+<link rel="icon" type="image/png" sizes="96x96" href="{{ "favicon-96.png" | absURL }}">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ "favicon-192.png" | absURL }}">
+<link rel="manifest" href="{{ "site.webmanifest" | absURL }}">
 {{- /* GoatCounter: cookie-free page counts; production builds only so hugo server never counts */ -}}
 {{- if hugo.IsProduction }}
 <script data-goatcounter="https://thenestedlab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
