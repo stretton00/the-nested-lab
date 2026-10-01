@@ -1,6 +1,7 @@
 ---
 title: "A datacenter in a catalog tile: nested ESXi pods via VCF Automation All Apps"
 date: 2026-09-16T07:40:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf, vcf-automation, all-apps, cci, blueprint, nested-esxi, vpc]
 products: ["VCF Automation", "NSX"]
@@ -136,8 +137,7 @@ command, not a scavenger hunt.
 
 ![Deployment topology after a successful request](/images/ui/u4-deployment-topology.jpg)
 
-![Request → deployment in progress → complete](/images/u7-catalog-request-flow.gif)
-*The request flow, end to end.*
+{{< video src="/images/u7-catalog-request-flow.mp4" poster="/images/u7-catalog-request-flow-poster.jpg" ratio="1344 / 788" caption="The request flow, end to end: request → deployment in progress → complete." >}}
 
 
 ## What the blueprint cannot express (yet)
