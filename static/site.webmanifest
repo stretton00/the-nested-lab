@@ -1,0 +1,20 @@
+{
+ "name": "The Nested Lab",
+ "short_name": "Nested Lab",
+ "start_url": "/",
+ "display": "browser",
+ "background_color": "#1b2a32",
+ "theme_color": "#1b2a32",
+ "icons": [
+  {
+   "src": "/favicon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "/favicon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  }
+ ]
+}
