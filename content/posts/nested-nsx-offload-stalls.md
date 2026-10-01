@@ -157,6 +157,9 @@ the merging, I never found out. The fix does not depend on it.
 
 ## The fix
 
+![A pod flow goes down from the sending nested host through the outer layer and up into the receiving nested host. Fault 1: the nested host hands down 64 KB super-frames, fixed by encapOffload=0. Fault 2: the outer host's LRO merges Geneve TCP and the nested driver rejects it, fixed by disableLRO=1](/images/diagrams/offload-stalls-two-faults.svg)
+*Both layers helping with big packets, with the best of intentions. Small packets were never touched, which is why every health check stayed green.*
+
 Three options go on both vmxnet3 drivers of every nested host that carries
 NSX overlay traffic, followed by a reboot:
 

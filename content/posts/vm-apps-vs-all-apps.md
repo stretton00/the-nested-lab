@@ -32,6 +32,9 @@ usual, turned up late.
 
 ## The two shapes
 
+![VM Apps: Org, Project, Cloud Zone, Cloud Account, profiles, Cloud Template, then the IaaS engine drives vCenter, imperatively, with state in the IaaS database. All Apps: Org, CCI Project, Region, VPC, Supervisor Namespace, blueprint, then Supervisor controllers reconcile, declaratively, with state in etcd](/images/diagrams/vm-apps-vs-all-apps.svg)
+*The same request, brokered on the left and declared on the right. The text versions below carry the detail.*
+
 **VM Apps**, the classic Aria Automation model:
 
 ```

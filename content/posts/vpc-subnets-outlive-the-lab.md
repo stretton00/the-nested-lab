@@ -107,6 +107,9 @@ it turns out, is a process rather than an event.
 
 ## Wait for the layer that holds the resource
 
+![Timeline: VCF Automation reports the deployment gone at 23:26:49, the Supervisor already holds no namespace or volumes, and NSX keeps the subnets for minutes; a lab requested 11 seconds later gets shifted subnets, so the delete tool now waits for NSX](/images/diagrams/subnets-three-layers.svg)
+*The deployment, the namespace and the subnets go at different times. The tool now waits for the slowest.*
+
 The delete tool used to watch VCF Automation and the Supervisor. Now it also
 asks NSX for the VPC's subnets, and waits up to ten minutes for there to be
 none:

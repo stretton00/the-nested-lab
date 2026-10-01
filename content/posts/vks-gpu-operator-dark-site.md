@@ -35,6 +35,9 @@ is the table at the end. I'd recommend the table over the experience.
 | 4 | Kernel headers (+ image + modules) | .deb → side repo | driver container's `apt` | apt-mirror's `clean.sh` **deletes side repos** |
 | 5 | vGPU licences | DLS appliance | driver | `.local` site domain → **mDNS**; needs a hosts injector |
 
+![Five supply chains through the airlock: the VKS bundle and the GPU Operator images into Harbor, Kubernetes release OVAs into a content library, kernel headers into a side repo, vGPU licences into a DLS appliance, each with the trap that passes every check](/images/diagrams/gpu-airlock-five-chains.svg)
+*Five payloads, five landing places, and five ways to pass every check and still fail at activation.*
+
 ## 1. The signatures you didn't know you dropped
 
 VCF 9.0.1+ withholds control-plane-VM trust for VKS versions above 3.4.0

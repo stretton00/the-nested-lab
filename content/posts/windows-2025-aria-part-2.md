@@ -54,6 +54,9 @@ every boot:
   cleanup → validate → publish → self-destruct → final reboot
 ```
 
+![The same script on three boots: boot 3 installs the agents and Windows Updates, then reboots; boot 4 skips the flagged steps, cleans up, validates, reports and self-destructs; boot 5 is a clean server, where a stray run exits at once](/images/diagrams/windows-state-machine.svg)
+*The loop above, boot by boot.*
+
 ## Phase 1: software, declaratively
 
 The stack is a single array, and that array is the designed extension

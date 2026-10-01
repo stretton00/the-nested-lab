@@ -43,6 +43,9 @@ the catalog feature that makes each one work. We've run most of them on f06.
 Where the design supports something we haven't run yet, I say so, rather than
 hoping nobody asks.
 
+![One catalog, five uses: a class, a demo, a new release side by side, an offline rehearsal and testing tools, each with who gains and the feature that makes it work](/images/diagrams/lab-use-cases.svg)
+*One catalog, five jobs. The sections below take them one at a time.*
+
 ## A class
 
 **Who gains:** students and trainers.
