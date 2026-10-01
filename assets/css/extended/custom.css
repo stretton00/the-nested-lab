@@ -304,3 +304,28 @@ details.toc summary { font-family: "Outfit", sans-serif; font-weight: 600; }
 .nl-series-list li { margin: 4px 0; }
 .nl-series-list li.current span { font-weight: 600; color: var(--primary); }
 .nl-series-list a { color: var(--nl-accent); }
+
+/* ---------- related lab notes, under the series box (1 Oct 2026) ---------- */
+.nl-related { margin: 20px 0 8px; padding: 14px 20px 10px; border-top: 1px solid var(--border); }
+.nl-related-eyebrow {
+    margin: 0 0 6px; font-family: "JetBrains Mono", monospace; font-size: .72rem; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--nl-accent);
+}
+.nl-related-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.nl-related-list li { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.nl-related-list a { color: var(--nl-accent); font-weight: 500; }
+.nl-related-date { font-family: "JetBrains Mono", monospace; font-size: .76rem; color: var(--secondary); font-variant-numeric: tabular-nums; }
+.nl-updated { color: var(--nl-accent); }
+
+/* ---------- subscribe line in the browse panel ---------- */
+.nl-subscribe { margin: 10px 0 0; font-size: .9rem; color: var(--secondary); }
+.nl-subscribe a { color: var(--nl-accent); }
+
+/* ---------- Start here: reading paths (1 Oct 2026) ---------- */
+.nl-path { margin: 28px 0 8px; }
+.nl-path h2 { margin-bottom: 4px; }
+.nl-path-intro { margin: 0 0 10px; color: var(--secondary); }
+.nl-path-list { margin: 0; padding-left: 24px; display: grid; gap: 8px; font-variant-numeric: tabular-nums; }
+.nl-path-list li { margin: 0; }
+.nl-path-list a { color: var(--nl-accent); font-weight: 500; }
+.nl-path-sum { display: block; font-size: .92rem; color: var(--secondary); line-height: 1.45; }

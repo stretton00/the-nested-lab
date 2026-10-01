@@ -1,6 +1,7 @@
 ---
 title: "Blueprinting the supervisor: seven CCI blueprint gotchas"
 date: 2026-09-16T07:10:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf, vcf-automation, all-apps, cci, blueprint, troubleshooting]
 products: ["VCF Automation"]

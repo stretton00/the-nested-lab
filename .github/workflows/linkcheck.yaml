@@ -1,0 +1,48 @@
+name: Weekly link check
+# Builds the site as published and checks every link on it (.github/scripts/linkcheck.py, standard library only:
+# the repository allows GitHub's own actions only). Broken links open an issue, or add a comment to the open one.
+on:
+  schedule:
+    - cron: '30 5 * * 1'   # Mondays 05:30 UTC, before the daily 06:15 publish
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+  actions: write           # the keepalive step below
+defaults:
+  run:
+    shell: bash
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    env:
+      HUGO_VERSION: 0.165.0
+    steps:
+      - name: Install Hugo CLI
+        run: |
+          wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb
+          sudo dpkg -i ${{ runner.temp }}/hugo.deb
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Keep the weekly schedule alive   # GitHub disables cron workflows after 60 quiet days
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow enable linkcheck.yaml
+      - name: Build the site as published
+        env:
+          HUGO_ENVIRONMENT: production
+        run: hugo --gc --minify
+      - name: Check every link
+        id: check
+        run: python3 .github/scripts/linkcheck.py public https://thenestedlab.com/ broken-links.md
+      - name: Open or update the issue
+        if: failure() && steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Broken links found by the weekly link check"
+          n=$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number // empty')
+          if [ -n "$n" ]; then gh issue comment "$n" --body-file broken-links.md
+          else gh issue create --title "$title" --body-file broken-links.md; fi

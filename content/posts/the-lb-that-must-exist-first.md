@@ -1,6 +1,7 @@
 ---
 title: "The load balancer that must exist before the namespace"
 date: 2026-09-16T08:10:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf, nsx, vpc, supervisor, ncp, troubleshooting]
 products: ["NSX", "vSphere and vSAN"]

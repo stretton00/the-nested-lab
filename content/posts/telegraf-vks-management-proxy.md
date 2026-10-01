@@ -1,6 +1,7 @@
 ---
 title: "Telegraf on VKS: the dependency that isn't in the README"
 date: 2026-09-23T06:10:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [observability, telegraf, vks, kubernetes, vcf-operations, supervisor-services, coredns, carvel]
 products: ["VCF Operations", "VKS"]

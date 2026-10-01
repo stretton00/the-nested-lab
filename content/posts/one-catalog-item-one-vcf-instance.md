@@ -1,6 +1,7 @@
 ---
 title: "One catalog item, one VCF instance: building a lab factory"
 date: 2026-09-16T06:40:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf, vcf-automation, vro, bringup, nested-esxi, automation]
 products: ["VCF Automation", "VCF Installer"]

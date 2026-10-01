@@ -1,6 +1,7 @@
 ---
 title: "Telegraf on Windows Server 2025: unsupported, works anyway"
 date: 2026-09-16T12:20:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [observability, telegraf, windows, vcf-operations, metrics, support-matrix, wmic]
 products: ["VCF Operations"]

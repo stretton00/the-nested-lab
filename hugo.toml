@@ -24,6 +24,7 @@ ShowBreadCrumbs = true
 ShowToc = true
 disableSpecial1stPost = true
 ShowFullTextinRSS = true
+ShowRssButtonInSectionTermList = true   # 1 Oct 2026: an RSS button on every product, series and tag page
 ShowWordCount = false
 UseHugoToc = true
 hideFooter = false
@@ -49,7 +50,7 @@ What gets covered — because all of it runs in the lab:
 - **Operations** — VCF Operations, Operations for Logs, fluent-bit, Telegraf, and metrics pipelines for things that don't have adapters (like vLLM).
 - **AI infrastructure** — GPU Operator, vGPU licensing and LLM serving on VKS, including in dark sites.
 
-Posts arrive in series; start with [The VPC Pod Papers](/series/the-vpc-pod-papers/) or browse [by series](/series/).
+New here? [Start here](/start-here/): reading paths by what you are trying to do. Or browse by product, series or month below.
 """
 
   [[params.socialIcons]]
@@ -62,12 +63,29 @@ Posts arrive in series; start with [The VPC Pod Papers](/series/the-vpc-pod-pape
   # name = "github"
   # url = "https://github.com/YOURHANDLE"
 
+# Related lab notes under each post (layouts/_partials/extend_post_content.html, 1 Oct 2026): posts that share
+# products weigh most, then tags; the post's own series is left out there because the series box lists it.
+[related]
+  includeNewer = true
+  threshold = 50
+  toLower = true
+  [[related.indices]]
+    name = "products"
+    weight = 100
+  [[related.indices]]
+    name = "tags"
+    weight = 80
+
 [taxonomies]
 tag = "tags"
 series = "series"
 product = "products"      # the VCF components a post covers (1 Oct 2026; tools/set_products.py)
 
 [menus]
+  [[menus.main]]
+  name = "Start here"
+  url = "/start-here/"
+  weight = 5
   [[menus.main]]
   name = "Posts"
   url = "/posts/"

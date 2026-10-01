@@ -1,6 +1,7 @@
 ---
 title: "Porting a PowerShell deploy script to a catalog item: the mapping table is the post"
 date: 2026-09-16T06:20:00+01:00
+lastmod: 2026-10-01
 draft: false
 tags: [vcf-automation, vm-apps, vro, powershell, powercli, ovftool, nested-esxi, refactoring]
 products: ["VCF Automation"]
