@@ -1,0 +1,60 @@
+/* Click to enlarge for images in a post's body (Adam, 1 Oct 2026: screenshots were hard to read at column width).
+   The overlay is built by layouts/_partials/extend_footer.html. */
+.post-content img.lb-zoomable {
+  cursor: zoom-in;
+}
+
+.post-content img.lb-zoomable:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.lb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 2vh 2vw;
+  background: rgba(10, 14, 18, 0.92);
+  cursor: zoom-out;
+  animation: lb-fade 0.15s ease-out;
+}
+
+.lb-overlay img {
+  max-width: 96vw;
+  max-height: 88vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #fff;            /* SVG diagrams with a transparent ground stay readable */
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+.lb-caption {
+  margin: 0;
+  max-width: 80ch;
+  color: #e6edf2;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+html.lb-open {
+  overflow: hidden;
+}
+
+@keyframes lb-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lb-overlay {
+    animation: none;
+  }
+}
