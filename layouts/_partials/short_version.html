@@ -1,10 +1,11 @@
 {{- /* The short version (1 Oct 2026, Adam: "more human, maybe even more fun and slightly less serious"): the post's
-       `tldr:` lines under the cover, so a reader gets the point in ten seconds, and `tested:` - the platform the post's own
+       `tldr:` lines under the cover, so a reader gets the point in ten seconds (labelled in plain English, not "tl;dr": Adam had
+       to ask what it meant), and `tested:` - the platform the post's own
        output came from, left out where it is not known. */ -}}
 {{- if or .Params.tldr .Params.tested }}
 <aside class="nl-short" aria-label="The short version">
   {{- with .Params.tldr }}
-  <p class="nl-short-label"><span class="nl-short-prompt" aria-hidden="true">&#8250;</span> tl;dr</p>
+  <p class="nl-short-label"><span class="nl-short-prompt" aria-hidden="true">&#8250;</span> the short version</p>
   <ul class="nl-short-list">
     {{- range . }}
     <li>{{ . | markdownify }}</li>
