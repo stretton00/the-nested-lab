@@ -6,6 +6,11 @@ tags: [vcf, vcf-automation, blueprints, property-groups, nested-esxi, homelab]
 products: ["VCF Automation"]
 series: ["The Lab Factory"]
 seriesPart: 5
+tldr:
+  - "Our lab blueprints had one platform written all over them: 59 values, from the region to every lab address."
+  - "Now they read it all from two property groups, so changing a site value is a sync, not a new version."
+  - "Blueprint validation skips expressions, so prove each construct with a throw-away deployment, and make the generator refuse hard-coded values."
+tested: "VCF 9.1"
 cover:
   image: "/images/post26-hero-catalog-v2.svg"
   alt: "One site file generates both the blueprints and two property groups; at deploy time the blueprints read every site value from the groups"

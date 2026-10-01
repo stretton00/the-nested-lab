@@ -7,6 +7,11 @@ tags: [vcf, vks, vcf-automation, all-apps, demo, kubernetes, pacman]
 products: ["VCF Automation", "VKS"]
 series: ["All Apps in Practice"]
 seriesPart: 2
+tldr:
+  - "KubeDoom, Pac-Man and five other apps run on a VKS cluster that VCF Automation provisioned, each behind its own NSX VIP."
+  - "The first build took the supervisor shortcut: it worked and it was wrong, so it was rebuilt the tenanted way."
+  - "Make the deploy idempotent, and a demo that breaks on stage is a three-minute re-run, not a rebuild."
+tested: "VCF 9.1"
 cover:
   image: "/images/post11-hero-demo-apps.svg"
   alt: "Seven demo apps behind seven VIPs on one VCFA-deployed VKS cluster"

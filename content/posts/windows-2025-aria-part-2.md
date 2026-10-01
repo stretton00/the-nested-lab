@@ -7,6 +7,10 @@ tags: [aria-automation, windows, powershell, state-machine, cloudbase-init]
 products: ["VCF Automation"]
 series: ["The Windows Build Pipeline"]
 seriesPart: 2
+tldr:
+  - "A startup task runs `05-build-master.ps1` on every boot, so it must reach a finished build however many reboots happen."
+  - "Three very boring mechanisms make that safe: a kill-switch flag, a flag per step, and a state file that keeps the timings."
+  - "At the end it cleans up, validates, publishes, scrubs secrets and deletes itself, leaving a server, not a build environment."
 cover:
   image: "/images/post16-hero-statemachine.svg"
   alt: "Boot → check kill switch → skip flagged steps → run next step → reboot if required → repeat"

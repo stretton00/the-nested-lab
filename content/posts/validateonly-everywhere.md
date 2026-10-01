@@ -7,6 +7,10 @@ tags: [automation, vro, vcf-automation, opinion, platform-engineering]
 products: ["VCF Automation"]
 series: ["The Lab Factory"]
 seriesPart: 2
+tldr:
+  - "Terraform has `plan` and Kubernetes has `--dry-run`, but vRO workflows have nothing, so mistakes can surface at 2am, mid-bringup."
+  - "Give every workflow a `validateOnly` input that does everything but change things, and let wrappers cascade it down the stack."
+  - "Run it on every change and the same checkbox becomes a smoke test that has caught more bugs than code review."
 cover:
   image: "/images/post18-hero-validateonly.svg"
   alt: "One checkbox on every form: validateOnly. Tick everything, plan the whole stack, change nothing."

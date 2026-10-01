@@ -6,6 +6,11 @@ tags: [vcf, vcf-automation, self-service, nested-esxi, training-labs, homelab]
 products: ["VCF Automation"]
 series: ["Nested Labs as Code"]
 seriesPart: 4
+tldr:
+  - "A student sees two catalog items, makes two choices and gets a complete nested lab in their own VPC."
+  - "Trainers use the same catalog for any student's lab, and no reset button is needed: every phase is a restore point."
+  - "Deployed is not ready: Create Successful only means the VMs are on, and markers show when each stage finishes."
+tested: "VCF 9.1"
 cover:
   image: "/images/post37-hero-six-phases.svg"
   alt: "Six catalog items as six restore points, from a jump host with blank hosts to a lab with vCenter, VCF Operations and Active Directory sign-in; students request Phases 1 and 2, trainers build any phase for any student"

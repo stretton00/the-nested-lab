@@ -6,6 +6,11 @@ tags: [vcf, nsx, vpc, nested-esxi, vcf-automation, training-labs]
 products: ["NSX", "VCF Automation"]
 series: ["Nested Labs as Code"]
 seriesPart: 3
+tldr:
+  - "Each lab's management, vMotion and vSAN networks are ordinary VPC subnets, bound to the nested hosts' trunk by VLAN tag."
+  - "The VPC gateway routes them and NSX handles NAT, load balancing and addresses, with no router VM to patch or rescue."
+  - "Let the VPC gateway route the lab's networks, and add a router VM only when routing is the lesson."
+tested: "VCF 9.1"
 cover:
   image: "/images/post36-hero-no-router.svg"
   alt: "A lab VPC whose gateway routes the management, vMotion and vSAN subnets that binding maps carry to the nested hosts' trunk, with the load balancer in front of the jump host and the transit gateway to the shared binaries server"

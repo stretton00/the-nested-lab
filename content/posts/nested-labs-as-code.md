@@ -6,6 +6,11 @@ tags: [vcf, vcf-automation, nested-esxi, nsx, vpc, blueprints, training-labs, ho
 products: ["VCF Automation", "NSX"]
 series: ["Nested Labs as Code"]
 seriesPart: 1
+tldr:
+  - "A VCF Automation catalog builds a complete nested lab per request, from jump host to VCF Operations, in its own VPC."
+  - "Blueprints are generated from one site file, and the VPC gateway does the routing, with no router VM to patch."
+  - "Capture a lab you need once, and generate a lab you need again."
+tested: "VCF 9.1"
 cover:
   image: "/images/post34-hero-labs-as-code.svg"
   alt: "site-f06.yaml feeds gen_lab_blueprint.py, which writes eight blueprints and two property groups; each request builds a lab in its own VPC with a jump host, dc01, four nested hosts, vCenter, VCF Operations and AD, routed by the VPC gateway with no router VM"

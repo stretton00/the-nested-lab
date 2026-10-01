@@ -7,6 +7,10 @@ tags: [aria-automation, windows, powershell, validation, reporting, session-0]
 products: ["VCF Automation"]
 series: ["The Windows Build Pipeline"]
 seriesPart: 3
+tldr:
+  - "Most pipelines end with \"Deployment completed\"; this one ends with a report of what was built, where it landed and what passed."
+  - "The Session 0 traps cost real hours: `vmtoolsd` mangles arguments under SYSTEM, and ejecting an ISO feels like 1998."
+  - "The ideas travel to any pipeline: one JSON document in, one HTML report out, three health checks, and cleanup before validation."
 cover:
   image: "/images/post17-hero-report.svg"
   alt: "A build report: scorecard, software cards, network table, provisioning Gantt with a shaded reboot"

@@ -7,6 +7,10 @@ tags: [vcf, bringup, vcf-installer, vro, vcf-automation, api, nested-esxi]
 products: ["VCF Installer", "VCF Automation"]
 series: ["The Lab Factory"]
 seriesPart: 4
+tldr:
+  - "Nobody hand-edits JSON at 2am: a vRO action generates the whole VCF 9.1 deployment spec from one environment number."
+  - "A catalog request dies after about two hours, so the workflow starts the eight-hour bringup and hands back a task id."
+  - "Run the installer's own validation first: it flags an unresolvable name within seconds instead of two hours into bringup."
 cover:
   image: "/images/post23-hero-installer.svg"
   alt: "Spec derived from X, validated by the installer, bringup started, task id returned; a second run polls without the catalog's leash"

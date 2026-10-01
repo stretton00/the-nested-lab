@@ -6,6 +6,11 @@ tags: [vcf, nsx, vpc, vdefend, distributed-firewall, vcf-automation, nested-esxi
 products: ["NSX", "VCF Automation"]
 series: ["The VPC Pod Papers"]
 seriesPart: 12
+tldr:
+  - "VCF Automation gives each new VPC the region's default security profile, and ours was isolation with essential services, not the None profile."
+  - "With vDefend enforcing, only the VPC's VM ports may talk to each other, and a nested lab's hosts are not VM ports."
+  - "Our hosts never enforced it, so no lab noticed; decide the profile with your security team before the first lab."
+tested: "VCF 9.1"
 cover:
   image: "/images/post32-hero-secprofile.svg"
   alt: "The region's default VPC security profile allows DNS, DHCP, NTP and ICMP and traffic between VM ports, and drops the rest; a nested lab's hosts, vCenter and VCF Operations sit behind trunk ports, and its binaries server and RDP load balancer sit outside the VPC"

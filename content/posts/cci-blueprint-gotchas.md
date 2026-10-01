@@ -7,6 +7,11 @@ tags: [vcf, vcf-automation, all-apps, cci, blueprint, troubleshooting]
 products: ["VCF Automation"]
 series: ["The VPC Pod Papers"]
 seriesPart: 9
+tldr:
+  - "The nested-esxi-pod blueprint failed seven different ways before it worked, including a polite 200 that quietly did nothing."
+  - "Most of the seven are undocumented: each is a five-minute fix once you know it, and can cost days if you don't."
+  - "Check `status.contentValid` rather than the HTTP code, use block-style YAML for expressions, and unrelease before you release."
+tested: "VCF 9.1"
 cover:
   image: "/images/post8-hero-gotchas.svg"
   alt: "ContentValid: False — and the seven reasons why"

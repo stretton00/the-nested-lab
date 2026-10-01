@@ -6,6 +6,11 @@ tags: [vcf, nsx, nested-esxi, vmxnet3, geneve, troubleshooting, homelab]
 products: ["NSX", "vSphere and vSAN"]
 series: ["The VPC Pod Papers"]
 seriesPart: 10
+tldr:
+  - "Tunnels were up, BFD green and big pings fine, yet bulk TCP across the nested overlay died connection by connection."
+  - "Two layers of virtual networking each tried to help with big packets: Geneve TSO going out, LRO merging coming in."
+  - "Set `encapOffload=0 rxInnerOffload=0 disableLRO=1` on both vmxnet3 drivers of every nested host, and reboot so they take effect."
+tested: "VCF 9.1"
 cover:
   image: "/images/post25-hero-offloads.svg"
   alt: "A nested ESXi host sends Geneve TSO super-frames the outer layer drops, and receives LRO-merged frames its driver rejects; the fix is encapOffload=0 rxInnerOffload=0 disableLRO=1"

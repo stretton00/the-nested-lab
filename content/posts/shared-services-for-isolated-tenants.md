@@ -7,6 +7,11 @@ tags: [vcf, nsx, vpc, transit-gateway, multi-tenancy, wsus]
 products: ["NSX"]
 series: ["The VPC Pod Papers"]
 seriesPart: 5
+tldr:
+  - "Isolated pods with identical addresses all need updates, a repo and DNS, and nobody wants a WSUS per pod."
+  - "One shared-services VPC with a `PrivateTGW` subnet serves them all over the transit gateway, and SNAT keeps identical addresses apart."
+  - "Pods reach the service but the service cannot reach back, so test both directions and still add a gateway firewall policy."
+tested: "VCF 9.1"
 cover:
   image: "/images/post5-hero-tgw.svg"
   alt: "Hub-and-spoke: three private pods reach one shared-services VPC over the transit gateway; the service cannot reach back"

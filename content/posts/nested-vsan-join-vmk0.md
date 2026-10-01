@@ -6,6 +6,11 @@ tags: [vcf, vsan, nested-esxi, powercli, troubleshooting, homelab]
 products: ["vSphere and vSAN"]
 series: ["The Lab Factory"]
 seriesPart: 6
+tldr:
+  - "The build tagged vmk2 for vSAN and checked it seconds before each join, yet three of four hosts joined on vmk0."
+  - "When a host joins, vCenter reads the host's vSAN view, not the tags, and that view was nearly three hours old."
+  - "Check the vSAN view rather than the tags, and set it with `UpdateVsan` before the host joins the cluster."
+tested: "VCF 9.1"
 cover:
   image: "/images/post27-hero-vsan-join.svg"
   alt: "The esxcli tags say vmk2, the host's vSAN view still says vmk0, and vCenter joins the host from the view; setting the vSAN network with UpdateVsan before the join fixes it"
