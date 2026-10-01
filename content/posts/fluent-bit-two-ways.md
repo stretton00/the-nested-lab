@@ -3,7 +3,9 @@ title: "fluent-bit two ways: VKS add-on and Windows agent, one log endpoint"
 date: 2026-09-16T12:00:00+01:00
 draft: false
 tags: [observability, fluent-bit, vks, windows, vcf-operations-for-logs, logging]
+products: ["VCF Operations", "VKS"]
 series: ["Observability on VCF"]
+seriesPart: 1
 cover:
   image: "/images/post19-hero-fluentbit.svg"
   alt: "Two fluent-bit shippers — a VKS package and a Windows service — converging on one Ops for Logs endpoint"

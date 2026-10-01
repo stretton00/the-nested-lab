@@ -3,7 +3,9 @@ title: "Make it yours: a new site, a new release, a new lab"
 date: 2026-12-02
 draft: false
 tags: [vcf, vcf-automation, blueprints, property-groups, nested-esxi, automation, air-gap]
+products: ["VCF Automation"]
 series: ["Nested Labs as Code"]
+seriesPart: 6
 cover:
   image: "/images/post39-hero-make-it-yours.svg"
   alt: "A site file filled in with the wizard passes site_check.py and is installed step by step by the install runner; afterwards a new release is a library item plus one entry in nestedLabMedia, and a new trainer is one line in nestedLabSite, with no new blueprint version"

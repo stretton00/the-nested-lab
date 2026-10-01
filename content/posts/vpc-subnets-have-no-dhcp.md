@@ -3,7 +3,9 @@ title: "Our VPC subnets have no DHCP — and that's fine"
 date: 2026-09-16T07:20:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, cloud-init, ovf, esxi, bootstrap]
+products: ["NSX", "vSphere and vSAN"]
 series: ["The VPC Pod Papers"]
+seriesPart: 8
 cover:
   image: "/images/post7-hero-nodhcp.svg"
   alt: "Three bootstrap paths into a VPC subnet: cloud-init, sysprep, vAppConfig"

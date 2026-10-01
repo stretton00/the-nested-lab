@@ -3,7 +3,9 @@ title: "Seven demo apps, one request: deploying a showcase stack via VCF Automat
 date: 2026-09-16T08:40:00+01:00
 draft: false
 tags: [vcf, vks, vcf-automation, all-apps, demo, kubernetes, pacman]
+products: ["VCF Automation", "VKS"]
 series: ["All Apps in Practice"]
+seriesPart: 2
 cover:
   image: "/images/post11-hero-demo-apps.svg"
   alt: "Seven demo apps behind seven VIPs on one VCFA-deployed VKS cluster"

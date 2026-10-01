@@ -3,7 +3,9 @@ title: "vLLM metrics into VCF Operations, part 2: monitor the monitor"
 date: 2026-10-07
 draft: false
 tags: [vllm, llm, observability, vcf-operations, telegraf, powershell, alerting]
+products: ["VCF Operations", "Private AI"]
 series: ["LLM Ops on VCF"]
+seriesPart: 2
 cover:
   image: "/images/post14-hero-vllm-ops.svg"
   alt: "Telegraf runs the script every 60 s; the script's stdout is one integer; the integer is the health of the integration"

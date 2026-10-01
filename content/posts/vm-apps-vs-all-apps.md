@@ -3,6 +3,7 @@ title: "VM Apps vs All Apps: a field comparison of VCF Automation's two provisio
 date: 2026-09-16T07:00:00+01:00
 draft: false
 tags: [vcf, vcf-automation, all-apps, vm-apps, aria-automation, architecture]
+products: ["VCF Automation"]
 cover:
   image: "/images/post9-hero-vmapps-allapps.svg"
   alt: "Two provisioning paths side by side: IaaS engine to vCenter, vs blueprint to supervisor reconciliation"

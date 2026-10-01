@@ -3,7 +3,9 @@ title: "The tags said vmk2: nested hosts that joined vSAN on the management netw
 date: 2026-12-23
 draft: false
 tags: [vcf, vsan, nested-esxi, powercli, troubleshooting, homelab]
+products: ["vSphere and vSAN"]
 series: ["The Lab Factory"]
+seriesPart: 6
 cover:
   image: "/images/post27-hero-vsan-join.svg"
   alt: "The esxcli tags say vmk2, the host's vSAN view still says vmk0, and vCenter joins the host from the view; setting the vSAN network with UpdateVsan before the join fixes it"

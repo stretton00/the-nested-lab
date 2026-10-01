@@ -3,7 +3,9 @@ title: "One catalog item, two audiences: a trainers list decides where the lab l
 date: 2027-01-20
 draft: false
 tags: [vcf, vcf-automation, blueprints, property-groups, self-service, homelab]
+products: ["VCF Automation"]
 series: ["The Lab Factory"]
+seriesPart: 7
 cover:
   image: "/images/post28-hero-trainers.svg"
   alt: "A Phase 1 request with Lab: student04 meets one check on the server, whether env.requestedBy is on the trainers list in nestedLabSite: a trainer's lab lands in vpc-student04, everyone else's in their own VPC"

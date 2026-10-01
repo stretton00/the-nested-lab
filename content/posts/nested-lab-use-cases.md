@@ -3,7 +3,9 @@ title: "What a nested lab catalog is for"
 date: 2026-11-04
 draft: false
 tags: [vcf, vcf-automation, nested-esxi, training-labs, self-service, homelab]
+products: ["VCF Automation"]
 series: ["Nested Labs as Code"]
+seriesPart: 2
 cover:
   image: "/images/post35-hero-use-cases.svg"
   alt: "One lab catalog, four of its uses: a class with the same lab for every student, a demo on a Phase 6 built ahead, a new release side by side, and an offline rehearsal of an install; each lab is requested, built, used, deleted and requested again"

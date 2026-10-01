@@ -3,7 +3,9 @@ title: "Ping works, TCP dies: two vmxnet3 offloads under a nested NSX pod"
 date: 2026-12-16
 draft: false
 tags: [vcf, nsx, nested-esxi, vmxnet3, geneve, troubleshooting, homelab]
+products: ["NSX", "vSphere and vSAN"]
 series: ["The VPC Pod Papers"]
+seriesPart: 10
 cover:
   image: "/images/post25-hero-offloads.svg"
   alt: "A nested ESXi host sends Geneve TSO super-frames the outer layer drops, and receives LRO-merged frames its driver rejects; the fix is encapOffload=0 rxInnerOffload=0 disableLRO=1"

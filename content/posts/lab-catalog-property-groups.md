@@ -3,7 +3,9 @@ title: "A blueprint that carries no site: property groups for a lab catalog"
 date: 2026-12-09
 draft: false
 tags: [vcf, vcf-automation, blueprints, property-groups, nested-esxi, homelab]
+products: ["VCF Automation"]
 series: ["The Lab Factory"]
+seriesPart: 5
 cover:
   image: "/images/post26-hero-catalog-v2.svg"
   alt: "One site file generates both the blueprints and two property groups; at deploy time the blueprints read every site value from the groups"

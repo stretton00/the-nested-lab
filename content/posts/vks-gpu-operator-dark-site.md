@@ -3,7 +3,9 @@ title: "VKS and the GPU Operator in a dark site: the whole airlock"
 date: 2026-10-21
 draft: false
 tags: [air-gap, vks, gpu-operator, nvidia, harbor, imgpkg, cosign, kernel-headers, vcf]
+products: ["VKS", "Private AI"]
 series: ["Dark Site Notes"]
+seriesPart: 2
 cover:
   image: "/images/post21-hero-darksite.svg"
   alt: "Everything that has to cross the airlock: images, signatures, node OVAs, kernel headers, licences"

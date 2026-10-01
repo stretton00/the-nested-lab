@@ -3,7 +3,9 @@ title: "Three datacenters, one IP plan: identical isolated pods with NSX VPCs"
 date: 2026-09-16T08:00:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, nested-esxi, multi-tenancy, training-labs]
+products: ["NSX"]
 series: ["The VPC Pod Papers"]
+seriesPart: 4
 cover:
   image: "/images/post4-hero-pods.svg"
   alt: "Three VPC pods with byte-identical addressing and no route between them"

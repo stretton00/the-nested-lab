@@ -1,0 +1,24 @@
+{{- /* Series box at the end of a post (1 Oct 2026): where this post sits in its series, with every published part linked
+       in reading order - each post's `seriesPart` (tools/set_series_parts.py), not its date: the 16 Sep launch batch was
+       stamped newest-first. Only for a series with more than one published part. */ -}}
+{{- with .GetTerms "series" }}
+{{- $s := index . 0 }}
+{{- $parts := sort $s.Pages "Params.seriesPart" }}
+{{- $n := 0 }}
+{{- range $i, $p := $parts }}{{ if eq $p.RelPermalink $.RelPermalink }}{{ $n = add $i 1 }}{{ end }}{{ end }}
+{{- if and (gt (len $parts) 1) (gt $n 0) }}
+<aside class="nl-series" aria-label="Series {{ $s.LinkTitle }}">
+  <p class="nl-series-eyebrow">Series</p>
+  <p class="nl-series-head"><a href="{{ $s.RelPermalink }}">{{ $s.LinkTitle }}</a> <span class="nl-series-pos">part {{ $n }} of {{ len $parts }}</span></p>
+  <ol class="nl-series-list">
+    {{- range $parts }}
+    {{- if eq .RelPermalink $.RelPermalink }}
+    <li class="current" aria-current="page"><span>{{ .Title }}</span></li>
+    {{- else }}
+    <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+    {{- end }}
+    {{- end }}
+  </ol>
+</aside>
+{{- end }}
+{{- end }}

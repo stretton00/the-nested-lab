@@ -3,7 +3,9 @@ title: "What's a VPC? Let Pac-Man explain"
 date: 2026-09-16T08:30:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, vks, kubernetes, explainer]
+products: ["NSX", "VKS"]
 series: ["The VPC Pod Papers"]
+seriesPart: 1
 cover:
   image: "/images/post0-hero-pacman.svg"
   alt: "Pac-Man inside a VPC boundary; a LoadBalancer VIP is the one door out"

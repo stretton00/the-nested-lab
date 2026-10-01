@@ -3,7 +3,9 @@ title: "The security profile that would have dropped every nested lab"
 date: 2027-01-13
 draft: false
 tags: [vcf, nsx, vpc, vdefend, distributed-firewall, vcf-automation, nested-esxi]
+products: ["NSX", "VCF Automation"]
 series: ["The VPC Pod Papers"]
+seriesPart: 12
 cover:
   image: "/images/post32-hero-secprofile.svg"
   alt: "The region's default VPC security profile allows DNS, DHCP, NTP and ICMP and traffic between VM ports, and drops the rest; a nested lab's hosts, vCenter and VCF Operations sit behind trunk ports, and its binaries server and RDP load balancer sit outside the VPC"

@@ -3,7 +3,9 @@ title: "Six phases, one catalog: what a student and a trainer get"
 date: 2026-11-18
 draft: false
 tags: [vcf, vcf-automation, self-service, nested-esxi, training-labs, homelab]
+products: ["VCF Automation"]
 series: ["Nested Labs as Code"]
+seriesPart: 4
 cover:
   image: "/images/post37-hero-six-phases.svg"
   alt: "Six catalog items as six restore points, from a jump host with blank hosts to a lab with vCenter, VCF Operations and Active Directory sign-in; students request Phases 1 and 2, trainers build any phase for any student"

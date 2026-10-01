@@ -3,7 +3,9 @@ title: "Telegraf on Windows Server 2025: unsupported, works anyway"
 date: 2026-09-16T12:20:00+01:00
 draft: false
 tags: [observability, telegraf, windows, vcf-operations, metrics, support-matrix, wmic]
+products: ["VCF Operations"]
 series: ["Observability on VCF"]
+seriesPart: 2
 cover:
   image: "/images/post20-hero-telegraf.svg"
   alt: "The support matrix says no; the agent status says Install Success"

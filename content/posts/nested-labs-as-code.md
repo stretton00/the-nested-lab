@@ -3,7 +3,9 @@ title: "Nested labs in VCF Automation 9.1, built from code instead of captured"
 date: 2026-10-28
 draft: false
 tags: [vcf, vcf-automation, nested-esxi, nsx, vpc, blueprints, training-labs, homelab]
+products: ["VCF Automation", "NSX"]
 series: ["Nested Labs as Code"]
+seriesPart: 1
 cover:
   image: "/images/post34-hero-labs-as-code.svg"
   alt: "site-f06.yaml feeds gen_lab_blueprint.py, which writes eight blueprints and two property groups; each request builds a lab in its own VPC with a jump host, dc01, four nested hosts, vCenter, VCF Operations and AD, routed by the VPC gateway with no router VM"

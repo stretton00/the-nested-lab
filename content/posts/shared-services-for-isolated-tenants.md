@@ -3,7 +3,9 @@ title: "Shared services for isolated tenants: PrivateTGW subnets"
 date: 2026-09-16T07:50:00+01:00
 draft: false
 tags: [vcf, nsx, vpc, transit-gateway, multi-tenancy, wsus]
+products: ["NSX"]
 series: ["The VPC Pod Papers"]
+seriesPart: 5
 cover:
   image: "/images/post5-hero-tgw.svg"
   alt: "Hub-and-spoke: three private pods reach one shared-services VPC over the transit gateway; the service cannot reach back"

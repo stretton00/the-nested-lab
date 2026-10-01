@@ -3,7 +3,9 @@ title: "One catalog item, one VCF instance: building a lab factory"
 date: 2026-09-16T06:40:00+01:00
 draft: false
 tags: [vcf, vcf-automation, vro, bringup, nested-esxi, automation]
+products: ["VCF Automation", "VCF Installer"]
 series: ["The Lab Factory"]
+seriesPart: 1
 cover:
   image: "/images/post3-hero-factory.svg"
   alt: "The lab factory: stage 1 nested hosts, stage 2 bringup, day-N items, one wrapper form"

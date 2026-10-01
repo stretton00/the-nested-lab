@@ -233,3 +233,74 @@ details.toc summary { font-family: "Outfit", sans-serif; font-weight: 600; }
 .nl-404-links{font-size:1rem;margin:0}
 .nl-404-links a{color:var(--nl-accent);text-decoration:none;border-bottom:1px solid transparent}
 .nl-404-links a:hover{border-bottom-color:var(--nl-accent)}
+
+/* ---------- home: Browse the lab notes (1 Oct 2026) - by product, by series, by month ---------- */
+.nl-browse {
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 26px 18px;
+    margin: 0 0 var(--gap);
+}
+.nl-browse-title { font-size: 1.3rem; font-weight: 600; color: var(--primary); margin: 0 0 14px; }
+.nl-browse-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 4px 34px; }
+.nl-browse h3 {
+    font-family: "JetBrains Mono", monospace; font-size: .72rem; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--secondary); margin: 16px 0 9px;
+}
+.nl-browse-col > h3:first-child { margin-top: 0; }
+.nl-chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.nl-chips li { margin: 0; }
+.nl-chips a {
+    display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--nl-accent-hi); border-radius: 999px;
+    padding: 1px 5px 1px 12px; font-size: .9rem; line-height: 1.6; color: var(--nl-accent);
+}
+.nl-chips a:hover, .nl-chips a:focus-visible { background: var(--nl-accent-soft); }
+.nl-chips-series a { border-color: var(--border); color: var(--content); }
+.nl-chips-series a:hover, .nl-chips-series a:focus-visible { border-color: var(--nl-series); color: var(--nl-series); background: transparent; }
+.nl-count {
+    font-family: "JetBrains Mono", monospace; font-size: .72rem; font-variant-numeric: tabular-nums;
+    color: var(--secondary); background: var(--tertiary); border-radius: 999px; padding: 0 7px; line-height: 1.7;
+}
+.nl-months details { border-top: 1px solid var(--border); }
+.nl-months details:last-child { border-bottom: 1px solid var(--border); }
+.nl-months summary {
+    cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 7px 2px; list-style: none;
+    font-family: "Outfit", sans-serif; font-weight: 600; color: var(--primary);
+}
+.nl-months summary::-webkit-details-marker { display: none; }
+.nl-months summary::before {
+    content: ""; width: 7px; height: 7px; flex: none; border-right: 2px solid var(--nl-accent-hi);
+    border-bottom: 2px solid var(--nl-accent-hi); transform: rotate(-45deg); transition: transform .15s;
+}
+.nl-months details[open] > summary::before { transform: rotate(45deg); }
+.nl-months summary .nl-count { margin-left: auto; }
+.nl-months summary:focus-visible { outline: 2px solid var(--nl-accent-hi); outline-offset: 2px; }
+.nl-months ul { list-style: none; margin: 0 0 10px; padding: 0 0 0 19px; }
+.nl-months li { font-size: .93rem; line-height: 1.45; margin: 6px 0; }
+.nl-months a, .nl-browse-more a { color: var(--nl-accent); }
+.nl-months a:hover { text-decoration: underline; }
+.nl-browse-more { margin: 12px 0 0; font-size: .9rem; color: var(--secondary); }
+@media (max-width: 720px) {
+    .nl-browse { padding: 18px 16px 14px; }
+    .nl-browse-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .nl-months summary::before { transition: none; } }
+
+/* ---------- series box at the end of a post ---------- */
+.nl-series {
+    margin: 36px 0 8px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--entry); padding: 16px 20px 12px;
+}
+.nl-series-eyebrow {
+    margin: 0; font-family: "JetBrains Mono", monospace; font-size: .72rem; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--nl-series);
+}
+.nl-series-head { margin: 2px 0 8px; font-family: "Outfit", sans-serif; font-weight: 600; font-size: 1.08rem; color: var(--primary); }
+.nl-series-head a { color: var(--primary); box-shadow: none; }
+.nl-series-head a:hover { color: var(--nl-series); }
+.nl-series-pos { font-family: "JetBrains Mono", monospace; font-weight: 400; font-size: .78rem; color: var(--secondary); margin-left: 6px; }
+.nl-series-list { margin: 0; padding-left: 22px; font-size: .95rem; font-variant-numeric: tabular-nums; }
+.nl-series-list li { margin: 4px 0; }
+.nl-series-list li.current span { font-weight: 600; color: var(--primary); }
+.nl-series-list a { color: var(--nl-accent); }

@@ -3,7 +3,9 @@ title: "Windows Server 2025 via Aria Automation, part 1: the pipeline"
 date: 2026-09-17T06:10:00+01:00
 draft: false
 tags: [aria-automation, vcf-automation, vm-apps, windows, cloudbase-init, vro, powershell]
+products: ["VCF Automation"]
 series: ["The Windows Build Pipeline"]
+seriesPart: 1
 cover:
   image: "/images/post15-hero-winpipe.svg"
   alt: "Three layers: Aria control plane, cloudbase-init first boot, file-share build engine"

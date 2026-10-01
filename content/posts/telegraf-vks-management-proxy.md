@@ -3,7 +3,9 @@ title: "Telegraf on VKS: the dependency that isn't in the README"
 date: 2026-09-23T06:10:00+01:00
 draft: false
 tags: [observability, telegraf, vks, kubernetes, vcf-operations, supervisor-services, coredns, carvel]
+products: ["VCF Operations", "VKS"]
 series: ["Observability on VCF"]
+seriesPart: 3
 cover:
   image: "/images/post24-hero-telegraf-vks.svg"
   alt: "Telegraf pods stuck in FailedMount until the Supervisor Management Proxy exists; then a domainless service URL until serviceDomain is set"

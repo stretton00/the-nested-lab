@@ -3,6 +3,7 @@ title: "Every resource in the VCF Automation 9.1 blueprint designer: the complet
 date: 2026-10-01
 draft: false
 tags: [vcf, vcf-automation, blueprints, vm-service, vks, nsx, vpc, reference]
+products: ["VCF Automation", "VKS", "NSX"]
 ShowToc: true
 ShowReadingTime: false
 TocOpen: false
