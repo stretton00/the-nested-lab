@@ -5,7 +5,7 @@ draft: true
 tags: [vcf, vcf-automation, blueprints, property-groups, automation, air-gap, nested-esxi]
 products: ["VCF Automation", "NSX"]
 series: ["Org Builder for VCF Automation"]
-seriesPart: 2
+seriesPart: 4
 tldr:
   - "Our lab catalog now ships as three packages that install, upgrade and uninstall themselves, with every object recorded as made or found."
   - "An uninstall removes only what an install made, so a live test in a throwaway organization ended with nothing new and nothing gone."
