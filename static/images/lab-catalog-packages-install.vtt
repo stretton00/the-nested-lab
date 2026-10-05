@@ -1,0 +1,274 @@
+WEBVTT
+
+1
+00:00:00.600 --> 00:00:03.529
+This is Org Builder for VCF Automation,
+
+2
+00:00:03.579 --> 00:00:08.800
+installing our lab catalog into a brand-new organization called acme.
+
+3
+00:00:10.000 --> 00:00:13.106
+One command made acme a few minutes ago,
+
+4
+00:00:13.156 --> 00:00:18.550
+empty apart from its quota, its networking and a first administrator.
+
+5
+00:00:19.000 --> 00:00:23.131
+Connect takes the platform's addresses from a site file,
+
+6
+00:00:23.181 --> 00:00:27.834
+and its tokens and passwords from this workstation's own files,
+
+7
+00:00:27.884 --> 00:00:29.850
+so nobody types a password.
+
+8
+00:00:30.250 --> 00:00:34.100
+VCF Automation, vCenter and NSX: all signed in.
+
+9
+00:00:34.500 --> 00:00:38.480
+Discover only reads, and it takes about seven seconds.
+
+10
+00:00:44.500 --> 00:00:49.572
+The result: a working platform, and an organization with nothing in it yet.
+
+11
+00:00:49.622 --> 00:00:52.850
+No images, no catalog items, no binaries server.
+
+12
+00:00:59.000 --> 00:01:05.250
+The kit's big files come from a media bundle, each one checked by SHA-256.
+
+13
+00:01:06.500 --> 00:01:09.599
+The install itself comes as three packages.
+
+14
+00:01:09.649 --> 00:01:13.041
+The foundation sets the organization up inside:
+
+15
+00:01:13.091 --> 00:01:15.750
+projects, VPCs and a content library.
+
+16
+00:01:16.150 --> 00:01:19.920
+The binaries server is where the labs get their installers.
+
+17
+00:01:19.970 --> 00:01:25.100
+And the nested lab catalog needs both, so one Install walks all three, in order.
+
+18
+00:01:25.500 --> 00:01:28.850
+Choose fills in the new site file.
+
+19
+00:01:34.200 --> 00:01:37.607
+It starts from the template, and the organization,
+
+20
+00:01:37.657 --> 00:01:42.100
+its client ID and its token files come straight from the sign-in.
+
+21
+00:01:42.700 --> 00:01:47.595
+Everything the platform already has is a pick-list of what Discover found,
+
+22
+00:01:47.645 --> 00:01:49.600
+so there's nothing to mistype.
+
+23
+00:01:50.000 --> 00:01:54.681
+For the Windows template, I pick a copy of our own from another library.
+
+24
+00:01:54.731 --> 00:01:57.900
+vCenter copies it across, so nothing is uploaded.
+
+25
+00:01:59.700 --> 00:02:02.750
+And the checks run again after every choice.
+
+26
+00:02:04.200 --> 00:02:06.300
+Validate runs the readiness checks.
+
+27
+00:02:09.300 --> 00:02:13.850
+Anything that isn't there yet shows as "to build": the install makes it.
+
+28
+00:02:14.250 --> 00:02:19.200
+Failures come first, each with the runbook step that fixes it.
+
+29
+00:02:20.500 --> 00:02:25.650
+Plan writes the new file, site-acme.yaml, beside the guides.
+
+30
+00:02:26.050 --> 00:02:32.450
+It's the template with the chosen values set in place, comments and all,
+
+31
+00:02:34.300 --> 00:02:36.950
+and the guide's own site check reads it straight away.
+
+32
+00:02:41.200 --> 00:02:45.515
+A short cut here. Off camera, the site file got its trainers,
+
+33
+00:02:45.565 --> 00:02:48.878
+and the runbook steps our lab had already done,
+
+34
+00:02:48.928 --> 00:02:53.100
+on this platform and this workstation, were marked as done.
+
+35
+00:02:53.500 --> 00:02:59.500
+Back on Packages, everything now points at the new file, with nothing installed yet.
+
+36
+00:03:01.200 --> 00:03:04.009
+One Install, up to the catalog's last item;
+
+37
+00:03:04.059 --> 00:03:07.200
+the class checks and acceptance labs come later.
+
+38
+00:03:09.200 --> 00:03:12.389
+It runs the same command you'd type at a console,
+
+39
+00:03:12.439 --> 00:03:14.900
+so a console could carry on from here.
+
+40
+00:03:19.100 --> 00:03:21.478
+Some runbook steps are still done by hand,
+
+41
+00:03:21.528 --> 00:03:24.600
+so the install stops and asks, right here on the page.
+
+42
+00:03:25.000 --> 00:03:29.750
+Step four point three W wants two profile IDs in the site file.
+
+43
+00:03:30.150 --> 00:03:33.550
+Choose already put them there, so: Done.
+
+44
+00:03:38.900 --> 00:03:41.860
+Step four point four is the directory.
+
+45
+00:03:42.260 --> 00:03:46.960
+There's no Active Directory in this film, so: Skip, and the walk goes on.
+
+46
+00:03:54.560 --> 00:03:58.550
+The next question waited eight minutes while I restarted the recording.
+
+47
+00:04:00.160 --> 00:04:05.870
+It's the binaries server's DNS domain, a value the template leaves out: res dot lab.
+
+48
+00:04:08.960 --> 00:04:12.127
+Then the long part, over an hour in fifteen seconds.
+
+49
+00:04:12.177 --> 00:04:17.510
+The binaries server deploys and takes on twenty-four and a half gig of installer media.
+
+50
+00:04:17.910 --> 00:04:21.600
+Then the images: the vCenter ISO alone is twelve gig,
+
+51
+00:04:21.650 --> 00:04:26.610
+and VCF Automation takes another sixteen minutes to hand it to vCenter.
+
+52
+00:04:27.010 --> 00:04:30.210
+Then the blueprints and the catalog items.
+
+53
+00:04:30.610 --> 00:04:36.124
+And that's acme, on the page: the foundation and the binaries server installed,
+
+54
+00:04:36.174 --> 00:04:38.660
+and the catalog up to its last item.
+
+55
+00:04:40.010 --> 00:04:42.508
+Every component says how it went in:
+
+56
+00:04:42.558 --> 00:04:46.260
+by the installer, by part of it, or by runbook steps.
+
+57
+00:04:48.510 --> 00:04:54.460
+And the runbook's own record, in the Build view, stays in step with the packages.
+
+58
+00:04:57.910 --> 00:05:02.316
+Here's acme in VCF Automation, signed in as its administrator,
+
+59
+00:05:02.366 --> 00:05:04.760
+and again nobody typed a password.
+
+60
+00:05:11.510 --> 00:05:16.210
+The catalog: nine items, released into its two projects.
+
+61
+00:05:16.810 --> 00:05:19.689
+Its content library, filled by the same install:
+
+62
+00:05:19.739 --> 00:05:22.192
+the kit's images uploaded from the media,
+
+63
+00:05:22.242 --> 00:05:25.060
+and the Windows template copied inside vCenter.
+
+64
+00:05:31.010 --> 00:05:31.960
+Its projects,
+
+65
+00:05:35.510 --> 00:05:39.810
+and a VPC for each student, all named in the site file.
+
+66
+00:05:43.210 --> 00:05:47.660
+And the binaries server the labs read their installers and scripts from.
+
+67
+00:05:48.110 --> 00:05:51.560
+A brand-new organization, built from the kit,
+
+68
+00:05:51.610 --> 00:05:55.060
+without a single click inside VCF Automation.
+
