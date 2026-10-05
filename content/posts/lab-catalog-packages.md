@@ -4,7 +4,7 @@ date: 2026-10-14
 draft: true
 tags: [vcf, vcf-automation, blueprints, property-groups, automation, air-gap, nested-esxi]
 products: ["VCF Automation", "NSX"]
-series: ["Org Builder for VCF Automation"]
+series: ["Org Builder"]
 seriesPart: 4
 tldr:
   - "Our lab catalog now ships as three packages that install, upgrade and uninstall themselves, with every object recorded as made or found."
@@ -58,13 +58,12 @@ again. Packages close that gap.
 ## The tool, in plain terms
 
 If VCF Automation isn't your day job, here's the short version. The packages
-below are installed by Org Builder for VCF Automation, the tool the
-[first post in this series](/series/org-builder-for-vcf-automation/)
+below are installed by Org Builder, the tool the
+[first post in this series](/series/org-builder/)
 introduces. It's a web page that runs on an administrator's
 workstation. It talks to VCF Automation, vCenter and NSX directly, so nobody
-clicks through three portals. It shows what it will do before it changes
-anything, and nobody types a password into it: the sign-ins live in files on
-that workstation.
+clicks through several portals. It shows what it will do before it changes
+anything.
 
 Why build one? Our implementation guide budgets 8 hours 30 minutes to set an
 organization up by hand, one portal page at a time, with plenty of chances to
