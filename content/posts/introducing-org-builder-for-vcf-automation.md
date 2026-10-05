@@ -1,10 +1,10 @@
 ---
-title: "Introducing Org Builder for VCF Automation"
+title: "Introducing Org Builder"
 date: 2026-10-05
 draft: false
 tags: [vcf, vcf-automation, blueprints, property-groups, automation]
 products: ["VCF Automation"]
-series: ["Org Builder for VCF Automation"]
+series: ["Org Builder"]
 seriesPart: 1
 tldr:
   - "A catalog service built in one VCF Automation organization usually has to be rebuilt by hand, or scripted call by call, in every organization that needs it."
@@ -12,10 +12,10 @@ tldr:
   - "Packages carry version numbers, so a whole organization is released the way software is, and an update is simply the next version."
 tested: "VCF 9.1"
 cover:
-  image: "/images/post43-hero-org-builder.svg"
-  alt: "On the left, by hand: several portals in order, projects, VPCs, content libraries, property groups, blueprints, forms, catalog items, policies and secrets, again for every organization. On the right, Org Builder: reads first, previews, builds through the APIs; a package says what with a version number, a site file says where; install, move, update and uninstall"
+  image: "/images/org-builder-home.png"
+  alt: "Org Builder's Home page: three ways in, each with its own button - Make a site file, Install packages, and Move an organization - beside the Install, Move and Build steps in the side menu"
   hidden: false
-summary: "Why we built Org Builder for VCF Automation: catalog services built in one organization have to reach others, and rebuilding them by hand or scripting every API call doesn't scale. Packages, site files and versioned releases, in brief."
+summary: "Why we built Org Builder, our tool for VCF Automation organizations: catalog services built in one organization have to reach others, and rebuilding them by hand or scripting every API call doesn't scale. Packages, site files and versioned releases, in brief."
 ---
 
 In our lab we build VCF Automation catalog services from start to finish. A
