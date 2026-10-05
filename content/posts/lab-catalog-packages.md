@@ -1,7 +1,7 @@
 ---
 title: "One command for a whole lab catalog: packages that install, upgrade and uninstall a VCF Automation organization"
-date: 2026-10-05
-draft: false
+date: 2026-10-14
+draft: true
 tags: [vcf, vcf-automation, blueprints, property-groups, automation, air-gap, nested-esxi]
 products: ["VCF Automation", "NSX"]
 series: ["Nested Labs as Code"]
