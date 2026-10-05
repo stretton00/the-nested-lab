@@ -4,8 +4,8 @@ date: 2026-10-14
 draft: true
 tags: [vcf, vcf-automation, blueprints, property-groups, automation, air-gap, nested-esxi]
 products: ["VCF Automation", "NSX"]
-series: ["Nested Labs as Code"]
-seriesPart: 7
+series: ["Org Builder for VCF Automation"]
+seriesPart: 2
 tldr:
   - "Our lab catalog now ships as three packages that install, upgrade and uninstall themselves, with every object recorded as made or found."
   - "An uninstall removes only what an install made, so a live test in a throwaway organization ended with nothing new and nothing gone."
@@ -46,8 +46,8 @@ whole lab catalog. Labs were requested in it and the catalog was upgraded.
 Then all three packages were uninstalled, and the organization went with them.
 
 The platform ended as it started, apart from 33 GiB of vSAN that I'll come
-back to. It's the least exciting output in this series, and the one I'm
-proudest of.
+back to. It's the least exciting output of this whole project, and the one
+I'm proudest of.
 
 Before packages, the kit ended with an install runner: the implementation
 guide's steps, in order, from the admin workstation. It works,
@@ -58,8 +58,9 @@ again. Packages close that gap.
 ## The tool, in plain terms
 
 If VCF Automation isn't your day job, here's the short version. The packages
-below are installed by Org Builder for VCF Automation, the tool this series
-has been building towards. It's a web page that runs on an administrator's
+below are installed by Org Builder for VCF Automation, the tool the
+[first post in this series](/series/org-builder-for-vcf-automation/)
+introduces. It's a web page that runs on an administrator's
 workstation. It talks to VCF Automation, vCenter and NSX directly, so nobody
 clicks through three portals. It shows what it will do before it changes
 anything, and nobody types a password into it: the sign-ins live in files on
