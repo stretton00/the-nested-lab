@@ -1,6 +1,12 @@
+{{- /* narrated="true" (5 Oct 2026, the org-move film's voice-over): no autoplay, loop or mute - the reader presses
+     play and hears it. captions="/images/x.vtt" adds a WebVTT track (on by default for a silent clip). */ -}}
+{{- $narrated := eq (printf "%v" (.Get "narrated")) "true" -}}
 <figure class="nl-video">
-  <video autoplay loop muted playsinline controls preload="metadata" style="{{ printf "aspect-ratio:%s" (.Get "ratio" | default "16 / 9") | safeCSS }}"{{ with .Get "poster" }} poster="{{ . }}"{{ end }}>
+  <video {{ if not $narrated }}autoplay loop muted {{ end }}playsinline controls preload="metadata" style="{{ printf "aspect-ratio:%s" (.Get "ratio" | default "16 / 9") | safeCSS }}"{{ with .Get "poster" }} poster="{{ . }}"{{ end }}>
     <source src="{{ .Get "src" }}" type="video/mp4">
+    {{- with .Get "captions" }}
+    <track kind="captions" srclang="en" label="English" src="{{ . }}"{{ if not $narrated }} default{{ end }}>
+    {{- end }}
   </video>
   {{ with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
 </figure>
