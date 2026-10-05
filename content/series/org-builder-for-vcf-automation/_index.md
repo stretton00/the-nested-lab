@@ -1,6 +1,6 @@
 ---
 title: "Org Builder for VCF Automation"
-description: "The tool we built to get a lab-built VCF Automation catalog into someone else's organization: a web page on an administrator's workstation that reads the platform, writes one site file, previews every change and builds through the APIs. What it is, one whole install on film, and an organization exported and imported in 53 minutes."
+description: "Our tool for building VCF Automation organizations from versioned packages: blueprints, property groups, request forms, content libraries and more, installed into any organization with that organization's own values. What it is, then small worked examples."
 ---
 
-Three posts on one tool. The first says what Org Builder is and why it exists, in screenshots. The second shows one whole install on film, from an empty organization to a working catalog. The third moves a whole organization, export to import, also on film. For platform teams, trainers and partners who have rebuilt a catalog by hand once and would rather not again. Read them in order.
+A short series on one tool. The first post says what Org Builder is and why we built it. The next ones show it working on small, generic examples: a few blueprints and property groups moved from one organization to another with the destination's own values, then a content library and a package's own instructions. For platform teams who have rebuilt a catalog by hand once and would rather not again. Read them in order.
