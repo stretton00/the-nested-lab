@@ -195,9 +195,10 @@ its own answers.
 
 ## What's next
 
-**Linux VM** is in production's catalog now, but its Ubuntu image isn't. The
-next example adds a content library: images that have to arrive before the
-blueprints that boot from them, plus a package's own instructions, shown to
+**Linux VM** is in production's catalog now, but its Ubuntu image isn't.
+[The next example](/posts/org-builder-image-step/) puts that right, bring
+your own image: a content library, an image that has to arrive before the
+blueprint that boots from it, and a package's own instructions, shown to
 whoever installs it at the step where they matter.
 
 ## Rules learned
