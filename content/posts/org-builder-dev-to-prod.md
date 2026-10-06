@@ -1,6 +1,6 @@
 ---
 title: "Same blueprints, different values: dev to prod with Org Builder"
-date: 2026-10-12
+date: 2026-10-06
 draft: false
 tags: [vcf, vcf-automation, blueprints, property-groups, automation]
 products: ["VCF Automation"]
