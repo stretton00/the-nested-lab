@@ -12,8 +12,8 @@ tldr:
   - "Packages carry version numbers, so a whole organization is released the way software is, and an update is simply the next version."
 tested: "VCF 9.1"
 cover:
-  image: "/images/org-builder-home.png"
-  alt: "Org Builder's Home page: three ways in, each with its own button - Make a site file, Install packages, and Move an organization - beside the Install, Move and Build steps in the side menu"
+  image: "/images/org-builder-home-v2.png"
+  alt: "Org Builder's Home page: four ways in, each a tile of its own - Make a site file, Create a package, Install or upgrade, and Move an organization - with links below for the offline site wizard, importing a bundle and editing a package, beside the Install and Package and move steps in the side menu"
   hidden: false
 summary: "Why we built Org Builder, our tool for VCF Automation organizations: catalog services built in one organization have to reach others, and rebuilding them by hand or scripting every API call doesn't scale. Packages, site files and versioned releases, in brief."
 ---
