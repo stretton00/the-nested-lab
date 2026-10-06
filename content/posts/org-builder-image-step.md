@@ -12,8 +12,8 @@ tldr:
   - "Edit a package puts a step done by hand where it matters; the install stops there with the step's own words, and production's Linux VM boots from production's own copy."
 tested: "VCF 9.1"
 cover:
-  image: "/images/post47-hero-image-step.svg"
-  alt: "Bring your own image: demo-dev's library with the Ubuntu image, a bundle team-catalog 1.2.0 that names the image and adds a step done by hand, and demo-prod where the step is answered with production's own copy and a Linux VM runs"
+  image: "/images/org-builder-home-create-package.jpg"
+  alt: "Org Builder's Home page, four ways in, with the Create a package tile highlighted and its note: Create a package from an organization"
   hidden: false
 summary: "Org Builder's second worked example, the bring-your-own-image case: a team catalog that boots from an image, packaged without the image file, edited to ask for each site's own copy at the right moment, and installed in production. Plus what VCF Automation's own OVA export does with the same blueprint."
 ---

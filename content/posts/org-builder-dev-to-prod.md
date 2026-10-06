@@ -12,8 +12,8 @@ tldr:
   - "Org Builder leaves development's values behind unless asked, and shows what it will make before it makes anything."
 tested: "VCF 9.1"
 cover:
-  image: "/images/post46-hero-dev-to-prod.svg"
-  alt: "Two organizations side by side: demo-dev with namespace class small and dev.example.com, demo-prod with medium and prod.example.com; between them a bundle of two property groups, two blueprints and two catalog items"
+  image: "/images/org-builder-home-move.jpg"
+  alt: "Org Builder's Home page, four ways in, with the Move an organization tile highlighted and its note: Package one organization and install it into another"
   hidden: false
 summary: "Org Builder's first worked example: two blueprints and the property groups they read, exported from a development organization and imported into production with production's own values."
 ---
