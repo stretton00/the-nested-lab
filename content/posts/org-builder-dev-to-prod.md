@@ -135,6 +135,34 @@ items. A request for **Team namespace** in production makes a namespace with
 the `medium` class. The same request in development still makes a `small`
 one, because each organization's property group says so.
 
+### Before and after, in VCF Automation itself
+
+Org Builder's page says what it made, but it's only fair to ask VCF
+Automation as well. Here's demo-prod's own portal before the import and
+after it.
+
+![demo-prod's catalog before the import: no catalog items, only VCF Automation's empty-catalog picture of a robot beside a light switch](/images/dev-to-prod-vcfa-before-catalog.jpg)
+*Before: an empty catalog, and a robot waiting hopefully by a light switch.*
+
+![demo-prod's catalog after the import: linux-vm and team-namespace, each released into default-project](/images/dev-to-prod-vcfa-after-catalog.jpg)
+*After: both catalog items, released into production's default-project.*
+
+![Blueprint Design in demo-prod before the import: No Blueprints found](/images/dev-to-prod-vcfa-before-blueprints.jpg)
+*Before: no blueprints.*
+
+![Blueprint Design in demo-prod after the import: team-namespace and linux-vm in default-project, updated by production's service account on 5 Oct 2026, one published version each](/images/dev-to-prod-vcfa-after-blueprints.jpg)
+*After: both blueprints, made by production's own service account, one published version each.*
+
+![The Property Groups tab in demo-prod before the import: No property groups found](/images/dev-to-prod-vcfa-before-propgroups.jpg)
+*Before: no property groups.*
+
+![The Property Groups tab in demo-prod after the import: vmSizes with 3 properties and platformDefaults with 9, both constant and available to any project](/images/dev-to-prod-vcfa-after-propgroups.jpg)
+*After: platformDefaults and vmSizes, holding production's values.*
+
+The before pictures came later, taken the honest way round. Org Builder
+uninstalled the package, taking back exactly what it had made, I photographed
+the empty organization, and then it imported the package again.
+
 The first take of the film had a cosmetic bug in it, so production got the
 catalog twice. In between, Org Builder's uninstall took back exactly the six
 things the import had made, in reverse order. The project's own VPC binding
