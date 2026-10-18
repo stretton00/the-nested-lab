@@ -63,7 +63,7 @@ service. So it isn't an outage. It's a stuck upgrade.
 
 ```
 imgpkg copy -b <bundle> --to-tar vks.tar --cosign-signatures
-imgpkg copy --tar vks.tar --to-repo harbor02/vks/vsphere-kubernetes-service --cosign-signatures
+imgpkg copy --tar vks.tar --to-repo supHarbor.example.com/vks/vsphere-kubernetes-service --cosign-signatures
 kubectl rollout restart deployment -n vmware-system-appplatform-operator-system
 # then force a fresh attempt, now the signatures are in
 kubectl -n svc-tkg-domain-<cluster> get deploy -o name | xargs -I{} kubectl -n svc-tkg-domain-<cluster> rollout restart {}
@@ -76,7 +76,8 @@ restarts the operator's StatefulSet instead:
 
 Adding signatures doesn't change the bundle digest, so there's no
 re-registration. And if the content is already in the registry, the
-signatures alone are about 100 KB: small enough to base64 through email.
+signatures alone are about 96 KB gzipped (27 of them for VKS 3.6.3):
+small enough to base64 through email.
 
 Lab tolerance lesson: the 9.1 lab never enforced this, which was very kind
 of it, and no use whatsoever. A rehearsal that can't hit the gate can't
