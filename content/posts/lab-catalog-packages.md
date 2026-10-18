@@ -352,17 +352,6 @@ has gone. They're VM Service's, not ours to delete, and certainly not from a
 host. Whether it reclaims them is still open, and a tidy mind finds that
 harder to leave alone than it should.
 
-## What isn't proven yet
-
-- **Catalog icons by API.** On 9.1 the provider's session got HTTP 500 and
-  the organization's got 403, so icons are set by hand for now.
-- **The full lab under packages.** That's Phase 5 with every option ticked
-  (it took over from Phase 6 on 12 October), and it hasn't been built in a
-  package-installed organization yet.
-- **Signing in through OpenID Connect (OIDC)** and the VCF identity broker,
-  instead of binding to Active Directory. It's built; the live test is next.
-- **A production signing key**, and the trust anchor that ships with it.
-
 ## Why this matters outside the lab
 
 A catalog that can't be uninstalled is one nobody dares try. Packages turn a
