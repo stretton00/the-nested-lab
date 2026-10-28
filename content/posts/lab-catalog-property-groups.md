@@ -1,6 +1,6 @@
 ---
 title: "A blueprint that carries no site: property groups for a lab catalog"
-date: 2026-12-09
+date: 2026-12-30
 draft: false
 tags: [vcf, vcf-automation, blueprints, property-groups, nested-esxi, homelab]
 products: ["VCF Automation"]

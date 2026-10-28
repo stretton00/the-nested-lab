@@ -1,6 +1,6 @@
 ---
 title: "What a nested lab catalog is for"
-date: 2026-11-04
+date: 2026-11-25
 draft: false
 tags: [vcf, vcf-automation, nested-esxi, training-labs, self-service, homelab]
 products: ["VCF Automation"]

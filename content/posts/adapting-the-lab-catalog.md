@@ -1,6 +1,6 @@
 ---
 title: "Make it yours: a new site, a new release, a new lab"
-date: 2026-12-02
+date: 2026-12-23
 draft: false
 tags: [vcf, vcf-automation, blueprints, property-groups, nested-esxi, automation, air-gap]
 products: ["VCF Automation"]

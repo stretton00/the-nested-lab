@@ -1,6 +1,6 @@
 ---
 title: "The security profile that would have dropped every nested lab"
-date: 2027-01-13
+date: 2027-02-03
 draft: false
 tags: [vcf, nsx, vpc, vdefend, distributed-firewall, vcf-automation, nested-esxi]
 products: ["NSX", "VCF Automation"]

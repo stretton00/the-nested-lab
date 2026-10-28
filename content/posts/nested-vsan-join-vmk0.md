@@ -1,6 +1,6 @@
 ---
 title: "The tags said vmk2: nested hosts that joined vSAN on the management network"
-date: 2026-12-23
+date: 2027-01-13
 draft: false
 tags: [vcf, vsan, nested-esxi, powercli, troubleshooting, homelab]
 products: ["vSphere and vSAN"]

@@ -1,6 +1,6 @@
 ---
 title: "No VLANs to request, no router to run: the network inside a lab VPC"
-date: 2026-11-11
+date: 2026-12-02
 draft: false
 tags: [vcf, nsx, vpc, nested-esxi, vcf-automation, training-labs]
 products: ["NSX", "VCF Automation"]

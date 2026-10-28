@@ -1,6 +1,6 @@
 ---
 title: "VCF Operations forgot our AD users two minutes after the build"
-date: 2026-12-30
+date: 2027-01-20
 draft: false
 tags: [vcf, vcf-operations, active-directory, ldap, rbac, troubleshooting, homelab]
 products: ["VCF Operations"]
