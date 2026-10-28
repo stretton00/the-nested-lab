@@ -1,6 +1,6 @@
 ---
 title: "One catalog item, two audiences: a trainers list decides where the lab lands"
-date: 2027-01-20
+date: 2027-02-10
 draft: false
 tags: [vcf, vcf-automation, blueprints, property-groups, self-service, homelab]
 products: ["VCF Automation"]

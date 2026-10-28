@@ -1,6 +1,6 @@
 ---
 title: "The subnets that outlive the lab: why a quick re-request never boots"
-date: 2027-01-06
+date: 2027-01-27
 draft: false
 tags: [vcf, nsx, vpc, vm-service, ipam, training-labs, troubleshooting]
 products: ["NSX", "VCF Automation"]

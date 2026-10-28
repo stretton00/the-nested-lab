@@ -1,6 +1,6 @@
 ---
 title: "Six phases, one catalog: what a student and a trainer get"
-date: 2026-11-18
+date: 2026-12-09
 draft: false
 tags: [vcf, vcf-automation, self-service, nested-esxi, training-labs, homelab]
 products: ["VCF Automation"]

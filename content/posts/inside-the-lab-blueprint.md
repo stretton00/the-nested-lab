@@ -1,6 +1,6 @@
 ---
 title: "Inside the blueprint: generated from one file, built by the lab itself"
-date: 2026-11-25
+date: 2026-12-16
 draft: false
 tags: [vcf, vcf-automation, blueprints, cci, nested-esxi, automation, homelab]
 products: ["VCF Automation"]

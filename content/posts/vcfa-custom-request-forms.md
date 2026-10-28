@@ -1,6 +1,6 @@
 ---
 title: "Custom request forms in VCF Automation 9.1: two tabs, a text box, and the version that keeps its own copy"
-date: 2027-01-27
+date: 2027-02-17
 draft: false
 tags: [vcf, vcf-automation, blueprints, custom-forms, self-service, homelab]
 products: ["VCF Automation"]

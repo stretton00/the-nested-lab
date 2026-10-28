@@ -1,6 +1,6 @@
 ---
 title: "Ping works, TCP dies: two vmxnet3 offloads under a nested NSX pod"
-date: 2026-12-16
+date: 2027-01-06
 draft: false
 tags: [vcf, nsx, nested-esxi, vmxnet3, geneve, troubleshooting, homelab]
 products: ["NSX", "vSphere and vSAN"]
