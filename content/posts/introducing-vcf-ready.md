@@ -67,9 +67,9 @@ reads a vSphere estate, runs 120+ checks against it, and says what it found, wha
 nothing while it does.
 
 This series shows how. This first post is about what it reads and how it
-decides. Part 2 is the upgrade plan and sizing. Part 3 is about sharing an
-assessment without sharing the customer, and part 4 is about writing your own
-checks.
+decides. Part 2 is the upgrade plan and sizing. Part 3 is the deliverables,
+and how to share an assessment without sharing the customer. Part 4 is about
+writing your own checks.
 
 Every picture in the series is of a made-up estate called Example Freight
 Group: four vCenters, 65 hosts and 596 VMs, with domains that end in
@@ -265,8 +265,9 @@ the tool.
 ## What's next
 
 [Part 2](/series/vcf-ready/) is the upgrade plan and sizing, from Broadcom's
-own workbook, planner and blueprints. Part 3 is about sharing an assessment
-without sharing the customer, and part 4 is about writing your own checks.
+own workbook, planner and blueprints. Part 3 is the deliverables, and how to
+share an assessment without sharing the customer. Part 4 is about writing
+your own checks.
 
 VCF Ready isn't public, so there is no download link. If you would like to
 see it run on an estate, [get in touch](/contact/).

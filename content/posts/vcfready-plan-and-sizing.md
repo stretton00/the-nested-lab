@@ -238,8 +238,9 @@ estate and tell the same story.
 
 ## What's next
 
-[Part 3](/series/vcf-ready/) is about sharing an assessment without sharing
-the customer, and part 4 is about writing your own checks.
+[Part 3](/series/vcf-ready/) is the deliverables, and how to share an
+assessment without sharing the customer. Part 4 is about writing your own
+checks.
 
 VCF Ready isn't public, so there is no download link. If you would like to
 see it plan an estate, [get in touch](/contact/).
